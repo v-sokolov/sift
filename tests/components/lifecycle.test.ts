@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect } from 'vitest';
+import { flushSync } from 'svelte';
 import {
   addChoice,
   clearDilemma,
@@ -6,25 +7,20 @@ import {
   getState,
   removeChoice,
   setState,
-  subscribe,
-} from '../../src/state';
-import { renderApp } from '../../src/render';
+} from '../../src/store.svelte';
+import App from '../../src/App.svelte';
+import { render } from '../svelte';
 import { flushSave, load } from '../../src/persistence';
 import { MAX_CHOICES, MIN_CHOICES } from '../../src/types';
 
-let root: HTMLElement;
-let unsub: () => void;
+let container: HTMLElement;
 
 beforeEach(() => {
-  document.body.innerHTML = '<div id="app"></div>';
-  root = document.getElementById('app')!;
   localStorage.clear();
   setState(emptyDilemma());
-  unsub = subscribe((s) => renderApp(root, s));
-  renderApp(root, getState());
+  ({ container } = render(App));
+  flushSync();
 });
-
-afterEach(() => unsub());
 
 describe('US2 — persistence & lifecycle', () => {
   it('restores a saved dilemma on boot', () => {
@@ -36,9 +32,12 @@ describe('US2 — persistence & lifecycle', () => {
     const restored = load();
     expect(restored).not.toBeNull();
     setState({ ...emptyDilemma(), dilemma: restored!.dilemma, view: restored!.view });
+    flushSync();
 
-    expect((root.querySelector('.header__title') as HTMLInputElement).value).toBe('Where to live?');
-    expect((root.querySelector('.choice__title') as HTMLInputElement).value).toBe('City');
+    expect((container.querySelector('.header__title') as HTMLInputElement).value).toBe(
+      'Where to live?',
+    );
+    expect((container.querySelector('.choice__title') as HTMLInputElement).value).toBe('City');
   });
 
   it('Clear erases all data back to the empty default state (FR-027)', () => {

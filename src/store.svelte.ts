@@ -1,6 +1,8 @@
-// Single source-of-truth store. Every mutation goes through `update()`, which
-// recomputes nothing (derived data is computed at render time) but notifies the
-// render channel and the persistence channel. See contracts/state-store.md.
+// Single source-of-truth store, Svelte 5 runes edition. Replaces state.ts: same
+// mutation names/signatures/invariants (see contracts/store.md), backed by `$state`.
+// Reactivity is automatic — components read getState() and re-render on change. A
+// persistence channel still fires on content/view mutations so persistence.ts can
+// debounce-save. setLastSaved / initLang are render-only (no save → no loop).
 
 import type {
   AppState,
@@ -20,8 +22,6 @@ import { DEFAULT_LANG, MAX_CHOICES, MIN_CHOICES } from './types';
 import { newId } from './ids';
 
 type Listener = (state: AppState) => void;
-
-const renderListeners = new Set<Listener>();
 const saveListeners = new Set<Listener>();
 
 export function emptyChoice(): Choice {
@@ -60,22 +60,16 @@ export function emptyDilemma(): AppState {
   };
 }
 
-let state: AppState = emptyDilemma();
+// The reactive source of truth. Reading `current` (directly or via getState()) inside
+// a component template/effect registers a dependency; mutating it re-renders.
+let current = $state<AppState>(emptyDilemma());
 
-function notifyRender(): void {
-  for (const cb of renderListeners) cb(state);
-}
 function notifySave(): void {
-  for (const cb of saveListeners) cb(state);
+  for (const cb of saveListeners) cb(current);
 }
 
-export function getState(): Readonly<AppState> {
-  return state;
-}
-
-export function subscribe(cb: Listener): () => void {
-  renderListeners.add(cb);
-  return () => renderListeners.delete(cb);
+export function getState(): AppState {
+  return current;
 }
 
 /** Persistence channel: fires on every content/view mutation (not on setLastSaved). */
@@ -85,22 +79,20 @@ export function subscribePersist(cb: Listener): () => void {
 }
 
 export function setState(next: AppState): void {
-  state = next;
-  notifyRender();
+  current = next;
   notifySave();
 }
 
 /** Set the "Saved" timestamp WITHOUT triggering another save (avoids a loop). */
 export function setLastSaved(ts: number): void {
-  state = { ...state, lastSavedAt: ts };
-  notifyRender();
+  current.lastSavedAt = ts;
 }
 
 function update(producer: (draft: AppState) => AppState | void): void {
-  const draft = structuredClone(state) as AppState;
+  // $state.snapshot gives a plain, non-proxied deep copy (proxy-safe clone).
+  const draft = $state.snapshot(current) as AppState;
   const ret = producer(draft);
-  state = (ret ?? draft) as AppState;
-  notifyRender();
+  current = (ret ?? draft) as AppState;
   notifySave();
 }
 
@@ -128,7 +120,7 @@ export function setDilemmaTitle(title: string): void {
 
 export function addChoice(): void {
   update((d) => {
-    if (d.dilemma.choices.length >= MAX_CHOICES) return; // I9
+    if (d.dilemma.choices.length >= MAX_CHOICES) return;
     d.dilemma.choices.push(emptyChoice());
     touch(d);
   });
@@ -145,7 +137,7 @@ export function renameChoice(choiceId: string, title: string): void {
 
 export function removeChoice(choiceId: string): void {
   update((d) => {
-    if (d.dilemma.choices.length <= MIN_CHOICES) return; // I8
+    if (d.dilemma.choices.length <= MIN_CHOICES) return;
     d.dilemma.choices = d.dilemma.choices.filter((c) => c.id !== choiceId);
     if (d.editing && d.editing.choiceId === choiceId) {
       d.editing = null;
@@ -258,7 +250,6 @@ export function submitForm(): void {
         type: draft.type,
         weight: normalizeWeight(draft.type, draft.weight),
       });
-      // Stay open for the next note: clear text, keep choice/type/weight.
       d.draft = { text: '', type: draft.type, weight: draft.weight };
     } else {
       const n = c.notes.find((x) => x.id === editing.noteId);
@@ -274,21 +265,17 @@ export function submitForm(): void {
   });
 }
 
-// ---- Lifecycle (US2) ----
+// ---- Lifecycle (US2 of MVP) ----
 
-/**
- * Erase the board/view/theme back to default, but PRESERVE the language choice —
- * flipping the visible language on Clear would be disorienting and language is not
- * decision data (002 data-model). Suggest modal is reset (closed/empty).
- */
+/** Erase board/view/theme to default but PRESERVE the language choice. */
 export function clearDilemma(): void {
-  const lang = state.view.lang;
+  const lang = current.view.lang;
   const fresh = emptyDilemma();
   fresh.view.lang = lang;
   setState(fresh);
 }
 
-// ---- Language (002 / US1) ----
+// ---- Language ----
 
 export function setLang(lang: Lang): void {
   update((d) => {
@@ -296,16 +283,12 @@ export function setLang(lang: Lang): void {
   });
 }
 
-/**
- * Apply a detected language at boot WITHOUT triggering a save (mirrors how the MVP
- * avoids persisting an empty board on first visit). Render-only.
- */
+/** Apply a detected language at boot WITHOUT triggering a save (render-only). */
 export function initLang(lang: Lang): void {
-  state = { ...state, view: { ...state.view, lang } };
-  notifyRender();
+  current.view.lang = lang;
 }
 
-// ---- Suggest a feature (002 / US2) ----
+// ---- Suggest a feature ----
 
 /** True when the suggestion can be sent: name AND description are non-whitespace. */
 export function canSend(draft: SuggestionDraft): boolean {
@@ -330,7 +313,7 @@ export function setSuggestField(field: keyof SuggestionDraft, value: string): vo
   });
 }
 
-// ---- View prefs (US3) ----
+// ---- View prefs ----
 
 export function toggleGroup(): void {
   update((d) => {
@@ -356,7 +339,7 @@ export function setDirection(direction: Direction): void {
   });
 }
 
-// ---- Theme (US4) ----
+// ---- Theme ----
 
 export function setTheme(theme: Theme): void {
   update((d) => {
