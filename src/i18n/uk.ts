@@ -44,6 +44,7 @@ export const uk: Record<string, string> = {
   'note.emptyShort': '(порожньо)',
   'note.weightLabel': ', вага {n}',
   'note.editAria': 'Редагувати {type}{weight}: {text}',
+  'note.removeAria': 'Видалити пункт',
   'noteType.advantage': 'перевага',
   'noteType.disadvantage': 'недолік',
   'noteType.neutral': 'нейтральне',

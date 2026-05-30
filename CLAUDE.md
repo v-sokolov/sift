@@ -1,31 +1,35 @@
 <!-- SPECKIT START -->
-## Active feature: Mobile & Responsive UI Hardening (`006-mobile-responsive-ui`)
+## Active feature: Remove Point & Preserve Preferences on Clear (`007-remove-point`)
 
 For technologies, project structure, shell commands, and other context, read the
 current implementation plan and its design artifacts:
 
-- Plan: `specs/006-mobile-responsive-ui/plan.md`
-- Spec: `specs/006-mobile-responsive-ui/spec.md` (incl. Clarifications)
-- Research / decisions: `specs/006-mobile-responsive-ui/research.md` (R1–R10)
-- Data model: `specs/006-mobile-responsive-ui/data-model.md` (no data changes)
-- Contracts: `specs/006-mobile-responsive-ui/contracts/` (responsive, components)
-- Quickstart: `specs/006-mobile-responsive-ui/quickstart.md` (on-device acceptance matrix)
+- Plan: `specs/007-remove-point/plan.md`
+- Spec: `specs/007-remove-point/spec.md` (incl. Clarifications, Session 2026-05-31)
+- Research / decisions: `specs/007-remove-point/research.md` (R1–R8)
+- Data model: `specs/007-remove-point/data-model.md` (no data changes; T1/T2 transitions)
+- Contracts: `specs/007-remove-point/contracts/` (`remove-point.md`, `clear-preferences.md`)
+- Quickstart: `specs/007-remove-point/quickstart.md` (on-device acceptance matrix)
 
-006 is a presentation-only mobile/responsive hardening pass on the 004 Svelte stack,
-promoting the abstract matrix `specs/004-phase2-ui-rebuild/mobile-responsive-matrix.md`
-(M1–M12) into testable requirements. Almost entirely CSS in `src/styles/app.css` plus one
-`index.html` attribute (`viewport-fit=cover`): safe-area insets (M6), `100vh`→`100dvh`
-(M7), `scroll-margin` keyboard avoidance (M8), 44px touch floor (M4), `@media (hover)`-gated
-hover + `:focus-visible` parity so nothing is hover-only (M9), toolbar `flex-wrap` and a
-full-width inline add/edit form (per Clarifications). **No new deps; no store/i18n/pure-core
-edits; no behavior/data/copy change** (FR-016/FR-017). "Remove point" was considered and
-**deferred to a separate feature (007)** with an always-present (never hover-only) ✕.
+007 is the small follow-up deferred out of 006. Two changes on the 004/006 Svelte stack:
+**(US1, P1) Remove a point** — an **always-visible** (never hover-only) ✕ on each point row
+wiring the existing `removeNote(choiceId, noteId)` store action; reuses the `.iconbtn` ✕
+pattern (44px, `:focus-visible`, `@media (hover)`-gated emphasis from 006); the ✕ must
+`stopPropagation` so it does not trigger the row's click-to-edit (FR-010); `removeNote` gains a
+guard that closes the edit form if it targets the removed note (FR-011). **(US2, P2) Clear
+preserves preferences** — `clearDilemma()` already keeps Language; it is amended to also keep
+**Theme** (today it resets theme to `system`). One new i18n key `note.removeAria` (EN/UK
+parity). **No new deps; no data-model/scoring/persistence-format change** (FR-014/FR-015); the
+one intentional behavior change is Clear preserving theme. TDD per Principle IV: store tests
+(clear-preserves-theme; remove-while-editing closes form) + a NoteRow component test (✕ removes,
+✕ ≠ edit, aria-label present), written to fail first.
 
 Prior features: `specs/001-sift-mvp/` (frozen MVP), `specs/002-post-mvp-improvements/`
 (UA/EN i18n, suggest-a-feature, footer, README), `specs/003-github-pages-hosting/`
 (GitHub Pages deploy), `specs/004-phase2-ui-rebuild/` (Svelte 5 + Tailwind v4 + Bits UI
 rebuild; merged PR #5), `specs/005-ui-copy-refinements/` (header intro, score-formula
-caption, note→point relabel; merged PR #6).
+caption, note→point relabel; merged PR #6), `specs/006-mobile-responsive-ui/` (mobile/
+responsive hardening; merged PR #7).
 
 **Stack**: TypeScript 5.x (strict) + Vite 5. MVP (001) and 002/003 are **framework-free**.
 Phase-2 (004) rebuilds the UI on **Svelte 5 (runes) + Tailwind v4 + Bits UI** (headless

@@ -45,6 +45,7 @@ export const en: Record<string, string> = {
   'note.emptyShort': '(empty)',
   'note.weightLabel': ', weight {n}',
   'note.editAria': 'Edit {type}{weight}: {text}',
+  'note.removeAria': 'Remove point',
   'noteType.advantage': 'advantage',
   'noteType.disadvantage': 'disadvantage',
   'noteType.neutral': 'neutral',
