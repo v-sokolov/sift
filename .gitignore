@@ -1,0 +1,14 @@
+# Brainstorm/visual-companion scratch files
+.superpowers/
+.claude/
+.specify/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Editor / OS
+.DS_Store
+*.local
