@@ -9,7 +9,7 @@ function choice(notes: Note[]): Choice {
   return { id: 'c', title: 'c', notes };
 }
 function prefs(p: Partial<ViewPrefs>): ViewPrefs {
-  return { mode: 'default', sortKey: 'weight', direction: 'desc', theme: 'system', ...p };
+  return { mode: 'default', sortKey: 'weight', direction: 'desc', theme: 'system', lang: 'en', ...p };
 }
 
 const mixed = choice([

@@ -7,13 +7,16 @@ import type {
   Choice,
   Direction,
   EditTarget,
+  Lang,
   NoteDraft,
   NoteType,
   SortKey,
+  SuggestionDraft,
+  SuggestState,
   Theme,
   Weight,
 } from './types';
-import { MAX_CHOICES, MIN_CHOICES } from './types';
+import { DEFAULT_LANG, MAX_CHOICES, MIN_CHOICES } from './types';
 import { newId } from './ids';
 
 type Listener = (state: AppState) => void;
@@ -23,6 +26,14 @@ const saveListeners = new Set<Listener>();
 
 export function emptyChoice(): Choice {
   return { id: newId(), title: '', notes: [] };
+}
+
+export function emptyDraft(): SuggestionDraft {
+  return { name: '', description: '', email: '', github: '', linkedin: '' };
+}
+
+export function emptySuggest(): SuggestState {
+  return { open: false, draft: emptyDraft(), status: 'idle' };
 }
 
 export function emptyDilemma(): AppState {
@@ -35,9 +46,16 @@ export function emptyDilemma(): AppState {
       createdAt: now,
       updatedAt: now,
     },
-    view: { mode: 'default', sortKey: 'weight', direction: 'desc', theme: 'system' },
+    view: {
+      mode: 'default',
+      sortKey: 'weight',
+      direction: 'desc',
+      theme: 'system',
+      lang: DEFAULT_LANG,
+    },
     editing: null,
     draft: null,
+    suggest: emptySuggest(),
     lastSavedAt: null,
   };
 }
@@ -258,9 +276,58 @@ export function submitForm(): void {
 
 // ---- Lifecycle (US2) ----
 
-/** FR-027: erase EVERYTHING (incl. theme) back to the default state. */
+/**
+ * Erase the board/view/theme back to default, but PRESERVE the language choice —
+ * flipping the visible language on Clear would be disorienting and language is not
+ * decision data (002 data-model). Suggest modal is reset (closed/empty).
+ */
 export function clearDilemma(): void {
-  setState(emptyDilemma());
+  const lang = state.view.lang;
+  const fresh = emptyDilemma();
+  fresh.view.lang = lang;
+  setState(fresh);
+}
+
+// ---- Language (002 / US1) ----
+
+export function setLang(lang: Lang): void {
+  update((d) => {
+    d.view.lang = lang;
+  });
+}
+
+/**
+ * Apply a detected language at boot WITHOUT triggering a save (mirrors how the MVP
+ * avoids persisting an empty board on first visit). Render-only.
+ */
+export function initLang(lang: Lang): void {
+  state = { ...state, view: { ...state.view, lang } };
+  notifyRender();
+}
+
+// ---- Suggest a feature (002 / US2) ----
+
+/** True when the suggestion can be sent: name AND description are non-whitespace. */
+export function canSend(draft: SuggestionDraft): boolean {
+  return draft.name.trim() !== '' && draft.description.trim() !== '';
+}
+
+export function openSuggest(): void {
+  update((d) => {
+    d.suggest = { open: true, draft: emptyDraft(), status: 'idle' };
+  });
+}
+
+export function closeSuggest(): void {
+  update((d) => {
+    d.suggest.open = false;
+  });
+}
+
+export function setSuggestField(field: keyof SuggestionDraft, value: string): void {
+  update((d) => {
+    d.suggest.draft[field] = value;
+  });
 }
 
 // ---- View prefs (US3) ----
