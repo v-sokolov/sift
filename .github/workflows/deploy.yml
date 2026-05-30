@@ -24,9 +24,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
+      # package.json pins yarn@4 via packageManager; Corepack activates it.
+      - run: corepack enable
       - uses: actions/configure-pages@v5
-      - run: yarn install --frozen-lockfile
+      # No lockfile is committed (the only locally-generatable one pinned an internal,
+      # CI-unreachable registry). The runner resolves fresh from public npm; --no-immutable
+      # lets Yarn write a lockfile during the build. .yarnrc.yml pins the public registry.
+      - run: yarn install --no-immutable
       # tsc --noEmit && vite build; a type/build error fails here so deploy never runs.
       - run: yarn build
         env:

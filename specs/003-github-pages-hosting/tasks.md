@@ -35,7 +35,7 @@ untouched.
 **Purpose**: Confirm the build preconditions the deploy relies on.
 
 - [X] T001 Verify the production build succeeds and yields `dist/`: run `yarn build` from repo root, confirm it exits 0 and `dist/index.html` exists.
-- [X] T002 [P] Confirm `yarn.lock` is committed and not git-ignored (it is, 1880 lines) so CI `yarn install --frozen-lockfile` is reproducible — `git ls-files --error-unmatch yarn.lock` succeeds.
+- [X] T002 [P] ~~Confirm `yarn.lock` is committed for a reproducible `--immutable` install.~~ **Superseded (Option B):** the committed lockfile pinned an internal Wix registry unreachable from CI, and the author's network can't reach public npm to regenerate it. Resolution: remove `yarn.lock` from the repo, pin the public registry in `.yarnrc.yml`, and have CI generate the lockfile via `yarn install --no-immutable` (see T015).
 
 **Checkpoint**: Build is green locally and the lockfile is committed.
 
@@ -91,7 +91,7 @@ base must already be in place to publish a correct site.
 
 ### Implementation for User Story 2
 
-- [X] T007 [US2] Create `.github/workflows/deploy.yml` exactly per `contracts/deploy-workflow.md`: triggers `push` to `main` + `workflow_dispatch`; `permissions` contents:read / pages:write / id-token:write; `concurrency: { group: pages, cancel-in-progress: true }`; `build` job (checkout@v4 → setup-node@v4 node 20 + cache yarn → configure-pages@v5 → `yarn install --frozen-lockfile` → `yarn build` with `env: GITHUB_PAGES: 'true'` → upload-pages-artifact@v3 path `dist`); `deploy` job (`needs: build`, environment `github-pages`, deploy-pages@v4 with `id: deploy`, url from `steps.deploy.outputs.page_url`).
+- [X] T007 [US2] Create `.github/workflows/deploy.yml` exactly per `contracts/deploy-workflow.md`: triggers `push` to `main` + `workflow_dispatch`; `permissions` contents:read / pages:write / id-token:write; `concurrency: { group: pages, cancel-in-progress: true }`; `build` job (checkout@v4 → setup-node@v4 node 20 → `corepack enable` → configure-pages@v5 → `yarn install --no-immutable` → `yarn build` with `env: GITHUB_PAGES: 'true'` → upload-pages-artifact@v3 path `dist`); `deploy` job (`needs: build`, environment `github-pages`, deploy-pages@v4 with `id: deploy`, url from `steps.deploy.outputs.page_url`). Corepack activates the pinned Yarn 4; `--immutable` is the Yarn 4 reproducible-install flag; `cache: yarn` omitted (Corepack ordering).
 - [X] T008 [US2] Static review of `deploy.yml` against the contract: confirm only first-party `actions/*` are used (no third-party action — FR-003), `needs: build` enforces fail-closed (FR-009), and concurrency provides supersede (FR-008).
 - [ ] T009 [US2] ⏸ MANUAL (needs a push to `main` + deploy run) — After enablement (US3/T011), verify auto-publish: push a trivial visible change to `main`, confirm the Actions run is green, the `deploy` job outputs the live URL (FR-010), and the change is live within ~5 minutes (SC-003).
 - [ ] T010 [US2] ⏸ MANUAL (GitHub Actions UI) — Verify manual re-trigger: from Actions → **Deploy to GitHub Pages** → **Run workflow**, confirm it republishes current `main` with no code change (FR-007).
@@ -127,6 +127,8 @@ manual setup.
 
 - [ ] T013 ⏸ MANUAL (after first deploy) — Run the full `quickstart.md` live verification: HTTPS on, zero console 404s, board persists across reload, suggest-a-feature opens a mail client with no network call (SC-001/SC-002/SC-006, FR-011).
 - [X] T014 [P] Conditional: if any file/dir in `dist/` begins with `_`, add an empty `.nojekyll` to the published output so GitHub Pages serves it intact (R5/FR-013). **Determination: not needed** — the Vite build emits only `index.html` and `assets/` (hashed filenames, no `_`-prefix), so Jekyll will not skip anything.
+- [X] T015 Resolve the lockfile/registry blocker (Option B): removed the wixpress-pinned `yarn.lock` from the repo, pinned `npmRegistryServer: https://registry.npmjs.org` in `.yarnrc.yml`, and set CI to `yarn install --no-immutable` so the GitHub runner resolves fresh from public npm (R4). The author's network blocks public npm at the TCP layer (Cloudflare IPs refused; GitHub allowed), so local regeneration wasn't possible.
+- [ ] T016 ⏸ OPTIONAL (restore reproducibility) — When on an unrestricted network, generate a lockfile against public npm (`touch yarn.lock && yarn install`, verify 0 `wixpress.com`), commit it, and switch the deploy workflow's install step back to `--immutable`.
 
 ---
 

@@ -55,8 +55,15 @@ yarn test       # suite still green (base does not affect tests)
 - **`.nojekyll`**: not needed today (Vite output has no `_`-prefixed paths). If a future
   build emits a file/dir starting with `_`, add an empty `.nojekyll` to the published output
   so GitHub Pages serves it intact (R5/FR-013).
-- **Lockfile**: CI uses `yarn install --frozen-lockfile`; `yarn.lock` is already committed,
-  so installs are reproducible.
+- **Yarn 4 / Corepack**: `package.json` pins `packageManager: yarn@4`, so CI runs
+  `corepack enable` first.
+- **No committed lockfile (by decision)**: the only lockfile generatable from the author's
+  network pinned packages to the internal `npm.dev.wixpress.com` (unreachable from public
+  CI), and that machine can't reach public npm to regenerate. So `yarn.lock` is **not**
+  committed; `.yarnrc.yml` pins the public npm registry and CI runs
+  `yarn install --no-immutable`, letting the runner resolve from public npm. To restore a
+  reproducible pinned install later: generate a lockfile on an unrestricted network, commit
+  it, and switch CI back to `--immutable`.
 - **No custom domain** (out of scope) — the `*.github.io` address provides HTTPS by default.
 
 ## Where things live
