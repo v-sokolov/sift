@@ -56,7 +56,7 @@ export const en: Record<string, string> = {
     "Each advantage adds its weight (1–3), each disadvantage subtracts it; neutral points don't count.",
 
   // Add/edit form
-  'form.addNote': '＋ add point',
+  'form.addNote': '＋ Add point',
   'form.choice': 'Choice',
   'form.noteTypeAria': 'Point type',
   'form.weightAria': 'Weight',
@@ -74,7 +74,7 @@ export const en: Record<string, string> = {
   'confirm.clear': "Clear this dilemma? This can't be undone.",
 
   // Footer (US3)
-  'footer.madeBy': 'Sift — a quiet way to weigh a decision. Made by {name}.',
+  'footer.madeBy': 'Made by {name}.',
   'footer.github': 'GitHub',
   'footer.linkedin': 'LinkedIn',
 

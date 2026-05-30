@@ -55,7 +55,7 @@ export const uk: Record<string, string> = {
     'Кожна перевага додає свою вагу (1–3), кожен недолік її віднімає; нейтральні пункти не враховуються.',
 
   // Add/edit form
-  'form.addNote': '＋ додати пункт',
+  'form.addNote': '＋ Додати пункт',
   'form.choice': 'Варіант',
   'form.noteTypeAria': 'Тип пункту',
   'form.weightAria': 'Вага',
@@ -73,7 +73,7 @@ export const uk: Record<string, string> = {
   'confirm.clear': 'Очистити це рішення? Це не можна скасувати.',
 
   // Footer (US3)
-  'footer.madeBy': 'Sift — тихий спосіб зважити рішення. Створив {name}.',
+  'footer.madeBy': 'Створив {name}.',
   'footer.github': 'GitHub',
   'footer.linkedin': 'LinkedIn',
 

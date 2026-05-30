@@ -17,7 +17,9 @@
   --radius: 10px;
   --font:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-size: 15px;
+  /* Relative base so the UI honors the user's browser/OS text-size preference
+     (15/16 = default 15px) — M3/FR-010 (006). */
+  --font-size: 0.9375rem;
   --line: 1.5;
 
   /* Light theme (default) */
@@ -137,10 +139,19 @@ body {
 #app {
   max-width: 1100px;
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-5);
+  /* Honor device safe-area insets so content clears the notch / rounded corners in
+     both orientations — M6/FR-004 (006). max() keeps the comfortable padding on
+     non-notched screens. Requires viewport-fit=cover (index.html). */
+  padding:
+    max(var(--space-6), env(safe-area-inset-top))
+    max(var(--space-4), env(safe-area-inset-right))
+    var(--space-5)
+    max(var(--space-4), env(safe-area-inset-left));
   /* Full-height column so the header stays at the top and the footer is pinned
-     to the bottom even when the board is short (sticky-footer layout). */
+     to the bottom even when the board is short (sticky-footer layout). dvh tracks the
+     dynamic viewport as browser chrome collapses/expands — M7/FR-007 (006). */
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -180,8 +191,28 @@ header {
   gap: var(--space-3);
   flex-wrap: wrap;
 }
-.header__title {
+.header__titlebox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   flex: 1 1 260px;
+  min-width: 0;
+}
+/* Pencil cue that the dilemma title is editable — decorative, always visible (not
+   hover-gated, M9), brightens when the field is focused. (006 UI refinement.) */
+.header__edit {
+  flex: none;
+  color: var(--text-faint);
+  font-size: 1.2rem;
+  line-height: 1;
+  pointer-events: none;
+}
+.header__titlebox:focus-within .header__edit {
+  color: var(--accent);
+}
+.header__title {
+  flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
   color: var(--text);
@@ -189,6 +220,17 @@ header {
   font-weight: 600;
   padding: var(--space-2) 0;
   outline: none;
+}
+/* On small screens, "Suggest a feature" and the dilemma title each take their own full-width
+   row (flex-wrap), with Suggest shown above the title (swap order). */
+@media (max-width: 719px) {
+  .header__tools {
+    order: -1;
+    flex-basis: 100%;
+  }
+  .header__titlebox {
+    flex-basis: 100%;
+  }
 }
 .header__tools {
   display: flex;
@@ -223,9 +265,10 @@ header {
   padding: var(--space-1) 0;
   text-decoration: underline;
   text-underline-offset: 2px;
-}
-.linklike:hover {
-  color: var(--text);
+  /* Standalone action button — give it a finger-sized hit area (M4/FR-001, 006). */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .header__title::placeholder {
   color: var(--text-faint);
@@ -250,11 +293,37 @@ header {
 .toolbar__spacer {
   flex: 1;
 }
+/* When the toolbar wraps on narrow widths, drop the flex spacer so it can't claim an
+   empty row and strand the Add-choice button — FR-019/M1·M4·M5 (006). The row already
+   wraps via .toolbar__row { flex-wrap: wrap }. */
+@media (max-width: 719px) {
+  .toolbar__spacer {
+    display: none;
+  }
+  /* On small screens give the Add-choice button, each toolbar action toggle, and each
+     config segmented control its own full-width row (Add choice, Group, Sort, Sort-by
+     Weight|Type, Direction Asc|Desc). The language toggle keeps its natural width.
+     (006 mobile refinement.) */
+  .toolbar [data-action='add-choice'],
+  .toolbar .toggle,
+  .toolbar__row .seg:not(.langtoggle) {
+    flex-basis: 100%;
+  }
+  /* Full-width segs split their buttons evenly so they read as a real segmented row. */
+  .toolbar__row .seg:not(.langtoggle) button {
+    flex: 1;
+  }
+}
 .btn {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: var(--space-2) var(--space-3);
+  /* Touch-target floor — M4/FR-001 (006). */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
 }
 .btn[disabled] {
   opacity: 0.5;
@@ -288,6 +357,11 @@ header {
   border: none;
   padding: var(--space-1) var(--space-3);
   border-left: 1px solid var(--border);
+  /* Touch-target floor — M4/FR-001 (006). */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
 }
 .seg button:first-child {
   border-left: none;
@@ -326,6 +400,18 @@ header {
   align-items: center;
   gap: var(--space-1);
 }
+/* Pencil cue that the choice name is editable — decorative, always visible (not
+   hover-gated, M9), brightens when the field is focused. (006 UI refinement.) */
+.choice__edit {
+  flex: none;
+  color: var(--text-faint);
+  font-size: 0.95rem;
+  line-height: 1;
+  pointer-events: none;
+}
+.choice__head:focus-within .choice__edit {
+  color: var(--accent);
+}
 .choice__title {
   flex: 1;
   border: none;
@@ -346,10 +432,12 @@ header {
   color: var(--text-faint);
   padding: var(--space-1);
   border-radius: 6px;
-}
-.iconbtn:hover {
-  color: var(--text);
-  background: var(--surface-2);
+  /* Touch-target floor — the box grows, the glyph stays centered (M4/FR-001, 006). */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 44px;
+  min-inline-size: 44px;
 }
 .iconbtn[disabled] {
   opacity: 0.3;
@@ -373,13 +461,21 @@ header {
 .note {
   display: flex;
   align-items: baseline;
+  /* Text on the left, the sign+dots cluster on the right. */
+  justify-content: space-between;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-2);
   border-radius: 6px;
   cursor: pointer;
+  /* Comfortable tap target for the click-to-edit row — M4/FR-001 (006). */
+  min-height: 44px;
 }
-.note:hover {
-  background: var(--surface-2);
+/* Right-hand cluster: the type sign followed by the weight dots (kept on one line). */
+.note__meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  white-space: nowrap;
 }
 .note__sign {
   font-weight: 700;
@@ -403,6 +499,9 @@ header {
 }
 .note__text {
   flex: 1;
+  /* Wrap long content / unbroken tokens instead of forcing horizontal scroll — M2/FR-011 (006). */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .note__text--empty {
   color: var(--text-faint);
@@ -464,6 +563,9 @@ header {
 /* ---- Add/edit form ---- */
 .addtrigger {
   margin: var(--space-3) 0;
+  /* Center the "＋ add point" trigger horizontally. */
+  display: flex;
+  justify-content: center;
 }
 .form {
   background: var(--surface);
@@ -498,11 +600,42 @@ header {
   min-height: 64px;
   resize: vertical;
 }
+/* Touch-target floor for the choice <select> — M4/FR-001 (006). */
+.form select {
+  min-height: 44px;
+}
+/* When a field is focused and the on-screen keyboard scrolls it into view, keep a
+   little breathing room so it isn't flush against the keyboard or a screen edge —
+   M8/FR-008 (006). CSS-only, so focus/caret are never disturbed (FR-017). */
+.header__title,
+.choice__title,
+.form,
+.form select,
+.form textarea {
+  scroll-margin-block: var(--space-5);
+}
+/* On narrow widths the inline form goes full-width and its controls stack, so each is
+   comfortably tappable (M8/FR-018, 006). The actions row keeps its buttons inline. */
+@media (max-width: 719px) {
+  .form__row:not(.form__row--actions) > * {
+    flex-basis: 100%;
+  }
+  .form select {
+    width: 100%;
+  }
+  /* Full-width "＋ add point" trigger on small screens, matching Add choice/Group/Sort. */
+  .addtrigger .btn {
+    width: 100%;
+  }
+}
 
 /* ---- Footer (pinned to the bottom of the column) ---- */
 .footer {
   margin-top: auto;
   padding-top: var(--space-3);
+  /* Clear the bottom safe-area inset (home indicator) so the links stay visible and
+     tappable — M6/FR-005, FR-020 (006). */
+  padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
   border-top: 1px solid var(--border);
   color: var(--text-faint);
   font-size: 0.85rem;
@@ -516,10 +649,6 @@ header {
 .footer__link {
   color: var(--accent);
   text-decoration: none;
-}
-.footer__link:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 /* ---- Suggest-a-feature modal (custom accessible overlay) ---- */
@@ -541,7 +670,9 @@ header {
   padding: var(--space-5);
   width: 100%;
   max-width: 460px;
+  /* dvh so the dialog fits short landscape / collapsing chrome — M7·M10 (006). */
   max-height: 90vh;
+  max-height: 90dvh;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -571,10 +702,12 @@ header {
   font-size: 1.1rem;
   padding: var(--space-1);
   border-radius: 6px;
-}
-.modal__close:hover {
-  color: var(--text);
-  background: var(--surface-2);
+  /* Touch-target floor — M4/FR-001 (006). */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 44px;
+  min-inline-size: 44px;
 }
 .modal form {
   display: flex;
@@ -616,4 +749,30 @@ header {
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* ---- Hover emphasis, gated to true pointer devices — M9/FR-002, FR-003 (006) ----
+   Hover only ever *raises emphasis*; every one of these affordances is also a real
+   button/link with the global :focus-visible outline above, so it stays reachable by
+   tap and keyboard. Gating behind (hover: hover) prevents stuck-hover artifacts after
+   a tap on touch devices and documents that nothing here is hover-only. */
+@media (hover: hover) and (pointer: fine) {
+  .linklike:hover {
+    color: var(--text);
+  }
+  .iconbtn:hover {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+  .note:hover {
+    background: var(--surface-2);
+  }
+  .footer__link:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .modal__close:hover {
+    color: var(--text);
+    background: var(--surface-2);
+  }
 }

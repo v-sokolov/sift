@@ -21,6 +21,17 @@
     modalEl?.querySelector<HTMLElement>('[data-field="suggest-name"]')?.focus();
   });
 
+  // Lock background scroll while the modal is open; restore on close. This component only
+  // mounts while the modal is open, so the effect cleanup runs on close. (006 UI refinement.)
+  $effect(() => {
+    const root = document.documentElement;
+    const prev = root.style.overflow;
+    root.style.overflow = 'hidden';
+    return () => {
+      root.style.overflow = prev;
+    };
+  });
+
   const FIELDS: Array<{
     key: keyof SuggestionDraft;
     labelKey: string;

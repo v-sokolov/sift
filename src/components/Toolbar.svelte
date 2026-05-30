@@ -63,6 +63,14 @@
     <span class="saved" aria-live="polite">{saved}</span>
     <span class="toolbar__spacer"></span>
     <button
+      class="btn btn--primary"
+      data-action="add-choice"
+      disabled={atMax}
+      title={atMax ? t(lang, "toolbar.maxChoices") : undefined}
+      onclick={addChoice}
+      >{t(lang, "toolbar.addChoice")} {n} / {MAX_CHOICES}</button
+    >
+    <button
       class="btn toggle"
       data-action="toggle-group"
       aria-pressed={mode === "grouped"}
@@ -73,14 +81,6 @@
       data-action="toggle-sort"
       aria-pressed={mode === "sorted"}
       onclick={toggleSort}>{t(lang, "toolbar.sort")}</button
-    >
-    <button
-      class="btn btn--primary"
-      data-action="add-choice"
-      disabled={atMax}
-      title={atMax ? t(lang, "toolbar.maxChoices") : undefined}
-      onclick={addChoice}
-      >{t(lang, "toolbar.addChoice")} {n} / {MAX_CHOICES}</button
     >
   </div>
 
