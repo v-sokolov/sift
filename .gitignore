@@ -2,6 +2,11 @@
 .superpowers/
 .claude/
 .specify/
+.yarn/
+.remember/
+
+# Superseded brainstorm design docs — kept locally; source of truth is specs/
+docs/
 
 # Dependencies
 node_modules/
