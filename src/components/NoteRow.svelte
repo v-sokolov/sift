@@ -42,11 +42,13 @@
   onclick={edit}
   {onkeydown}
 >
-  <span class="note__sign" aria-hidden="true">{SIGN[note.type]}</span>
-  {#if dotsStr}<span class="dots" aria-hidden="true">{dotsStr}</span>{/if}
   <span class="note__text"
     >{#if note.text.trim()}{note.text}{:else}<span class="note__text--empty"
         >{t(lang, 'note.empty')}</span
       >{/if}</span
   >
+  <span class="note__meta" aria-hidden="true">
+    {#if dotsStr}<span class="dots">{dotsStr}</span>{/if}
+    <span class="note__sign">{SIGN[note.type]}</span>
+  </span>
 </li>

@@ -1,25 +1,31 @@
 <!-- SPECKIT START -->
-## Active feature: UI Copy Refinements (`005-ui-copy-refinements`)
+## Active feature: Mobile & Responsive UI Hardening (`006-mobile-responsive-ui`)
 
 For technologies, project structure, shell commands, and other context, read the
 current implementation plan and its design artifacts:
 
-- Plan: `specs/005-ui-copy-refinements/plan.md`
-- Spec: `specs/005-ui-copy-refinements/spec.md`
-- Research / decisions: `specs/005-ui-copy-refinements/research.md`
-- Data model: `specs/005-ui-copy-refinements/data-model.md`
-- Contracts: `specs/005-ui-copy-refinements/contracts/` (i18n, components)
-- Quickstart: `specs/005-ui-copy-refinements/quickstart.md`
+- Plan: `specs/006-mobile-responsive-ui/plan.md`
+- Spec: `specs/006-mobile-responsive-ui/spec.md` (incl. Clarifications)
+- Research / decisions: `specs/006-mobile-responsive-ui/research.md` (R1–R10)
+- Data model: `specs/006-mobile-responsive-ui/data-model.md` (no data changes)
+- Contracts: `specs/006-mobile-responsive-ui/contracts/` (responsive, components)
+- Quickstart: `specs/006-mobile-responsive-ui/quickstart.md` (on-device acceptance matrix)
 
-005 is a presentation-only change on the 004 Svelte stack: a header wordmark+tagline
-intro, a muted score-formula caption under the score band, and a "note"→"point" /
-«нотатка»→«пункт» umbrella-noun relabel (display values only). No new deps, no behavior
-or data-shape change.
+006 is a presentation-only mobile/responsive hardening pass on the 004 Svelte stack,
+promoting the abstract matrix `specs/004-phase2-ui-rebuild/mobile-responsive-matrix.md`
+(M1–M12) into testable requirements. Almost entirely CSS in `src/styles/app.css` plus one
+`index.html` attribute (`viewport-fit=cover`): safe-area insets (M6), `100vh`→`100dvh`
+(M7), `scroll-margin` keyboard avoidance (M8), 44px touch floor (M4), `@media (hover)`-gated
+hover + `:focus-visible` parity so nothing is hover-only (M9), toolbar `flex-wrap` and a
+full-width inline add/edit form (per Clarifications). **No new deps; no store/i18n/pure-core
+edits; no behavior/data/copy change** (FR-016/FR-017). "Remove point" was considered and
+**deferred to a separate feature (007)** with an always-present (never hover-only) ✕.
 
 Prior features: `specs/001-sift-mvp/` (frozen MVP), `specs/002-post-mvp-improvements/`
 (UA/EN i18n, suggest-a-feature, footer, README), `specs/003-github-pages-hosting/`
 (GitHub Pages deploy), `specs/004-phase2-ui-rebuild/` (Svelte 5 + Tailwind v4 + Bits UI
-rebuild; merged PR #5).
+rebuild; merged PR #5), `specs/005-ui-copy-refinements/` (header intro, score-formula
+caption, note→point relabel; merged PR #6).
 
 **Stack**: TypeScript 5.x (strict) + Vite 5. MVP (001) and 002/003 are **framework-free**.
 Phase-2 (004) rebuilds the UI on **Svelte 5 (runes) + Tailwind v4 + Bits UI** (headless

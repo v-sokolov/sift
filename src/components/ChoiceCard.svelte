@@ -23,6 +23,7 @@
 
 <article class="choice" data-choice-id={choice.id}>
   <div class="choice__head">
+    <span class="choice__edit" aria-hidden="true">✎</span>
     <input
       class="choice__title"
       data-field="choice-title-{choice.id}"
