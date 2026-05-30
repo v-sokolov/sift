@@ -4,7 +4,7 @@
    surfaces in both themes. Light is the default; dark via prefers-color-scheme
    (theme=system) or an explicit [data-theme="dark"] (US2 toggle). */
 
-@import 'tailwindcss';
+@import "tailwindcss";
 
 :root {
   --space-1: 4px;
@@ -16,7 +16,8 @@
 
   --radius: 10px;
   --font:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
   /* Relative base so the UI honors the user's browser/OS text-size preference
      (15/16 = default 15px) — M3/FR-010 (006). */
   --font-size: 0.9375rem;
@@ -43,7 +44,7 @@
 
 /* Dark palette, shared by OS-preference (theme=system) and explicit toggle. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
+  :root:not([data-theme="light"]) {
     --bg: #1b1b19;
     --surface: #242421;
     --surface-2: #2d2d2a;
@@ -64,7 +65,7 @@
 }
 
 /* Explicit dark override regardless of OS preference. */
-:root[data-theme='dark'] {
+:root[data-theme="dark"] {
   --bg: #1b1b19;
   --surface: #242421;
   --surface-2: #2d2d2a;
@@ -117,7 +118,6 @@ body {
 
 /* ---- Component styles (migrated from the MVP's main.css) ---- */
 
-
 * {
   box-sizing: border-box;
 }
@@ -142,10 +142,8 @@ body {
   /* Honor device safe-area insets so content clears the notch / rounded corners in
      both orientations — M6/FR-004 (006). max() keeps the comfortable padding on
      non-notched screens. Requires viewport-fit=cover (index.html). */
-  padding:
-    max(var(--space-6), env(safe-area-inset-top))
-    max(var(--space-4), env(safe-area-inset-right))
-    var(--space-5)
+  padding: max(var(--space-6), env(safe-area-inset-top))
+    max(var(--space-4), env(safe-area-inset-right)) var(--space-5)
     max(var(--space-4), env(safe-area-inset-left));
   /* Full-height column so the header stays at the top and the footer is pinned
      to the bottom even when the board is short (sticky-footer layout). dvh tracks the
@@ -180,7 +178,6 @@ header {
 }
 .header__tagline {
   margin: var(--space-1) 0 0;
-  max-width: 60ch;
   color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.5;
@@ -304,7 +301,7 @@ header {
      config segmented control its own full-width row (Add choice, Group, Sort, Sort-by
      Weight|Type, Direction Asc|Desc). The language toggle keeps its natural width.
      (006 mobile refinement.) */
-  .toolbar [data-action='add-choice'],
+  .toolbar [data-action="add-choice"],
   .toolbar .toggle,
   .toolbar__row .seg:not(.langtoggle) {
     flex-basis: 100%;
@@ -333,7 +330,7 @@ header {
   border-color: var(--accent);
   color: var(--accent);
 }
-.toggle[aria-pressed='true'] {
+.toggle[aria-pressed="true"] {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
@@ -366,7 +363,7 @@ header {
 .seg button:first-child {
   border-left: none;
 }
-.seg button[aria-pressed='true'] {
+.seg button[aria-pressed="true"] {
   background: var(--surface-2);
   font-weight: 600;
 }
@@ -460,20 +457,33 @@ header {
 }
 .note {
   display: flex;
-  align-items: baseline;
+  /* Center everything vertically so text, dots, sign and the 44px remove ✕ line up
+     on the Y axis (the tall touch-target button has no shared text baseline). */
+  align-items: center;
   /* Text on the left, the sign+dots cluster on the right. */
   justify-content: space-between;
   gap: var(--space-2);
   padding: var(--space-2);
+  /* No right padding so the row's remove ✕ sits flush to the card content edge,
+     vertically aligned with the choice-card's remove ✕ (same 44px .iconbtn column). */
+  padding-right: 0;
   border-radius: 6px;
   cursor: pointer;
   /* Comfortable tap target for the click-to-edit row — M4/FR-001 (006). */
   min-height: 44px;
 }
-/* Right-hand cluster: the type sign followed by the weight dots (kept on one line). */
+/* Left cluster: the type sign followed by the note text (grows so text wraps). */
+.note__main {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+/* Right cluster: the weight dots followed by the remove ✕ (kept on one line). */
 .note__meta {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-2);
   white-space: nowrap;
 }
@@ -506,6 +516,14 @@ header {
 .note__text--empty {
   color: var(--text-faint);
   font-style: italic;
+}
+/* Always-visible per-point remove ✕ (007). Reuses .iconbtn for the 44px touch floor,
+   de-emphasized resting color, focus ring, and @media(hover)-gated emphasis. Seated at
+   the row's right edge after the meta cluster; centered against the baseline-aligned row. */
+.note__remove {
+  flex: none;
+  align-self: center;
+  font-size: 0.85rem;
 }
 .empty {
   color: var(--text-faint);

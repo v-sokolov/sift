@@ -53,7 +53,8 @@ describe('US2 — persistence & lifecycle', () => {
     expect(d.dilemma.title).toBe('');
     expect(d.dilemma.choices).toHaveLength(MIN_CHOICES);
     expect(d.dilemma.choices.every((c) => c.notes.length === 0)).toBe(true);
-    expect(d.view.theme).toBe('system');
+    // 007/FR-016: Clear preserves the user's theme preference (previously reset to 'system').
+    expect(d.view.theme).toBe('dark');
     expect(d.view.mode).toBe('default');
   });
 

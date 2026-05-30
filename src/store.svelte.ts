@@ -179,6 +179,12 @@ export function removeNote(choiceId: string, noteId: string): void {
     const c = findChoice(d, choiceId);
     if (!c) return;
     c.notes = c.notes.filter((n) => n.id !== noteId);
+    // FR-011: if the edit form is open for the note being removed, close it so it
+    // never stays bound to a now-nonexistent note.
+    if (d.editing?.kind === 'edit' && d.editing.noteId === noteId) {
+      d.editing = null;
+      d.draft = null;
+    }
     touch(d);
   });
 }
@@ -267,11 +273,12 @@ export function submitForm(): void {
 
 // ---- Lifecycle (US2 of MVP) ----
 
-/** Erase board/view/theme to default but PRESERVE the language choice. */
+/** Erase the board/view to defaults but PRESERVE the language AND theme choices (FR-016/017/018). */
 export function clearDilemma(): void {
-  const lang = current.view.lang;
+  const { lang, theme } = current.view;
   const fresh = emptyDilemma();
   fresh.view.lang = lang;
+  fresh.view.theme = theme;
   setState(fresh);
 }
 

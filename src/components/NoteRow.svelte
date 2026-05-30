@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Lang, Note } from '../types';
   import { t } from '../i18n';
-  import { openEditForm } from '../store.svelte';
+  import { openEditForm, removeNote } from '../store.svelte';
 
   let { note, choiceId, lang }: { note: Note; choiceId: string; lang: Lang } = $props();
 
@@ -27,6 +27,21 @@
       edit();
     }
   }
+
+  // Remove the point. stopPropagation keeps the row's click-to-edit from also firing
+  // (FR-010); the keydown handler activates the button itself and preventDefault stops
+  // the native click so removal happens exactly once (FR-008).
+  function remove(e: MouseEvent) {
+    e.stopPropagation();
+    removeNote(choiceId, note.id);
+  }
+  function onRemoveKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      removeNote(choiceId, note.id);
+    }
+  }
 </script>
 
 <!-- A note row is a click/keyboard target to edit; role=button + tabindex + keydown
@@ -42,13 +57,24 @@
   onclick={edit}
   {onkeydown}
 >
-  <span class="note__text"
-    >{#if note.text.trim()}{note.text}{:else}<span class="note__text--empty"
-        >{t(lang, 'note.empty')}</span
-      >{/if}</span
-  >
-  <span class="note__meta" aria-hidden="true">
-    {#if dotsStr}<span class="dots">{dotsStr}</span>{/if}
-    <span class="note__sign">{SIGN[note.type]}</span>
+  <span class="note__main">
+    <span class="note__sign" aria-hidden="true">{SIGN[note.type]}</span>
+    <span class="note__text"
+      >{#if note.text.trim()}{note.text}{:else}<span class="note__text--empty"
+          >{t(lang, 'note.empty')}</span
+        >{/if}</span
+    >
+  </span>
+  <span class="note__meta">
+    {#if dotsStr}<span class="dots" aria-hidden="true">{dotsStr}</span>{/if}
+    <button
+      class="iconbtn note__remove"
+      data-action="remove-note"
+      data-note-id={note.id}
+      aria-label={t(lang, 'note.removeAria')}
+      title={t(lang, 'note.removeAria')}
+      onclick={remove}
+      onkeydown={onRemoveKeydown}>✕</button
+    >
   </span>
 </li>

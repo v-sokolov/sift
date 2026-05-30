@@ -14,11 +14,13 @@ import {
   openAddForm,
   openEditForm,
   removeChoice,
+  removeNote,
   setFormText,
   setFormType,
   setLang,
   setLastSaved,
   setState,
+  setTheme,
   submitForm,
   subscribePersist,
 } from '../../src/store.svelte';
@@ -109,6 +111,45 @@ describe('clearDilemma preserves language', () => {
     expect(getState().view.lang).toBe('uk');
     expect(getState().dilemma.choices[0].notes).toHaveLength(0);
     expect(getState().dilemma.title).toBe('');
+  });
+});
+
+describe('clearDilemma preserves theme and language (US2, FR-016/017/018)', () => {
+  test('theme and language survive a clear; board resets', () => {
+    setTheme('dark');
+    setLang('uk');
+    const cid = getState().dilemma.choices[0].id;
+    addNote(cid, { text: 'x', type: 'advantage', weight: 1 });
+    clearDilemma();
+    expect(getState().view.theme).toBe('dark');
+    expect(getState().view.lang).toBe('uk');
+    expect(getState().dilemma.choices[0].notes).toHaveLength(0);
+    expect(getState().dilemma.title).toBe('');
+  });
+});
+
+describe('removeNote closes an open edit form for the removed note (FR-011)', () => {
+  test('removing the currently-edited note resets editing/draft', () => {
+    const cid = getState().dilemma.choices[0].id;
+    addNote(cid, { text: 'x', type: 'advantage', weight: 1 });
+    const nid = getState().dilemma.choices[0].notes[0].id;
+    openEditForm(cid, nid);
+    expect(getState().editing).not.toBeNull();
+    removeNote(cid, nid);
+    expect(getState().editing).toBeNull();
+    expect(getState().draft).toBeNull();
+    expect(getState().dilemma.choices[0].notes).toHaveLength(0);
+  });
+
+  test('removing a non-edited note leaves an open edit form untouched', () => {
+    const cid = getState().dilemma.choices[0].id;
+    addNote(cid, { text: 'a', type: 'advantage', weight: 1 });
+    addNote(cid, { text: 'b', type: 'advantage', weight: 1 });
+    const [n1, n2] = getState().dilemma.choices[0].notes;
+    openEditForm(cid, n1.id);
+    removeNote(cid, n2.id);
+    expect(getState().editing).not.toBeNull();
+    expect(getState().dilemma.choices[0].notes.map((n) => n.id)).toEqual([n1.id]);
   });
 });
 
