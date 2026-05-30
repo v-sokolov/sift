@@ -154,6 +154,28 @@ button {
 /* ---- Header ---- */
 header {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+.header__brand {
+  margin-bottom: var(--space-1);
+}
+.header__wordmark {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.header__tagline {
+  margin: var(--space-1) 0 0;
+  max-width: 60ch;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.header__bar {
+  display: flex;
   align-items: center;
   gap: var(--space-3);
   flex-wrap: wrap;
@@ -430,6 +452,13 @@ header {
   font-size: 0.85rem;
   color: var(--text-faint);
   font-variant-numeric: tabular-nums;
+}
+.summary__formula {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
 }
 
 /* ---- Add/edit form ---- */

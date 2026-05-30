@@ -28,4 +28,5 @@
       </div>
     </div>
   {/each}
+  <p class="summary__formula">{t(lang, 'summary.formula')}</p>
 </section>

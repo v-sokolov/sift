@@ -87,6 +87,30 @@ describe('US1 — localization at the DOM level', () => {
       messages.uk['header.titlePlaceholder'],
     );
   });
+
+  it('shows the localized header tagline (US1)', () => {
+    expect(container.querySelector('.header__tagline')!.textContent).toBe(
+      messages.en['header.tagline'],
+    );
+    setLang('uk');
+    flushSync();
+    expect(container.querySelector('.header__tagline')!.textContent).toBe(
+      messages.uk['header.tagline'],
+    );
+  });
+
+  it('shows the localized score-formula caption below the score band (US2)', () => {
+    // The caption lives inside .summary but is not one of the .sum score cells.
+    expect(container.querySelector('.summary .sum')).not.toBeNull();
+    const caption = container.querySelector('.summary__formula')!;
+    expect(caption.classList.contains('sum')).toBe(false);
+    expect(caption.textContent).toBe(messages.en['summary.formula']);
+    setLang('uk');
+    flushSync();
+    expect(container.querySelector('.summary__formula')!.textContent).toBe(
+      messages.uk['summary.formula'],
+    );
+  });
 });
 
 describe('US1 — boot language detection (wired via main.ts)', () => {
