@@ -127,6 +127,11 @@ export function load(): { dilemma: Dilemma; view: ViewPrefs } | null {
   if (!isLang(view.lang)) {
     delete view.lang;
   }
+  // 008: groupKey is additive — a missing/invalid value defaults to 'type' (the prior
+  // grouped behaviour), so pre-008 saves load unchanged without a schemaVersion bump.
+  if (view.groupKey !== 'type' && view.groupKey !== 'weight') {
+    view.groupKey = 'type';
+  }
   return { dilemma: parsed.dilemma, view: parsed.view };
 }
 

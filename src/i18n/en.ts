@@ -25,6 +25,8 @@ export const en: Record<string, string> = {
   'toolbar.sortKeyAria': 'Sort key',
   'toolbar.weight': 'Weight',
   'toolbar.type': 'Type',
+  'toolbar.groupBy': 'Group by:',
+  'toolbar.groupKeyAria': 'Group by',
   'theme.system': '◐ Auto',
   'theme.light': '☀ Light',
   'theme.dark': '☾ Dark',
@@ -39,6 +41,8 @@ export const en: Record<string, string> = {
   'group.advantage': 'Advantages',
   'group.disadvantage': 'Disadvantages',
   'group.neutral': 'Neutral',
+  'group.weight': 'Weight {n}',
+  'group.weightless': 'Neutral',
 
   // Note
   'note.empty': '(empty point)',
@@ -75,6 +79,9 @@ export const en: Record<string, string> = {
   'confirm.clear': "Clear this dilemma? This can't be undone.",
 
   // Footer (US3)
+  'footer.inspiredPre': "Inspired by Greg McKeown's ",
+  'footer.inspiredBook': 'Essentialism',
+  'footer.inspiredPost': ' book.',
   'footer.madeBy': 'Made by {name}.',
   'footer.github': 'GitHub',
   'footer.linkedin': 'LinkedIn',

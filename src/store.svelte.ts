@@ -9,6 +9,7 @@ import type {
   Choice,
   Direction,
   EditTarget,
+  GroupKey,
   Lang,
   NoteDraft,
   NoteType,
@@ -50,6 +51,7 @@ export function emptyDilemma(): AppState {
       mode: 'default',
       sortKey: 'weight',
       direction: 'desc',
+      groupKey: 'type',
       theme: 'system',
       lang: DEFAULT_LANG,
     },
@@ -343,6 +345,13 @@ export function setSortKey(key: SortKey): void {
 export function setDirection(direction: Direction): void {
   update((d) => {
     d.view.direction = direction;
+  });
+}
+
+/** Group mode only (008): pick the dimension points are grouped by. */
+export function setGroupKey(key: GroupKey): void {
+  update((d) => {
+    d.view.groupKey = key;
   });
 }
 

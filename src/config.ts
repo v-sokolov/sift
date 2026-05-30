@@ -9,3 +9,7 @@ export const AUTHOR_NAME = 'Vitalii Sokolov';
 export const GITHUB_URL = 'https://github.com/v-sokolov';
 export const LINKEDIN_URL = 'https://www.linkedin.com/in/vitalii-sokolov/';
 export const CONTACT_EMAIL = 'vetalsokolov4@gmail.com';
+
+// The book that inspired Sift's "less, but better" ethos. Rendered as the
+// header inspiration link (and in the README).
+export const ESSENTIALISM_URL = 'https://www.goodreads.com/book/show/54644719-essentialism';

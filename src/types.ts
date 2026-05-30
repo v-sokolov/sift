@@ -26,6 +26,7 @@ export interface Dilemma {
 
 export type ViewMode = 'default' | 'grouped' | 'sorted';
 export type SortKey = 'weight' | 'type';
+export type GroupKey = 'type' | 'weight'; // dimension Group mode buckets points by (008)
 export type Direction = 'asc' | 'desc';
 export type Theme = 'system' | 'light' | 'dark';
 
@@ -36,8 +37,9 @@ export const DEFAULT_LANG: Lang = 'en';
 
 export interface ViewPrefs {
   mode: ViewMode;
-  sortKey: SortKey;
-  direction: Direction;
+  sortKey: SortKey; // Sort mode only
+  direction: Direction; // Sort mode only
+  groupKey: GroupKey; // Group mode only (008); default 'type'
   theme: Theme;
   lang: Lang; // active interface language
 }

@@ -24,6 +24,8 @@ export const uk: Record<string, string> = {
   'toolbar.sortKeyAria': 'Ключ сортування',
   'toolbar.weight': 'Вагою',
   'toolbar.type': 'Типом',
+  'toolbar.groupBy': 'Групувати за:',
+  'toolbar.groupKeyAria': 'Групувати за',
   'theme.system': '◐ Авто',
   'theme.light': '☀ Світла',
   'theme.dark': '☾ Темна',
@@ -38,6 +40,8 @@ export const uk: Record<string, string> = {
   'group.advantage': 'Переваги',
   'group.disadvantage': 'Недоліки',
   'group.neutral': 'Нейтральні',
+  'group.weight': 'Вага {n}',
+  'group.weightless': 'Нейтральні',
 
   // Note
   'note.empty': '(порожній пункт)',
@@ -74,6 +78,9 @@ export const uk: Record<string, string> = {
   'confirm.clear': 'Очистити це рішення? Це не можна скасувати.',
 
   // Footer (US3)
+  'footer.inspiredPre': 'Натхненна книжкою ',
+  'footer.inspiredBook': 'Essentialism',
+  'footer.inspiredPost': ' Ґреґа Мак-Кеоуна.',
   'footer.madeBy': 'Створив {name}.',
   'footer.github': 'GitHub',
   'footer.linkedin': 'LinkedIn',
