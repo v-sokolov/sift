@@ -79,19 +79,30 @@ clarification (continuous deploy chosen).
 
 ---
 
-## R4 — `--frozen-lockfile` and the yarn lockfile
+## R4 — Yarn 4 via Corepack, `--immutable`, and a public-registry lockfile
 
-**Decision**: CI installs with `yarn install --frozen-lockfile` and `cache: yarn`, which
-require a committed `yarn.lock`. Verify `yarn.lock` is committed and not git-ignored; if it
-is absent/ignored, that is a prerequisite fix (commit it) so CI installs are reproducible.
+**Decision**: `package.json` pins `packageManager: yarn@4.12.0`, so CI MUST activate Yarn 4
+via **`corepack enable`** before installing (the runner's default Yarn 1 aborts on the
+`packageManager` field). The reproducible-install flag is **`yarn install --immutable`**
+(Yarn 4's equivalent of Yarn 1's `--frozen-lockfile`, which does not exist in Yarn 4).
+`cache: yarn` in `setup-node` is omitted to avoid a Corepack/cache ordering conflict.
 
-**Rationale**: Frozen installs make the deployed build deterministic and catch lockfile
-drift. The project already standardizes on yarn (per repo memory), so this matches existing
-practice; the dev sandbox's empty-lockfile trick is a local-only concern and does not change
-what CI needs.
+> **Update (during /speckit-implement)**: the first CI run surfaced two issues the offline
+> sandbox hid: (1) the Corepack/`packageManager` mismatch above, and (2) the committed
+> `yarn.lock` embeds `__archiveUrl` resolutions pointing at an **internal Wix registry**
+> (`npm.dev.wixpress.com`, 183/184 entries) that GitHub-hosted runners cannot reach. CI
+> therefore **requires a `yarn.lock` regenerated against the public npm registry** (run
+> `rm yarn.lock && yarn install` from a machine off the Wix network/registry, then commit).
+> This is an environment artifact, not a design choice.
 
-**Alternatives considered**: Plain `yarn install` (no frozen) — rejected: non-reproducible,
-can silently resolve different versions in CI than locally.
+**Rationale**: Immutable installs make the deployed build deterministic and catch lockfile
+drift. Corepack is the supported way to honor the pinned Yarn version. A public-registry
+lockfile is mandatory for a public CI runner to fetch dependencies.
+
+**Alternatives considered**: Plain `yarn install` (non-immutable) — rejected: non-reproducible.
+Keeping `cache: yarn` — rejected: ordering conflict with `corepack enable`; re-add later via a
+dedicated cache action if install time matters. Hand-stripping the Wix archive URLs from the
+lockfile — rejected in favor of a clean off-network regeneration.
 
 ---
 

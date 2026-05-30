@@ -31,12 +31,20 @@ concurrency:
 
 ### `build`
 1. `actions/checkout@v4`
-2. `actions/setup-node@v4` with `node-version: 20` and `cache: yarn`
-3. `actions/configure-pages@v5`
-4. `yarn install --frozen-lockfile`
-5. `yarn build` with `env: { GITHUB_PAGES: 'true' }`  ← sets sub-path base; runs
+2. `actions/setup-node@v4` with `node-version: 20`
+3. `corepack enable` — `package.json` pins `packageManager: yarn@4.x`, so Corepack must
+   activate Yarn 4 (the runner's default Yarn 1 would abort the install)
+4. `actions/configure-pages@v5`
+5. `yarn install --immutable` — Yarn 4's reproducible-install flag (the Yarn 1
+   `--frozen-lockfile` flag does not exist in Yarn 4). **Requires** a `yarn.lock` whose
+   resolutions point at the public npm registry, not an internal mirror.
+6. `yarn build` with `env: { GITHUB_PAGES: 'true' }`  ← sets sub-path base; runs
    `tsc --noEmit && vite build`, so a type/build error fails here (FR-009)
-6. `actions/upload-pages-artifact@v3` with `path: dist`
+7. `actions/upload-pages-artifact@v3` with `path: dist`
+
+> `cache: yarn` is intentionally omitted: with Corepack-activated Yarn 4 it creates a
+> chicken-and-egg with the cache step (it runs before `corepack enable`). Installs are
+> small; caching can be added later via a dedicated cache action if needed.
 
 ### `deploy`
 - `needs: build` (only runs if build succeeded — fail-closed, FR-009)
@@ -67,9 +75,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
+      - run: corepack enable
       - uses: actions/configure-pages@v5
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - run: yarn build
         env:
           GITHUB_PAGES: 'true'

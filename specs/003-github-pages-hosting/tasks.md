@@ -35,7 +35,7 @@ untouched.
 **Purpose**: Confirm the build preconditions the deploy relies on.
 
 - [X] T001 Verify the production build succeeds and yields `dist/`: run `yarn build` from repo root, confirm it exits 0 and `dist/index.html` exists.
-- [X] T002 [P] Confirm `yarn.lock` is committed and not git-ignored (it is, 1880 lines) so CI `yarn install --frozen-lockfile` is reproducible — `git ls-files --error-unmatch yarn.lock` succeeds.
+- [X] T002 [P] Confirm `yarn.lock` is committed and not git-ignored (it is, 1880 lines) so CI `yarn install --immutable` is reproducible — `git ls-files --error-unmatch yarn.lock` succeeds. ⚠️ See T015: the committed lockfile targets an internal Wix registry and must be regenerated against public npm before CI install can succeed.
 
 **Checkpoint**: Build is green locally and the lockfile is committed.
 
@@ -91,7 +91,7 @@ base must already be in place to publish a correct site.
 
 ### Implementation for User Story 2
 
-- [X] T007 [US2] Create `.github/workflows/deploy.yml` exactly per `contracts/deploy-workflow.md`: triggers `push` to `main` + `workflow_dispatch`; `permissions` contents:read / pages:write / id-token:write; `concurrency: { group: pages, cancel-in-progress: true }`; `build` job (checkout@v4 → setup-node@v4 node 20 + cache yarn → configure-pages@v5 → `yarn install --frozen-lockfile` → `yarn build` with `env: GITHUB_PAGES: 'true'` → upload-pages-artifact@v3 path `dist`); `deploy` job (`needs: build`, environment `github-pages`, deploy-pages@v4 with `id: deploy`, url from `steps.deploy.outputs.page_url`).
+- [X] T007 [US2] Create `.github/workflows/deploy.yml` exactly per `contracts/deploy-workflow.md`: triggers `push` to `main` + `workflow_dispatch`; `permissions` contents:read / pages:write / id-token:write; `concurrency: { group: pages, cancel-in-progress: true }`; `build` job (checkout@v4 → setup-node@v4 node 20 → `corepack enable` → configure-pages@v5 → `yarn install --immutable` → `yarn build` with `env: GITHUB_PAGES: 'true'` → upload-pages-artifact@v3 path `dist`); `deploy` job (`needs: build`, environment `github-pages`, deploy-pages@v4 with `id: deploy`, url from `steps.deploy.outputs.page_url`). Corepack activates the pinned Yarn 4; `--immutable` is the Yarn 4 reproducible-install flag; `cache: yarn` omitted (Corepack ordering).
 - [X] T008 [US2] Static review of `deploy.yml` against the contract: confirm only first-party `actions/*` are used (no third-party action — FR-003), `needs: build` enforces fail-closed (FR-009), and concurrency provides supersede (FR-008).
 - [ ] T009 [US2] ⏸ MANUAL (needs a push to `main` + deploy run) — After enablement (US3/T011), verify auto-publish: push a trivial visible change to `main`, confirm the Actions run is green, the `deploy` job outputs the live URL (FR-010), and the change is live within ~5 minutes (SC-003).
 - [ ] T010 [US2] ⏸ MANUAL (GitHub Actions UI) — Verify manual re-trigger: from Actions → **Deploy to GitHub Pages** → **Run workflow**, confirm it republishes current `main` with no code change (FR-007).
@@ -127,6 +127,7 @@ manual setup.
 
 - [ ] T013 ⏸ MANUAL (after first deploy) — Run the full `quickstart.md` live verification: HTTPS on, zero console 404s, board persists across reload, suggest-a-feature opens a mail client with no network call (SC-001/SC-002/SC-006, FR-011).
 - [X] T014 [P] Conditional: if any file/dir in `dist/` begins with `_`, add an empty `.nojekyll` to the published output so GitHub Pages serves it intact (R5/FR-013). **Determination: not needed** — the Vite build emits only `index.html` and `assets/` (hashed filenames, no `_`-prefix), so Jekyll will not skip anything.
+- [ ] T015 ⏸ MANUAL (off Wix network) — Regenerate `yarn.lock` against the public npm registry so CI `yarn install --immutable` can fetch on GitHub runners: on a machine off the Wix VPN/registry run `rm yarn.lock && yarn install` (or `YARN_NPM_REGISTRY_SERVER=https://registry.npmjs.org yarn install`), confirm resolutions no longer reference `npm.dev.wixpress.com`, commit and push (R4). Blocks the first green CI run.
 
 ---
 

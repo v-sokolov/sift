@@ -24,9 +24,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
+      # package.json pins yarn@4 via packageManager; Corepack activates it.
+      - run: corepack enable
       - uses: actions/configure-pages@v5
-      - run: yarn install --frozen-lockfile
+      # Yarn 4 uses --immutable (the Yarn 1 --frozen-lockfile flag does not exist here).
+      - run: yarn install --immutable
       # tsc --noEmit && vite build; a type/build error fails here so deploy never runs.
       - run: yarn build
         env:

@@ -3,6 +3,10 @@
 **A quiet way to weigh a decision.** Compare 2–4 options with weighted pros & cons and a
 calm summary score — entirely in your browser, with nothing to sign up for.
 
+Sift is for thinking, not deciding for you: the score is a gentle nudge, never a verdict.
+It stays deliberately simple — each advantage adds its weight (1–3), each disadvantage
+subtracts it, and neutral notes don't count.
+
 **Live:** https://v-sokolov.github.io/sift/ — published to GitHub Pages; every push to
 `main` auto-deploys via GitHub Actions.
 
@@ -26,9 +30,9 @@ calm summary score — entirely in your browser, with nothing to sign up for.
 - Persistence via `localStorage`; the "Suggest a feature" form hands off through a
   `mailto:` link (no network calls)
 
-> Built almost end-to-end with **Claude Opus 4.8** in Claude Code — using the
-> **Superpowers** skill workflows and **Spec Kit** spec-driven development, from
-> brainstorming and specs through planning and implementation.
+> Built almost end-to-end with **Claude Opus 4.8 (1M context)** — using the
+> **Superpowers** skill workflows and **Spec Kit** (SDD — spec-driven development) —
+> from brainstorming and specs through planning and implementation.
 
 ## Run locally
 
