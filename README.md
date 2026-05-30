@@ -3,6 +3,9 @@
 **A quiet way to weigh a decision.** Compare 2–4 options with weighted pros & cons and a
 calm summary score — entirely in your browser, with nothing to sign up for.
 
+**Live:** https://v-sokolov.github.io/sift/ — published to GitHub Pages; every push to
+`main` auto-deploys via GitHub Actions.
+
 <!-- Screenshot: add ./assets/screenshot.png (comparison screen) once captured. -->
 
 ## Features
@@ -22,6 +25,10 @@ calm summary score — entirely in your browser, with nothing to sign up for.
 - No UI framework and **no runtime dependencies**
 - Persistence via `localStorage`; the "Suggest a feature" form hands off through a
   `mailto:` link (no network calls)
+
+> Built almost end-to-end with **Claude Opus 4.8** in Claude Code — using the
+> **Superpowers** skill workflows and **Spec Kit** spec-driven development, from
+> brainstorming and specs through planning and implementation.
 
 ## Run locally
 
