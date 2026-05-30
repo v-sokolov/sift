@@ -5,6 +5,8 @@ export const uk: Record<string, string> = {
   'header.titlePlaceholder': 'Що ви вирішуєте?',
   'header.titleAria': 'Рішення, яке ви зважуєте',
   'header.langAria': 'Мова',
+  'header.tagline':
+    'Тихий спосіб зважити рішення. Порівняйте кілька варіантів за перевагами й недоліками, а делікатна оцінка допоможе подумати — вона ніколи не вирішує за вас.',
 
   // Toolbar
   'toolbar.addChoice': '＋ Додати варіант',
@@ -28,7 +30,7 @@ export const uk: Record<string, string> = {
 
   // Choice
   'choice.placeholder': 'Варіант {n}',
-  'choice.empty': 'Поки немає нотаток',
+  'choice.empty': 'Поки немає пунктів',
   'choice.nameAria': 'Назва варіанту',
   'choice.remove': 'Видалити варіант',
   'choice.removeDisabled': 'Щонайменше 2 варіанти',
@@ -38,7 +40,7 @@ export const uk: Record<string, string> = {
   'group.neutral': 'Нейтральні',
 
   // Note
-  'note.empty': '(порожня нотатка)',
+  'note.empty': '(порожній пункт)',
   'note.emptyShort': '(порожньо)',
   'note.weightLabel': ', вага {n}',
   'note.editAria': 'Редагувати {type}{weight}: {text}',
@@ -49,15 +51,17 @@ export const uk: Record<string, string> = {
   // Summary
   'summary.totals': 'за {for} · проти {against}',
   'summary.aria': 'Підсумкові бали',
+  'summary.formula':
+    'Кожна перевага додає свою вагу (1–3), кожен недолік її віднімає; нейтральні пункти не враховуються.',
 
   // Add/edit form
-  'form.addNote': '＋ додати нотатку',
+  'form.addNote': '＋ додати пункт',
   'form.choice': 'Варіант',
-  'form.noteTypeAria': 'Тип нотатки',
+  'form.noteTypeAria': 'Тип пункту',
   'form.weightAria': 'Вага',
   'form.weightN': 'Вага {n}',
   'form.textPlaceholder': 'У чому суть?',
-  'form.textAria': 'Текст нотатки',
+  'form.textAria': 'Текст пункту',
   'form.cancel': 'Скасувати',
   'form.save': 'Зберегти',
   'form.add': 'Додати',

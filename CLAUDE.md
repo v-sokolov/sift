@@ -1,19 +1,25 @@
 <!-- SPECKIT START -->
-## Active feature: Phase-2 UI Rebuild (`004-phase2-ui-rebuild`)
+## Active feature: UI Copy Refinements (`005-ui-copy-refinements`)
 
 For technologies, project structure, shell commands, and other context, read the
 current implementation plan and its design artifacts:
 
-- Plan: `specs/004-phase2-ui-rebuild/plan.md`
-- Spec: `specs/004-phase2-ui-rebuild/spec.md`
-- Research / decisions: `specs/004-phase2-ui-rebuild/research.md`
-- Data model: `specs/004-phase2-ui-rebuild/data-model.md`
-- Contracts: `specs/004-phase2-ui-rebuild/contracts/` (store, components, theming, motion)
-- Quickstart: `specs/004-phase2-ui-rebuild/quickstart.md`
+- Plan: `specs/005-ui-copy-refinements/plan.md`
+- Spec: `specs/005-ui-copy-refinements/spec.md`
+- Research / decisions: `specs/005-ui-copy-refinements/research.md`
+- Data model: `specs/005-ui-copy-refinements/data-model.md`
+- Contracts: `specs/005-ui-copy-refinements/contracts/` (i18n, components)
+- Quickstart: `specs/005-ui-copy-refinements/quickstart.md`
+
+005 is a presentation-only change on the 004 Svelte stack: a header wordmark+tagline
+intro, a muted score-formula caption under the score band, and a "note"→"point" /
+«нотатка»→«пункт» umbrella-noun relabel (display values only). No new deps, no behavior
+or data-shape change.
 
 Prior features: `specs/001-sift-mvp/` (frozen MVP), `specs/002-post-mvp-improvements/`
 (UA/EN i18n, suggest-a-feature, footer, README), `specs/003-github-pages-hosting/`
-(GitHub Pages deploy).
+(GitHub Pages deploy), `specs/004-phase2-ui-rebuild/` (Svelte 5 + Tailwind v4 + Bits UI
+rebuild; merged PR #5).
 
 **Stack**: TypeScript 5.x (strict) + Vite 5. MVP (001) and 002/003 are **framework-free**.
 Phase-2 (004) rebuilds the UI on **Svelte 5 (runes) + Tailwind v4 + Bits UI** (headless

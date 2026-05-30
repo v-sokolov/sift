@@ -6,6 +6,8 @@ export const en: Record<string, string> = {
   'header.titlePlaceholder': 'What are you deciding?',
   'header.titleAria': "The decision you're weighing",
   'header.langAria': 'Language',
+  'header.tagline':
+    'A quiet way to weigh a decision. Compare a few options by their pros and cons, and let a gentle score help you think — it never decides for you.',
 
   // Toolbar
   'toolbar.addChoice': '＋ Add choice',
@@ -29,7 +31,7 @@ export const en: Record<string, string> = {
 
   // Choice
   'choice.placeholder': 'Choice {n}',
-  'choice.empty': 'No notes yet',
+  'choice.empty': 'No points yet',
   'choice.nameAria': 'Choice name',
   'choice.remove': 'Remove choice',
   'choice.removeDisabled': 'At least 2 choices',
@@ -39,7 +41,7 @@ export const en: Record<string, string> = {
   'group.neutral': 'Neutral',
 
   // Note
-  'note.empty': '(empty note)',
+  'note.empty': '(empty point)',
   'note.emptyShort': '(empty)',
   'note.weightLabel': ', weight {n}',
   'note.editAria': 'Edit {type}{weight}: {text}',
@@ -50,15 +52,17 @@ export const en: Record<string, string> = {
   // Summary
   'summary.totals': 'for {for} · against {against}',
   'summary.aria': 'Summary scores',
+  'summary.formula':
+    "Each advantage adds its weight (1–3), each disadvantage subtracts it; neutral points don't count.",
 
   // Add/edit form
-  'form.addNote': '＋ add note',
+  'form.addNote': '＋ add point',
   'form.choice': 'Choice',
-  'form.noteTypeAria': 'Note type',
+  'form.noteTypeAria': 'Point type',
   'form.weightAria': 'Weight',
   'form.weightN': 'Weight {n}',
   'form.textPlaceholder': "What's the point?",
-  'form.textAria': 'Note text',
+  'form.textAria': 'Point text',
   'form.cancel': 'Cancel',
   'form.save': 'Save',
   'form.add': 'Add',
