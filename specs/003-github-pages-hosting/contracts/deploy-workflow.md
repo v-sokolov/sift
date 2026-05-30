@@ -35,9 +35,15 @@ concurrency:
 3. `corepack enable` — `package.json` pins `packageManager: yarn@4.x`, so Corepack must
    activate Yarn 4 (the runner's default Yarn 1 would abort the install)
 4. `actions/configure-pages@v5`
-5. `yarn install --immutable` — Yarn 4's reproducible-install flag (the Yarn 1
-   `--frozen-lockfile` flag does not exist in Yarn 4). **Requires** a `yarn.lock` whose
-   resolutions point at the public npm registry, not an internal mirror.
+5. `yarn install --no-immutable` — **no `yarn.lock` is committed**: the only lockfile
+   generatable from the author's machine pinned packages to an internal, CI-unreachable
+   registry (`npm.dev.wixpress.com`). The runner resolves fresh from public npm and writes
+   a lockfile during the build. `.yarnrc.yml` pins `npmRegistryServer` to the public npm
+   registry so resolution is deterministic regardless of any global config.
+
+   > Trade-off: no pinned/reproducible lockfile (acceptable for this dev-deps-only static
+   > site). To restore reproducibility, commit a lockfile generated against public npm
+   > (from an unrestricted network) and switch this step back to `--immutable`.
 6. `yarn build` with `env: { GITHUB_PAGES: 'true' }`  ← sets sub-path base; runs
    `tsc --noEmit && vite build`, so a type/build error fails here (FR-009)
 7. `actions/upload-pages-artifact@v3` with `path: dist`
@@ -77,7 +83,7 @@ jobs:
           node-version: 20
       - run: corepack enable
       - uses: actions/configure-pages@v5
-      - run: yarn install --immutable
+      - run: yarn install --no-immutable
       - run: yarn build
         env:
           GITHUB_PAGES: 'true'

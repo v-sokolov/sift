@@ -56,11 +56,14 @@ yarn test       # suite still green (base does not affect tests)
   build emits a file/dir starting with `_`, add an empty `.nojekyll` to the published output
   so GitHub Pages serves it intact (R5/FR-013).
 - **Yarn 4 / Corepack**: `package.json` pins `packageManager: yarn@4`, so CI runs
-  `corepack enable` then `yarn install --immutable` (not the Yarn 1 `--frozen-lockfile`).
-- **Lockfile must target the public registry**: the `yarn.lock` committed from a Wix machine
-  pins packages to `npm.dev.wixpress.com`, which public CI runners can't reach. Regenerate it
-  off the Wix network/registry (`rm yarn.lock && yarn install`) and commit, so
-  `yarn install --immutable` succeeds on GitHub-hosted runners.
+  `corepack enable` first.
+- **No committed lockfile (by decision)**: the only lockfile generatable from the author's
+  network pinned packages to the internal `npm.dev.wixpress.com` (unreachable from public
+  CI), and that machine can't reach public npm to regenerate. So `yarn.lock` is **not**
+  committed; `.yarnrc.yml` pins the public npm registry and CI runs
+  `yarn install --no-immutable`, letting the runner resolve from public npm. To restore a
+  reproducible pinned install later: generate a lockfile on an unrestricted network, commit
+  it, and switch CI back to `--immutable`.
 - **No custom domain** (out of scope) — the `*.github.io` address provides HTTPS by default.
 
 ## Where things live

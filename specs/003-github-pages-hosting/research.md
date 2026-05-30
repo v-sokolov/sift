@@ -90,10 +90,17 @@ via **`corepack enable`** before installing (the runner's default Yarn 1 aborts 
 > **Update (during /speckit-implement)**: the first CI run surfaced two issues the offline
 > sandbox hid: (1) the Corepack/`packageManager` mismatch above, and (2) the committed
 > `yarn.lock` embeds `__archiveUrl` resolutions pointing at an **internal Wix registry**
-> (`npm.dev.wixpress.com`, 183/184 entries) that GitHub-hosted runners cannot reach. CI
-> therefore **requires a `yarn.lock` regenerated against the public npm registry** (run
-> `rm yarn.lock && yarn install` from a machine off the Wix network/registry, then commit).
-> This is an environment artifact, not a design choice.
+> (`npm.dev.wixpress.com`, 183/184 entries) that GitHub-hosted runners cannot reach.
+>
+> **Resolution (Option B):** the author's machine could not reach public npm to regenerate
+> a clean lockfile — its network resolves npm's Cloudflare IPs but the TCP connection is
+> refused (corporate split-tunnel/firewall; GitHub is allowed, npm is not). Rather than
+> block on that, we **do not commit a `yarn.lock`**: the deleted wixpress lockfile is
+> removed from the repo, `.yarnrc.yml` pins `npmRegistryServer` to public npm, and CI runs
+> `yarn install --no-immutable` so the runner (which *does* reach public npm) resolves
+> fresh and writes a lockfile at build time. Trade-off: no pinned reproducibility — fine
+> for a dev-deps-only static site; revisit by committing a public-npm lockfile later and
+> switching back to `--immutable`.
 
 **Rationale**: Immutable installs make the deployed build deterministic and catch lockfile
 drift. Corepack is the supported way to honor the pinned Yarn version. A public-registry
