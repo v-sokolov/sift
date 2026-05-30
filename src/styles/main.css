@@ -22,6 +22,11 @@ body {
   max-width: 1100px;
   margin: 0 auto;
   padding: var(--space-6) var(--space-4) var(--space-5);
+  /* Full-height column so the header stays at the top and the footer is pinned
+     to the bottom even when the board is short (sticky-footer layout). */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 button {
@@ -31,8 +36,14 @@ button {
 }
 
 /* ---- Header ---- */
+header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
 .header__title {
-  width: 100%;
+  flex: 1 1 260px;
   border: none;
   background: transparent;
   color: var(--text);
@@ -40,6 +51,43 @@ button {
   font-weight: 600;
   padding: var(--space-2) 0;
   outline: none;
+}
+.header__tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+/* Match the adjacent .btn (theme/Clear) height and font so the toggle lines up. */
+.langtoggle .langbtn {
+  background: var(--surface);
+  border: none;
+  border-left: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--font-size);
+}
+.langtoggle .langbtn:first-child {
+  border-left: none;
+}
+/* Active language: weight + underline, not color alone (Constitution V). */
+.langtoggle .langbtn.is-active {
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.linklike {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 0.9rem;
+  padding: var(--space-1) 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.linklike:hover {
+  color: var(--text);
 }
 .header__title::placeholder {
   color: var(--text-faint);
@@ -306,14 +354,113 @@ button {
   resize: vertical;
 }
 
-/* ---- Footer ---- */
+/* ---- Footer (pinned to the bottom of the column) ---- */
 .footer {
-  margin-top: var(--space-6);
+  margin-top: auto;
   padding-top: var(--space-3);
   border-top: 1px solid var(--border);
   color: var(--text-faint);
   font-size: 0.85rem;
   text-align: center;
+}
+.footer__links {
+  margin-left: var(--space-2);
+  white-space: nowrap;
+}
+/* Links use --accent (AA in both themes) rather than the faint footer text. */
+.footer__link {
+  color: var(--accent);
+  text-decoration: none;
+}
+.footer__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---- Suggest-a-feature modal (custom accessible overlay) ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  z-index: 100;
+}
+.modal {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-5);
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+.modal__title {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.modal__intro {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.modal__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  font-size: 1.1rem;
+  padding: var(--space-1);
+  border-radius: 6px;
+}
+.modal__close:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.modal__field input,
+.modal__field textarea {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: var(--space-2);
+}
+.modal__field textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.modal__fallback {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 0.82rem;
 }
 
 /* Focus visibility for keyboard users (FR-032). */

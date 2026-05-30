@@ -1,0 +1,11 @@
+// Fixed author/maintainer identity. Single source of truth for footer, README,
+// and the Suggest-a-feature mailto target.
+//
+// NOTE: CONTACT_EMAIL is used ONLY to build the `mailto:` href for the suggestion
+// form. It MUST NOT be rendered as visible text anywhere in the UI (see
+// contracts/suggestion.md, invariant I-S2).
+
+export const AUTHOR_NAME = 'Vitalii Sokolov';
+export const GITHUB_URL = 'https://github.com/v-sokolov';
+export const LINKEDIN_URL = 'https://www.linkedin.com/in/vitalii-sokolov/';
+export const CONTACT_EMAIL = 'vetalsokolov4@gmail.com';

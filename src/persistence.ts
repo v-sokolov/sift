@@ -4,6 +4,7 @@ import type {
   AppState,
   Dilemma,
   Direction,
+  Lang,
   NoteType,
   SortKey,
   Theme,
@@ -11,7 +12,7 @@ import type {
   ViewPrefs,
   PersistedV1,
 } from './types';
-import { MAX_CHOICES, MIN_CHOICES } from './types';
+import { LANGS, MAX_CHOICES, MIN_CHOICES } from './types';
 
 export const STORAGE_KEY = 'sift.v1';
 export const DEBOUNCE_MS = 400;
@@ -62,10 +63,17 @@ const SORT_KEYS: SortKey[] = ['weight', 'type'];
 const DIRECTIONS: Direction[] = ['asc', 'desc'];
 const THEMES: Theme[] = ['system', 'light', 'dark'];
 
+export function isLang(v: unknown): v is Lang {
+  return typeof v === 'string' && (LANGS as string[]).includes(v);
+}
+
 function isObj(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null;
 }
 
+// `lang` is intentionally NOT validated here so that older payloads (pre-i18n,
+// no `lang`) still load — language is resolved at boot via detection. A present
+// but invalid `lang` is normalized away in load().
 function validView(v: unknown): v is ViewPrefs {
   if (!isObj(v)) return false;
   return (
@@ -114,6 +122,11 @@ export function load(): { dilemma: Dilemma; view: ViewPrefs } | null {
   }
   if (!isObj(parsed) || parsed.schemaVersion !== 1) return null;
   if (!validDilemma(parsed.dilemma) || !validView(parsed.view)) return null;
+  const view = parsed.view as unknown as Record<string, unknown>;
+  // Drop a missing/invalid language so boot detection resolves it (FR-002/FR-004).
+  if (!isLang(view.lang)) {
+    delete view.lang;
+  }
   return { dilemma: parsed.dilemma, view: parsed.view };
 }
 

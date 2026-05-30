@@ -4,6 +4,8 @@ import { renderToolbar } from './toolbar';
 import { renderChoice } from './choice';
 import { renderSummary } from './summary';
 import { renderAddForm } from './addForm';
+import { renderFooter } from './footer';
+import { renderSuggest } from './suggest';
 
 function applyTheme(theme: Theme): void {
   const root = document.documentElement;
@@ -41,7 +43,8 @@ export function renderApp(root: HTMLElement, state: AppState): void {
     <section class="choices" style="--choice-count:${n}">${choicesHtml}</section>
     ${renderSummary(state)}
     ${renderAddForm(state)}
-    <footer class="footer">Sift — a quiet way to weigh a decision. Made with care.</footer>
+    ${renderFooter(state)}
+    ${renderSuggest(state)}
   `;
 
   if (focusKey) {

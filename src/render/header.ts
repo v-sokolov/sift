@@ -1,8 +1,12 @@
 import type { AppState } from '../types';
 import { esc } from './util';
+import { t } from '../i18n';
 
-// Editable, persistent dilemma title with a ghost placeholder (FR-001).
+// Editable dilemma title + a quiet Suggest-a-feature link. (The language toggle
+// lives in the toolbar, next to the theme picker.)
 export function renderHeader(state: AppState): string {
+  const lang = state.view.lang;
+
   return `<header>
     <input
       class="header__title"
@@ -10,8 +14,11 @@ export function renderHeader(state: AppState): string {
       data-action="title"
       type="text"
       value="${esc(state.dilemma.title)}"
-      placeholder="What are you deciding?"
-      aria-label="The decision you're weighing"
+      placeholder="${esc(t(lang, 'header.titlePlaceholder'))}"
+      aria-label="${t(lang, 'header.titleAria')}"
     />
+    <div class="header__tools">
+      <button class="linklike" data-action="open-suggest">${t(lang, 'suggest.open')}</button>
+    </div>
   </header>`;
 }
