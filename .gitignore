@@ -11,6 +11,11 @@ docs/
 # Dependencies
 node_modules/
 
+# Lockfile intentionally NOT committed (003 decision): a lock generated against the
+# internal Wix mirror pins npm.dev.wixpress.com archive URLs that the public GitHub
+# Pages CI cannot reach. CI runs `yarn install --no-immutable` from public npm instead.
+yarn.lock
+
 # Build output
 dist/
 

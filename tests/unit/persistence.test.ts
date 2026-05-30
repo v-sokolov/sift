@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { AppState } from '../../src/types';
-import { emptyDilemma } from '../../src/state';
+import { emptyDilemma } from '../../src/store.svelte';
 import { STORAGE_KEY, flushSave, load, scheduleSave } from '../../src/persistence';
 
 function seedState(): AppState {
