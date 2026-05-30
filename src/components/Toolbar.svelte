@@ -7,6 +7,7 @@
     cycleTheme,
     getState,
     setDirection,
+    setGroupKey,
     setLang,
     setSortKey,
     toggleGroup,
@@ -86,7 +87,28 @@
 
   {#if showConfig}
     <div class="toolbar__row">
-      {#if mode === "sorted"}
+      {#if mode === "grouped"}
+        <span class="count">{t(lang, "toolbar.groupBy")}</span>
+        <div
+          class="seg"
+          role="group"
+          aria-label={t(lang, "toolbar.groupKeyAria")}
+        >
+          <button
+            data-action="set-groupkey"
+            data-key="type"
+            aria-pressed={s.view.groupKey === "type"}
+            onclick={() => setGroupKey("type")}>{t(lang, "toolbar.type")}</button
+          >
+          <button
+            data-action="set-groupkey"
+            data-key="weight"
+            aria-pressed={s.view.groupKey === "weight"}
+            onclick={() => setGroupKey("weight")}
+            >{t(lang, "toolbar.weight")}</button
+          >
+        </div>
+      {:else if mode === "sorted"}
         <span class="count">{t(lang, "toolbar.by")}</span>
         <div
           class="seg"
@@ -107,26 +129,26 @@
             onclick={() => setSortKey("type")}>{t(lang, "toolbar.type")}</button
           >
         </div>
+        <span class="count">{t(lang, "toolbar.direction")}</span>
+        <div
+          class="seg"
+          role="group"
+          aria-label={t(lang, "toolbar.directionAria")}
+        >
+          <button
+            data-action="set-direction"
+            data-dir="asc"
+            aria-pressed={s.view.direction === "asc"}
+            onclick={() => setDirection("asc")}>{t(lang, "toolbar.asc")}</button
+          >
+          <button
+            data-action="set-direction"
+            data-dir="desc"
+            aria-pressed={s.view.direction === "desc"}
+            onclick={() => setDirection("desc")}>{t(lang, "toolbar.desc")}</button
+          >
+        </div>
       {/if}
-      <span class="count">{t(lang, "toolbar.direction")}</span>
-      <div
-        class="seg"
-        role="group"
-        aria-label={t(lang, "toolbar.directionAria")}
-      >
-        <button
-          data-action="set-direction"
-          data-dir="asc"
-          aria-pressed={s.view.direction === "asc"}
-          onclick={() => setDirection("asc")}>{t(lang, "toolbar.asc")}</button
-        >
-        <button
-          data-action="set-direction"
-          data-dir="desc"
-          aria-pressed={s.view.direction === "desc"}
-          onclick={() => setDirection("desc")}>{t(lang, "toolbar.desc")}</button
-        >
-      </div>
     </div>
   {/if}
 </div>

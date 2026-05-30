@@ -71,8 +71,8 @@
     <ChoiceCard {choice} {index} />
   {/each}
 </section>
-<Summary />
 <AddEditForm />
+<Summary />
 <Footer />
 {#if s.suggest.open}
   <SuggestDialog />

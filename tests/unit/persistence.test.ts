@@ -57,6 +57,33 @@ describe('language migration (002)', () => {
   });
 });
 
+describe('groupKey persistence (008)', () => {
+  it('round-trips a stored grouping dimension', () => {
+    const s = seedState();
+    s.view.groupKey = 'weight';
+    flushSave(s);
+    expect(load()!.view.groupKey).toBe('weight');
+  });
+
+  it('defaults a missing groupKey to type (legacy save loads, board not lost)', () => {
+    const s = seedState();
+    const view = { ...s.view } as unknown as Record<string, unknown>;
+    delete view.groupKey;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view }));
+    const out = load();
+    expect(out).not.toBeNull();
+    expect(out!.dilemma.title).toBe('Which job?');
+    expect(out!.view.groupKey).toBe('type');
+  });
+
+  it('defaults an invalid groupKey to type', () => {
+    const s = seedState();
+    const view = { ...s.view, groupKey: 'bogus' };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view }));
+    expect(load()!.view.groupKey).toBe('type');
+  });
+});
+
 describe('defensive load (P4)', () => {
   it('returns null when key is missing', () => {
     expect(load()).toBeNull();

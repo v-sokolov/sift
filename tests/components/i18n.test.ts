@@ -99,6 +99,24 @@ describe('US1 — localization at the DOM level', () => {
     );
   });
 
+  it('renders the Essentialism inspiration with a real link in the footer', () => {
+    const inspired = container.querySelector('.footer .footer__inspired')!;
+    const link = inspired.querySelector('a') as HTMLAnchorElement;
+    expect(link).not.toBeNull();
+    expect(link.textContent).toBe(messages.en['footer.inspiredBook']);
+    expect(link.getAttribute('href')).toBe(
+      'https://www.goodreads.com/book/show/54644719-essentialism',
+    );
+    expect(link.getAttribute('rel')).toContain('noopener');
+    expect(inspired.textContent).toContain(messages.en['footer.inspiredPre'].trim());
+    expect(inspired.textContent).toContain(messages.en['footer.inspiredPost'].trim());
+    setLang('uk');
+    flushSync();
+    expect(container.querySelector('.footer .footer__inspired a')!.textContent).toBe(
+      messages.uk['footer.inspiredBook'],
+    );
+  });
+
   it('shows the localized score-formula caption below the score band (US2)', () => {
     // The caption lives inside .summary but is not one of the .sum score cells.
     expect(container.querySelector('.summary .sum')).not.toBeNull();

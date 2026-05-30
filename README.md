@@ -7,6 +7,8 @@ Sift is for thinking, not deciding for you: the score is a gentle nudge, never a
 It stays deliberately simple — each advantage adds its weight (1–3), each disadvantage
 subtracts it, and neutral notes don't count.
 
+Inspired by Greg McKeown's [*Essentialism*](https://www.goodreads.com/book/show/54644719-essentialism) — the disciplined pursuit of less.
+
 **Live:** https://v-sokolov.github.io/sift/ — published to GitHub Pages; every push to
 `main` auto-deploys via GitHub Actions.
 

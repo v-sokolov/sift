@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getState } from '../store.svelte';
-  import { AUTHOR_NAME, GITHUB_URL, LINKEDIN_URL } from '../config';
+  import { AUTHOR_NAME, ESSENTIALISM_URL, GITHUB_URL, LINKEDIN_URL } from '../config';
   import { t } from '../i18n';
 
   let s = $derived(getState());
@@ -11,6 +11,14 @@
 </script>
 
 <footer class="footer">
+  <span class="footer__inspired"
+    >{t(lang, 'footer.inspiredPre')}<a
+      class="footer__link"
+      href={ESSENTIALISM_URL}
+      target="_blank"
+      rel="noopener noreferrer">{t(lang, 'footer.inspiredBook')}</a
+    >{t(lang, 'footer.inspiredPost')}</span
+  >
   <span class="footer__text">{sentence}</span>
   <span class="footer__links">
     <a

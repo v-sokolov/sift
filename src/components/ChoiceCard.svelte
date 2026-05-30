@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Choice, NoteType } from '../types';
+  import type { Choice, NoteType, Weight } from '../types';
   import { MIN_CHOICES } from '../types';
   import { arrange } from '../view';
   import { getState, removeChoice, renameChoice } from '../store.svelte';
@@ -19,6 +19,16 @@
     disadvantage: 'group.disadvantage',
     neutral: 'group.neutral',
   };
+
+  // A section label is a NoteType (group-by-type), a Weight number or 'weightless'
+  // (group-by-weight), or null (flat). Render the right localized heading (008).
+  type SectionLabel = NoteType | Weight | 'weightless' | null;
+  function heading(label: SectionLabel): string {
+    if (label === null) return '';
+    if (label === 'weightless') return t(lang, 'group.weightless');
+    if (typeof label === 'number') return t(lang, 'group.weight', { n: String(label) });
+    return t(lang, GROUP_KEY[label]);
+  }
 </script>
 
 <article class="choice" data-choice-id={choice.id}>
@@ -48,8 +58,8 @@
   {:else}
     {#each sections as section}
       {#if !(section.label && section.notes.length === 0)}
-        {#if section.label}
-          <div class="group-label">{t(lang, GROUP_KEY[section.label])}</div>
+        {#if section.label !== null}
+          <div class="group-label">{heading(section.label)}</div>
         {/if}
         <ul class="notes">
           {#each section.notes as nt (nt.id)}
