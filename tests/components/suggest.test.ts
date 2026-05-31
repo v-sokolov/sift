@@ -72,6 +72,36 @@ describe('US2 — suggest modal (render/state)', () => {
   });
 });
 
+describe('equal-width action buttons (011)', () => {
+  let container: HTMLElement;
+  beforeEach(() => {
+    localStorage.clear();
+    setState(emptyDilemma());
+    ({ container } = render(App));
+    flushSync();
+    openSuggest();
+    flushSync();
+  });
+
+  const actionButtons = () =>
+    Array.from(
+      (container.querySelector('.modal__actions') as HTMLElement).querySelectorAll('button'),
+    );
+
+  it('action row holds exactly two buttons, Cancel then Send (C-1, FR-005)', () => {
+    const btns = actionButtons();
+    expect(btns).toHaveLength(2);
+    expect(btns[0].getAttribute('data-action')).toBe('close-suggest');
+    expect(btns[1].getAttribute('data-action')).toBe('suggest-send');
+  });
+
+  it('both action buttons carry the btn--half equal-width hook (C-2, FR-001/003)', () => {
+    for (const btn of actionButtons()) {
+      expect(btn.classList.contains('btn--half')).toBe(true);
+    }
+  });
+});
+
 describe('US2 — suggest modal (wired interactions)', () => {
   let clicks: string[];
   let r: HTMLElement;

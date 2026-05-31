@@ -1,34 +1,30 @@
 <!-- SPECKIT START -->
-## Active feature: Save-Status Indicator & Header/Footer Polish (`010-save-status-indicator`)
+## Active feature: Suggest-Feature Form Button Layout (`011-suggest-form-css`)
 
 For technologies, project structure, shell commands, and other context, read the
 current implementation plan and its design artifacts:
 
-- Plan: `specs/010-save-status-indicator/plan.md`
-- Spec: `specs/010-save-status-indicator/spec.md` (incl. Clarifications, Session 2026-05-31)
-- Research / decisions: `specs/010-save-status-indicator/research.md` (R1–R7)
-- Data model: `specs/010-save-status-indicator/data-model.md` (`SaveStatus` + runtime `AppState.status`; no schema change)
-- Contracts: `specs/010-save-status-indicator/contracts/{save-status,ui-presentation}.md`
-- Quickstart: `specs/010-save-status-indicator/quickstart.md` (on-device + test acceptance matrix)
+- Plan: `specs/011-suggest-form-css/plan.md`
+- Spec: `specs/011-suggest-form-css/spec.md` (incl. Clarifications, Session 2026-05-31)
+- Research / decisions: `specs/011-suggest-form-css/research.md` (R1–R4)
+- Data model: `specs/011-suggest-form-css/data-model.md` (no entities — presentation-only, no schema change)
+- Contracts: `specs/011-suggest-form-css/contracts/ui-presentation.md`
+- Quickstart: `specs/011-suggest-form-css/quickstart.md` (test matrix A1–A9; A1–A4 automated, A5–A9 manual)
 
-010 is a **UI-polish pass** with two streams. **Stream 1 (save-status indicator, core)**: a
-three-state runtime field `status: SaveStatus = 'hidden' | 'editing' | 'saved'` on `AppState`
-(NOT persisted — no `PersistedV1`/schema change, FR-013). Set `'editing'` inside the **8 content
-mutations** (`setDilemmaTitle`, `addChoice`, `renameChoice`, `removeChoice`, `addNote`,
-`updateNote`, `removeNote`, `submitForm` commit); **preference** mutations (lang/theme/sort/group/
-mode/direction) and **transient form** mutations MUST NOT touch it. `setLastSaved` flips
-`editing→saved` **only when currently `editing`** (guard — so a preference-triggered save never
-shows a false "Saved" on an empty board); `clearDilemma`→`hidden`; fresh load→`hidden`. Debounce
-`DEBOUNCE_MS` 400→**2000** in `persistence.ts`. Toolbar derives the indicator from `status` (dot is
-`aria-hidden`, text label inside the existing `aria-live="polite"` span carries meaning — Principle
-V). **Stream 2 (header/footer polish, presentation-only)**: favicon (`public/favicon.svg`,
-decorative) left of the "Sift" wordmark; move the `open-suggest` button into the brand row
-(space-between, rendered once); drop the "Greg McKeown" author credit from `footer.inspired*` i18n
-in EN+UK, keep the *Essentialism* book link. New i18n key `toolbar.editing` (EN/UK). Test-first
-(Principle IV): store transitions, debounce, toolbar/header/footer component tests — fail first,
-then green.
+011 is a **presentation-only** polish of the suggest-a-feature dialog's action row. The two
+buttons (Cancel, Send) become equal-width, sharing the row instead of sitting right-aligned at
+natural content widths. Implementation: `.modal__actions` keeps its flex `gap`, drops
+`justify-content: flex-end`; both action buttons gain a shared **`btn--half`** class and the CSS
+rule `.modal__actions .btn--half { flex: 1 1 0; }` (zero basis → equal halves regardless of label
+length/language, FR-001/003). Footnote stays **left-aligned** (settled in Clarifications, FR-006).
+No store/persistence/i18n/behavior change; `SuggestionDraft`, `canSend`, order (Cancel→Send),
+disabled gating, focus, Esc/backdrop close all unchanged. Test-first (Principle IV): jsdom can't
+apply CSS or compute layout, so the new `suggest.test.ts` contract asserts the **markup hook**
+(two buttons in order, both carry `btn--half`) — fail first, then green; existing suggest
+behavior tests are the regression gate; pixel-equality verified manually (quickstart A5–A9).
 
-Prior features: `specs/001-sift-mvp/` (frozen MVP), `specs/009-group-ordering/` (locked Group-mode
+Prior features: `specs/010-save-status-indicator/` (save-status indicator hidden→editing→saved +
+header/footer polish; merged PR #11), `specs/001-sift-mvp/` (frozen MVP), `specs/009-group-ordering/` (locked Group-mode
 `arrange()` ordering with regression tests; merged PR #10), `specs/008-group-by-dimension/`
 (Group by Type/Weight dimension + Add-point above score; merged PR #9),
 `specs/002-post-mvp-improvements/`
