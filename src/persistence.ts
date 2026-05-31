@@ -15,7 +15,7 @@ import type {
 import { LANGS, MAX_CHOICES, MIN_CHOICES } from './types';
 
 export const STORAGE_KEY = 'sift.v1';
-export const DEBOUNCE_MS = 400;
+export const DEBOUNCE_MS = 2000; // 2s settle window (010, FR-004)
 
 let timer: ReturnType<typeof setTimeout> | null = null;
 

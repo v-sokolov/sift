@@ -8,6 +8,7 @@ import {
   addNote,
   clearDilemma,
   closeForm,
+  cycleTheme,
   emptyDilemma,
   getState,
   initLang,
@@ -15,14 +16,22 @@ import {
   openEditForm,
   removeChoice,
   removeNote,
+  renameChoice,
+  setDilemmaTitle,
+  setDirection,
   setFormText,
   setFormType,
+  setGroupKey,
   setLang,
   setLastSaved,
+  setSortKey,
   setState,
   setTheme,
   submitForm,
   subscribePersist,
+  toggleGroup,
+  toggleSort,
+  updateNote,
 } from '../../src/store.svelte';
 
 beforeEach(() => {
@@ -150,6 +159,125 @@ describe('removeNote closes an open edit form for the removed note (FR-011)', ()
     removeNote(cid, n2.id);
     expect(getState().editing).not.toBeNull();
     expect(getState().dilemma.choices[0].notes.map((n) => n.id)).toEqual([n1.id]);
+  });
+});
+
+describe('save status (010)', () => {
+  const cid = () => getState().dilemma.choices[0].id;
+
+  test('fresh state is hidden', () => {
+    expect(getState().status).toBe('hidden');
+  });
+
+  test('each of the 8 content mutations sets status to editing', () => {
+    const contentMutations: Array<() => void> = [
+      () => setDilemmaTitle('q'),
+      () => addChoice(),
+      () => renameChoice(cid(), 'A'),
+      () => {
+        addChoice();
+        removeChoice(getState().dilemma.choices[2].id);
+      },
+      () => addNote(cid(), { text: 'x', type: 'advantage', weight: 1 }),
+      () => {
+        addNote(cid(), { text: 'x', type: 'advantage', weight: 1 });
+        const nid = getState().dilemma.choices[0].notes[0].id;
+        updateNote(cid(), nid, { text: 'y', type: 'advantage', weight: 2 });
+      },
+      () => {
+        addNote(cid(), { text: 'x', type: 'advantage', weight: 1 });
+        const nid = getState().dilemma.choices[0].notes[0].id;
+        removeNote(cid(), nid);
+      },
+      () => {
+        openAddForm(cid());
+        setFormText('z');
+        submitForm();
+      },
+    ];
+    for (const mutate of contentMutations) {
+      setState(emptyDilemma());
+      expect(getState().status).toBe('hidden');
+      mutate();
+      expect(getState().status).toBe('editing');
+    }
+  });
+
+  test('setLastSaved flips editing → saved and records lastSavedAt', () => {
+    setDilemmaTitle('q');
+    expect(getState().status).toBe('editing');
+    setLastSaved(123);
+    expect(getState().status).toBe('saved');
+    expect(getState().lastSavedAt).toBe(123);
+  });
+
+  test('setLastSaved does not invent a "saved" while hidden (guard, FR-006/008)', () => {
+    expect(getState().status).toBe('hidden');
+    setLastSaved(123);
+    expect(getState().status).toBe('hidden');
+    expect(getState().lastSavedAt).toBe(123);
+  });
+
+  test('setLastSaved leaves an already-saved status as saved', () => {
+    setDilemmaTitle('q');
+    setLastSaved(1);
+    expect(getState().status).toBe('saved');
+    setLastSaved(2);
+    expect(getState().status).toBe('saved');
+  });
+
+  test('preference & transient-form mutations never change status (FR-006)', () => {
+    const noops: Array<() => void> = [
+      () => setLang('uk'),
+      () => setTheme('dark'),
+      () => cycleTheme(),
+      () => toggleGroup(),
+      () => toggleSort(),
+      () => setSortKey('type'),
+      () => setDirection('asc'),
+      () => setGroupKey('weight'),
+      () => openAddForm(cid()),
+      () => {
+        openAddForm(cid());
+        setFormType('neutral');
+      },
+      () => {
+        openAddForm(cid());
+        setFormText('draft');
+      },
+      () => {
+        openAddForm(cid());
+        closeForm();
+      },
+    ];
+    const bases: Array<[string, () => void]> = [
+      ['hidden', () => {}],
+      ['editing', () => setDilemmaTitle('q')],
+      [
+        'saved',
+        () => {
+          setDilemmaTitle('q');
+          setLastSaved(1);
+        },
+      ],
+    ];
+    for (const [expected, setup] of bases) {
+      for (const noop of noops) {
+        setState(emptyDilemma());
+        setup();
+        expect(getState().status).toBe(expected);
+        noop();
+        expect(getState().status).toBe(expected);
+      }
+    }
+  });
+
+  test('clearDilemma resets status to hidden (FR-009)', () => {
+    setDilemmaTitle('q');
+    setLastSaved(1);
+    expect(getState().status).toBe('saved');
+    clearDilemma();
+    expect(getState().status).toBe('hidden');
   });
 });
 

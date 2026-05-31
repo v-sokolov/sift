@@ -40,6 +40,10 @@
 
   --accent: #3a6ea5;
   --focus: #3a6ea5;
+
+  /* Save-status dot (010): green = saved, amber = editing. */
+  --status-saved: var(--advantage);
+  --status-editing: #c08a00;
 }
 
 /* Dark palette, shared by OS-preference (theme=system) and explicit toggle. */
@@ -61,6 +65,9 @@
 
     --accent: #79a9d6;
     --focus: #79a9d6;
+
+    --status-saved: var(--advantage);
+    --status-editing: #e0b34d;
   }
 }
 
@@ -82,6 +89,9 @@
 
   --accent: #79a9d6;
   --focus: #79a9d6;
+
+  --status-saved: var(--advantage);
+  --status-editing: #e0b34d;
 }
 
 html,
@@ -170,6 +180,27 @@ header {
 .header__brand {
   margin-bottom: var(--space-1);
 }
+/* Brand row (010): favicon + wordmark on the left, Suggest button on the right. */
+.header__brandmain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.header__brandleft {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.header__logo {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 6px;
+  display: block;
+}
 .header__wordmark {
   margin: 0;
   font-size: 1.5rem;
@@ -218,21 +249,11 @@ header {
   padding: var(--space-2) 0;
   outline: none;
 }
-/* On small screens, "Suggest a feature" and the dilemma title each take their own full-width
-   row (flex-wrap), with Suggest shown above the title (swap order). */
+/* On small screens, the dilemma title takes its own full-width row (flex-wrap). */
 @media (max-width: 719px) {
-  .header__tools {
-    order: -1;
-    flex-basis: 100%;
-  }
   .header__titlebox {
     flex-basis: 100%;
   }
-}
-.header__tools {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
 }
 /* Match the adjacent .btn (theme/Clear) height and font so the toggle lines up. */
 .langtoggle .langbtn {
@@ -342,6 +363,22 @@ header {
 .saved {
   color: var(--text-faint);
   font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+/* Save-status dot (010): decorative cue; the text label carries the meaning (Constitution V). */
+.status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex: none;
+}
+.status-dot--saved {
+  background: var(--status-saved);
+}
+.status-dot--editing {
+  background: var(--status-editing);
 }
 .seg {
   display: inline-flex;

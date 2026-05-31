@@ -28,7 +28,14 @@
   let atMax = $derived(n >= MAX_CHOICES);
   let mode = $derived(s.view.mode);
   let showConfig = $derived(mode === "grouped" || mode === "sorted");
-  let saved = $derived(s.lastSavedAt ? t(lang, "toolbar.saved") : "");
+  // Save-status indicator (010): hidden shows nothing; editing/saved show a dot + label.
+  let statusLabel = $derived(
+    s.status === "editing"
+      ? t(lang, "toolbar.editing")
+      : s.status === "saved"
+        ? t(lang, "toolbar.saved")
+        : "",
+  );
 
   function clear() {
     if (window.confirm(t(lang, "confirm.clear"))) clearDilemma();
@@ -61,7 +68,12 @@
     <button class="btn" data-action="clear" onclick={clear}
       >{t(lang, "toolbar.clear")}</button
     >
-    <span class="saved" aria-live="polite">{saved}</span>
+    <span class="saved" aria-live="polite"
+      >{#if s.status !== "hidden"}<span
+          class="status-dot status-dot--{s.status}"
+          aria-hidden="true"
+        ></span>{statusLabel}{/if}</span
+    >
     <span class="toolbar__spacer"></span>
     <button
       class="btn btn--primary"

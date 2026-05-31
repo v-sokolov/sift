@@ -1,29 +1,35 @@
 <!-- SPECKIT START -->
-## Active feature: Group Ordering — Confirm & Document (`009-group-ordering`)
+## Active feature: Save-Status Indicator & Header/Footer Polish (`010-save-status-indicator`)
 
 For technologies, project structure, shell commands, and other context, read the
 current implementation plan and its design artifacts:
 
-- Plan: `specs/009-group-ordering/plan.md`
-- Spec: `specs/009-group-ordering/spec.md` (incl. Clarifications, Session 2026-05-31)
-- Research / decisions: `specs/009-group-ordering/research.md` (R1–R3)
-- Data model: `specs/009-group-ordering/data-model.md` (no change — restates Section/ordering rules)
-- Contracts: `specs/009-group-ordering/contracts/group-ordering.md` (locked `arrange()` ordering)
-- Quickstart: `specs/009-group-ordering/quickstart.md` (on-device + test acceptance matrix)
+- Plan: `specs/010-save-status-indicator/plan.md`
+- Spec: `specs/010-save-status-indicator/spec.md` (incl. Clarifications, Session 2026-05-31)
+- Research / decisions: `specs/010-save-status-indicator/research.md` (R1–R7)
+- Data model: `specs/010-save-status-indicator/data-model.md` (`SaveStatus` + runtime `AppState.status`; no schema change)
+- Contracts: `specs/010-save-status-indicator/contracts/{save-status,ui-presentation}.md`
+- Quickstart: `specs/010-save-status-indicator/quickstart.md` (on-device + test acceptance matrix)
 
-009 is a **regression-protection** pass: it locks Group mode's ordering, which already ships
-(008), with explicit fail-first tests and **no expected production code change** (FR-010).
-**(US1, P1)** Pin the `arrange()` contract — **Type** → Advantages (weight 3→2→1) → Disadvantages
-(3→2→1) → Neutral (creation order); **Weight** → sections 3→2→1→weightless(0), empties omitted,
-members creation-order with types mixed; deterministic/stable on re-render; every point in exactly
-one section; no mutation. Key nuance (research R2): the "no empty section" guarantee (FR-006) is
-enforced in **`arrange`** for Weight mode but in the **renderer** (`ChoiceCard.svelte`) for Type
-mode (which returns empty type sections). Work is confined to `tests/unit/view.test.ts`
-(strengthen Type full-3→2→1 + Weight full-3→2→1→0 + determinism/purity cases), optionally one
-ChoiceCard empty-section test via `tests/svelte.ts`. If a test goes red, it is a genuine regression
-to fix per the contract — not a behaviour change.
+010 is a **UI-polish pass** with two streams. **Stream 1 (save-status indicator, core)**: a
+three-state runtime field `status: SaveStatus = 'hidden' | 'editing' | 'saved'` on `AppState`
+(NOT persisted — no `PersistedV1`/schema change, FR-013). Set `'editing'` inside the **8 content
+mutations** (`setDilemmaTitle`, `addChoice`, `renameChoice`, `removeChoice`, `addNote`,
+`updateNote`, `removeNote`, `submitForm` commit); **preference** mutations (lang/theme/sort/group/
+mode/direction) and **transient form** mutations MUST NOT touch it. `setLastSaved` flips
+`editing→saved` **only when currently `editing`** (guard — so a preference-triggered save never
+shows a false "Saved" on an empty board); `clearDilemma`→`hidden`; fresh load→`hidden`. Debounce
+`DEBOUNCE_MS` 400→**2000** in `persistence.ts`. Toolbar derives the indicator from `status` (dot is
+`aria-hidden`, text label inside the existing `aria-live="polite"` span carries meaning — Principle
+V). **Stream 2 (header/footer polish, presentation-only)**: favicon (`public/favicon.svg`,
+decorative) left of the "Sift" wordmark; move the `open-suggest` button into the brand row
+(space-between, rendered once); drop the "Greg McKeown" author credit from `footer.inspired*` i18n
+in EN+UK, keep the *Essentialism* book link. New i18n key `toolbar.editing` (EN/UK). Test-first
+(Principle IV): store transitions, debounce, toolbar/header/footer component tests — fail first,
+then green.
 
-Prior features: `specs/001-sift-mvp/` (frozen MVP), `specs/008-group-by-dimension/`
+Prior features: `specs/001-sift-mvp/` (frozen MVP), `specs/009-group-ordering/` (locked Group-mode
+`arrange()` ordering with regression tests; merged PR #10), `specs/008-group-by-dimension/`
 (Group by Type/Weight dimension + Add-point above score; merged PR #9),
 `specs/002-post-mvp-improvements/`
 (UA/EN i18n, suggest-a-feature, footer, README), `specs/003-github-pages-hosting/`

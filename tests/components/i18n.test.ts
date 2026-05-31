@@ -194,4 +194,15 @@ describe('US3 — author footer', () => {
   it('never renders the maintainer email anywhere', () => {
     expect(container.innerHTML).not.toContain(CONTACT_EMAIL);
   });
+
+  it('drops the author name from the inspiration credit, keeps the book (010, FR-014)', () => {
+    const footer = container.querySelector('.footer')!;
+    expect(footer.textContent).toContain('Essentialism');
+    expect(footer.textContent).not.toContain('Greg McKeown');
+    setLang('uk');
+    flushSync();
+    const footerUk = container.querySelector('.footer')!;
+    expect(footerUk.textContent).toContain('Essentialism');
+    expect(footerUk.textContent).not.toContain('Мак-Кеоуна');
+  });
 });

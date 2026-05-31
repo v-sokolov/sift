@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { AppState } from '../../src/types';
 import { emptyDilemma } from '../../src/store.svelte';
-import { STORAGE_KEY, flushSave, load, scheduleSave } from '../../src/persistence';
+import { DEBOUNCE_MS, STORAGE_KEY, flushSave, load, scheduleSave } from '../../src/persistence';
 
 function seedState(): AppState {
   const s = emptyDilemma();
@@ -111,16 +111,25 @@ describe('defensive load (P4)', () => {
 });
 
 describe('debounce (P2/P3)', () => {
-  it('coalesces rapid scheduleSave calls into a single write', () => {
+  it('uses a 2s settle window (010, FR-004)', () => {
+    expect(DEBOUNCE_MS).toBe(2000);
+  });
+
+  it('coalesces rapid scheduleSave calls into a single write after the 2s window (SC-006)', () => {
     vi.useFakeTimers();
     const setItem = vi.spyOn(Storage.prototype, 'setItem');
+    const onSaved = vi.fn();
     const s = seedState();
-    scheduleSave(s);
-    scheduleSave(s);
-    scheduleSave(s);
+    scheduleSave(s, onSaved);
+    scheduleSave(s, onSaved);
+    scheduleSave(s, onSaved);
     expect(setItem).not.toHaveBeenCalled();
-    vi.advanceTimersByTime(400);
+    // Nothing fires before the full window elapses.
+    vi.advanceTimersByTime(1999);
+    expect(setItem).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
     expect(setItem).toHaveBeenCalledTimes(1);
+    expect(onSaved).toHaveBeenCalledTimes(1);
     setItem.mockRestore();
   });
 
@@ -134,7 +143,7 @@ describe('debounce (P2/P3)', () => {
     expect(load()).not.toBeNull();
     // The earlier pending debounce must not fire a second write.
     const setItem = vi.spyOn(Storage.prototype, 'setItem');
-    vi.advanceTimersByTime(400);
+    vi.advanceTimersByTime(2000);
     expect(setItem).not.toHaveBeenCalled();
     setItem.mockRestore();
   });

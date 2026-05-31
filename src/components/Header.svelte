@@ -8,7 +8,15 @@
 
 <header>
   <div class="header__brand">
-    <h1 class="header__wordmark">Sift</h1>
+    <div class="header__brandmain">
+      <span class="header__brandleft">
+        <img class="header__logo" src="/favicon.svg" alt="" aria-hidden="true" />
+        <h1 class="header__wordmark">Sift</h1>
+      </span>
+      <button class="linklike" data-action="open-suggest" onclick={openSuggest}
+        >{t(lang, 'suggest.open')}</button
+      >
+    </div>
     <p class="header__tagline">{t(lang, 'header.tagline')}</p>
   </div>
   <div class="header__bar">
@@ -23,11 +31,6 @@
         placeholder={t(lang, 'header.titlePlaceholder')}
         aria-label={t(lang, 'header.titleAria')}
       />
-    </div>
-    <div class="header__tools">
-      <button class="linklike" data-action="open-suggest" onclick={openSuggest}
-        >{t(lang, 'suggest.open')}</button
-      >
     </div>
   </div>
 </header>

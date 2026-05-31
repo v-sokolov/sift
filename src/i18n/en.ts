@@ -7,7 +7,7 @@ export const en: Record<string, string> = {
   'header.titleAria': "The decision you're weighing",
   'header.langAria': 'Language',
   'header.tagline':
-    'A quiet way to weigh a decision. Compare a few options by their pros and cons, and let a gentle score help you think — it never decides for you.',
+    'A quiet way to weigh a decision. Compare a few options by their pros and cons, and let a gentle score help you think - it never decides for you.',
 
   // Toolbar
   'toolbar.addChoice': '＋ Add choice',
@@ -15,6 +15,7 @@ export const en: Record<string, string> = {
   'toolbar.group': 'Group',
   'toolbar.sort': 'Sort',
   'toolbar.saved': 'Saved',
+  'toolbar.editing': 'Editing',
   'toolbar.themeTitle': 'Theme',
   'toolbar.clear': 'Clear',
   'toolbar.direction': 'Direction:',
@@ -79,7 +80,7 @@ export const en: Record<string, string> = {
   'confirm.clear': "Clear this dilemma? This can't be undone.",
 
   // Footer (US3)
-  'footer.inspiredPre': "Inspired by Greg McKeown's ",
+  'footer.inspiredPre': 'Inspired by the ',
   'footer.inspiredBook': 'Essentialism',
   'footer.inspiredPost': ' book.',
   'footer.madeBy': 'Made by {name}.',

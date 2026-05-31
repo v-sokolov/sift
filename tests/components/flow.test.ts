@@ -79,6 +79,21 @@ describe('US1 — weigh a decision and see a quiet score', () => {
     expect(dots.textContent).toBe('●●●');
   });
 
+  it('renders a decorative favicon beside the Sift wordmark (010, FR-015)', () => {
+    const brand = container.querySelector('.header__brand')!;
+    const logo = brand.querySelector('img');
+    expect(logo).not.toBeNull();
+    expect(logo!.getAttribute('alt')).toBe('');
+    expect(logo!.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('places exactly one "Suggest a feature" button, in the brand row (010, FR-016)', () => {
+    expect(container.querySelectorAll('[data-action="open-suggest"]')).toHaveLength(1);
+    expect(
+      container.querySelector('.header__brand [data-action="open-suggest"]'),
+    ).not.toBeNull();
+  });
+
   it('typing in the title never loses focus while the score updates (FR-002/SC-002)', () => {
     const title = container.querySelector('.header__title') as HTMLInputElement;
     title.focus();

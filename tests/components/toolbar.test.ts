@@ -4,7 +4,16 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { flushSync } from 'svelte';
-import { addNote, emptyDilemma, getState, setState, toggleGroup, toggleSort } from '../../src/store.svelte';
+import {
+  addNote,
+  emptyDilemma,
+  getState,
+  setDilemmaTitle,
+  setLastSaved,
+  setState,
+  toggleGroup,
+  toggleSort,
+} from '../../src/store.svelte';
 import { t } from '../../src/i18n';
 import App from '../../src/App.svelte';
 import { render, cleanup } from '../svelte';
@@ -67,6 +76,34 @@ describe('US1 — Group toolbar shows the grouping dimension, not direction (FR-
     expect(groupLabels()).not.toContain(t(lang, 'group.advantage'));
     expect(groupLabels().some((l) => /\d/.test(l))).toBe(true);
     expect(getState().view.groupKey).toBe('weight');
+  });
+});
+
+describe('save-status indicator (010)', () => {
+  const statusEl = () => container.querySelector('.saved') as HTMLElement;
+  const dot = () => container.querySelector('.saved .status-dot');
+
+  it('is hidden by default — no dot, no label text (FR-008)', () => {
+    expect(dot()).toBeNull();
+    expect(statusEl().textContent?.trim()).toBe('');
+  });
+
+  it('shows "Editing" + an editing-modifier dot after a content edit (FR-003)', () => {
+    setDilemmaTitle('q');
+    flushSync();
+    const lang = getState().view.lang;
+    expect(statusEl().textContent).toContain(t(lang, 'toolbar.editing'));
+    expect(dot()).not.toBeNull();
+    expect(dot()!.classList.contains('status-dot--editing')).toBe(true);
+  });
+
+  it('shows "Saved" + a saved-modifier dot once the save completes (FR-004)', () => {
+    setDilemmaTitle('q');
+    setLastSaved(123);
+    flushSync();
+    const lang = getState().view.lang;
+    expect(statusEl().textContent).toContain(t(lang, 'toolbar.saved'));
+    expect(dot()!.classList.contains('status-dot--saved')).toBe(true);
   });
 });
 

@@ -59,6 +59,7 @@ export function emptyDilemma(): AppState {
     draft: null,
     suggest: emptySuggest(),
     lastSavedAt: null,
+    status: 'hidden',
   };
 }
 
@@ -85,9 +86,15 @@ export function setState(next: AppState): void {
   notifySave();
 }
 
-/** Set the "Saved" timestamp WITHOUT triggering another save (avoids a loop). */
+/**
+ * Record a completed store WITHOUT triggering another save (avoids a loop). Flips the
+ * indicator to 'saved' ONLY when a content edit was pending ('editing') — so a save that
+ * completes because a preference changed never shows a false "Saved" on an unedited board
+ * (010, FR-006/FR-008).
+ */
 export function setLastSaved(ts: number): void {
   current.lastSavedAt = ts;
+  if (current.status === 'editing') current.status = 'saved';
 }
 
 function update(producer: (draft: AppState) => AppState | void): void {
@@ -98,8 +105,13 @@ function update(producer: (draft: AppState) => AppState | void): void {
   notifySave();
 }
 
+// Called on the success path of every content mutation (dilemma title / choices / points)
+// and nowhere else — so it is the single point that both stamps updatedAt and marks the
+// save-status indicator 'editing' (010, FR-003). Preference and transient-form mutations
+// never call touch(), so they never flip the indicator (FR-006).
 function touch(d: AppState): void {
   d.dilemma.updatedAt = Date.now();
+  d.status = 'editing';
 }
 
 function findChoice(d: AppState, choiceId: string): Choice | undefined {
