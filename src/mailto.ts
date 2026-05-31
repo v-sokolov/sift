@@ -6,7 +6,7 @@ import type { SuggestionDraft } from './types';
 
 // Non-localized constant: keeps buildMailto pure/language-agnostic and gives the
 // maintainer a consistent inbox subject. (Form UI is localized; this is not.)
-export const SUGGEST_SUBJECT = 'Sift — feature suggestion';
+export const SUGGEST_SUBJECT = 'Sift - feature suggestion';
 
 /**
  * Build `mailto:<to>?subject=<enc>&body=<enc>`. The body is a readable template

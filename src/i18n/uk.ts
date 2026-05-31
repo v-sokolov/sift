@@ -6,7 +6,7 @@ export const uk: Record<string, string> = {
   'header.titleAria': 'Рішення, яке ви зважуєте',
   'header.langAria': 'Мова',
   'header.tagline':
-    'Тихий спосіб зважити рішення. Порівняйте кілька варіантів за перевагами й недоліками, а делікатна оцінка допоможе подумати — вона ніколи не вирішує за вас.',
+    'Тихий спосіб зважити рішення. Порівняйте кілька варіантів за перевагами й недоліками, а делікатна оцінка допоможе подумати - вона ніколи не вирішує за вас.',
 
   // Toolbar
   'toolbar.addChoice': '＋ Додати варіант',
@@ -14,6 +14,7 @@ export const uk: Record<string, string> = {
   'toolbar.group': 'Групувати',
   'toolbar.sort': 'Сортувати',
   'toolbar.saved': 'Збережено',
+  'toolbar.editing': 'Редагування',
   'toolbar.themeTitle': 'Тема',
   'toolbar.clear': 'Очистити',
   'toolbar.direction': 'Напрям:',
@@ -80,7 +81,7 @@ export const uk: Record<string, string> = {
   // Footer (US3)
   'footer.inspiredPre': 'Натхненна книжкою ',
   'footer.inspiredBook': 'Essentialism',
-  'footer.inspiredPost': ' Ґреґа Мак-Кеоуна.',
+  'footer.inspiredPost': '.',
   'footer.madeBy': 'Створив {name}.',
   'footer.github': 'GitHub',
   'footer.linkedin': 'LinkedIn',

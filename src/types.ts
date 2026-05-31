@@ -30,6 +30,12 @@ export type GroupKey = 'type' | 'weight'; // dimension Group mode buckets points
 export type Direction = 'asc' | 'desc';
 export type Theme = 'system' | 'light' | 'dark';
 
+// Save-status indicator (010). Runtime-only display state, never persisted:
+//  hidden  — no content edit yet this session (fresh open / just cleared)
+//  editing — a content change is pending (not yet stored)
+//  saved   — the most recent content change has been stored
+export type SaveStatus = 'hidden' | 'editing' | 'saved';
+
 // Localization (002-post-mvp-improvements).
 export type Lang = 'en' | 'uk';
 export const LANGS: Lang[] = ['en', 'uk'];
@@ -80,7 +86,8 @@ export interface AppState {
   editing: EditTarget | null; // the add/edit form target, or null when form hidden
   draft: NoteDraft | null; // working form values while the form is open
   suggest: SuggestState; // the suggest-a-feature modal (transient)
-  lastSavedAt: number | null; // drives the quiet "Saved" indicator
+  lastSavedAt: number | null; // timestamp of the last successful store (transient)
+  status: SaveStatus; // drives the save-status indicator (transient; not persisted) — 010
 }
 
 // Persisted slice (localStorage). See contracts/persistence.md.
