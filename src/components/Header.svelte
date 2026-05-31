@@ -10,7 +10,12 @@
   <div class="header__brand">
     <div class="header__brandmain">
       <span class="header__brandleft">
-        <img class="header__logo" src="/favicon.svg" alt="" aria-hidden="true" />
+        <img
+          class="header__logo"
+          src="{import.meta.env.BASE_URL}favicon.svg"
+          alt=""
+          aria-hidden="true"
+        />
         <h1 class="header__wordmark">Sift</h1>
       </span>
       <button class="linklike" data-action="open-suggest" onclick={openSuggest}
