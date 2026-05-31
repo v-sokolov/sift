@@ -63,9 +63,6 @@ export type EditTarget =
   | { kind: 'edit'; choiceId: string; noteId: string };
 
 // Suggest-a-feature modal (002-post-mvp-improvements). Transient — never persisted.
-// The mailto hand-off has no async network states, so a single 'idle' status suffices.
-export type SuggestStatus = 'idle';
-
 export interface SuggestionDraft {
   name: string; // required (non-whitespace) to enable Send
   description: string; // required (non-whitespace) to enable Send
@@ -77,7 +74,6 @@ export interface SuggestionDraft {
 export interface SuggestState {
   open: boolean;
   draft: SuggestionDraft;
-  status: SuggestStatus;
 }
 
 export interface AppState {

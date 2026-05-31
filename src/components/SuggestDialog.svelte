@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Dialog } from 'bits-ui';
   import type { SuggestionDraft } from '../types';
   import { canSend, closeSuggest, getState, setSuggestField } from '../store.svelte';
   import { buildMailto } from '../mailto';
@@ -9,28 +10,11 @@
   let lang = $derived(s.view.lang);
   let draft = $derived(s.suggest.draft);
   let sendDisabled = $derived(!canSend(draft));
+  let open = $derived(s.suggest.open);
 
   // Split the localized fallback around its {link} token so the LinkedIn anchor is
   // a real element (the maintainer email is never rendered — invariant I-S2).
   let fbParts = $derived(t(lang, 'suggest.fallback').split('{link}'));
-
-  let modalEl: HTMLElement | undefined = $state();
-
-  // Move focus into the dialog when it opens (FR-008).
-  $effect(() => {
-    modalEl?.querySelector<HTMLElement>('[data-field="suggest-name"]')?.focus();
-  });
-
-  // Lock background scroll while the modal is open; restore on close. This component only
-  // mounts while the modal is open, so the effect cleanup runs on close. (006 UI refinement.)
-  $effect(() => {
-    const root = document.documentElement;
-    const prev = root.style.overflow;
-    root.style.overflow = 'hidden';
-    return () => {
-      root.style.overflow = prev;
-    };
-  });
 
   const FIELDS: Array<{
     key: keyof SuggestionDraft;
@@ -64,18 +48,31 @@
     closeSuggest();
   }
 
-  function backdrop(e: MouseEvent) {
-    if (e.target === e.currentTarget) closeSuggest();
+  // Move focus to the first field on open instead of Bits UI's default (the close button),
+  // preserving the prior behavior (FR-008/FR-004). Focus-return to the trigger on close is
+  // handled by the primitive's focus scope.
+  function focusFirstField(e: Event) {
+    e.preventDefault();
+    const el = document.querySelector('[data-field="suggest-name"]');
+    if (el instanceof HTMLElement) el.focus();
   }
 </script>
 
-<!-- Overlay backdrop closes on click; Esc + focus-trap handled in App (FR-008). The
-     backdrop is presentational — the dialog inside carries the interactive semantics. -->
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<div class="modal-overlay" role="presentation" data-action="suggest-backdrop" onclick={backdrop}>
-  <div bind:this={modalEl} class="modal" role="dialog" aria-modal="true" aria-labelledby="suggest-title" data-region="suggest">
-    <button class="modal__close" data-action="close-suggest" aria-label={t(lang, 'suggest.close')} onclick={closeSuggest}>✕</button>
-    <h2 id="suggest-title" class="modal__title">{t(lang, 'suggest.title')}</h2>
+<!-- Dialog semantics, focus-trap, Esc, outside-click dismiss, and scroll-lock are provided by
+     Bits UI's Dialog (012). Open is controlled by the store; the external Header trigger calls
+     openSuggest(). Rendered inline (no Portal) so the dialog stays in the app subtree. -->
+<Dialog.Root {open} onOpenChange={(v) => { if (!v) closeSuggest(); }}>
+  <Dialog.Overlay class="modal-overlay" data-action="suggest-backdrop" />
+  <Dialog.Content
+    class="modal"
+    data-region="suggest"
+    aria-labelledby="suggest-title"
+    onOpenAutoFocus={focusFirstField}
+  >
+    <Dialog.Close class="modal__close" data-action="close-suggest" aria-label={t(lang, 'suggest.close')}
+      >✕</Dialog.Close
+    >
+    <Dialog.Title id="suggest-title" class="modal__title">{t(lang, 'suggest.title')}</Dialog.Title>
     <p class="modal__intro">{t(lang, 'suggest.intro')}</p>
     <form data-action="suggest-form" novalidate onsubmit={send}>
       {#each FIELDS as f (f.key)}
@@ -117,5 +114,5 @@
         >{t(lang, 'suggest.fallbackLink')}</a
       >{fbParts[1] ?? ''}
     </p>
-  </div>
-</div>
+  </Dialog.Content>
+</Dialog.Root>

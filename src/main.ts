@@ -12,9 +12,18 @@ import {
 } from './store.svelte';
 import { detectLang } from './i18n';
 import { installUnloadFlush, isLang, load, scheduleSave } from './persistence';
+import { applyTheme } from './theme';
 
 const target = document.getElementById('app');
 if (!target) throw new Error('Missing #app root element');
+
+// Keep the explicit data-theme live when the OS preference flips while the stored theme is
+// 'system' (012, FR-006). Installed once at boot; applyTheme re-resolves from current state.
+if (typeof matchMedia === 'function') {
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    applyTheme(getState().view.theme);
+  });
+}
 
 // Persistence channel: debounce-save on every content/view mutation; flush on unload.
 subscribePersist((state) => scheduleSave(state, setLastSaved));
