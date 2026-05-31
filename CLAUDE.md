@@ -1,36 +1,37 @@
 <!-- SPECKIT START -->
-## Active feature: Codebase-Health Remediation (`012-review-remediation`)
+## Active feature: Fix Suggest-Dialog Positioning (`014-fix-dialog-positioning`)
 
 For technologies, project structure, shell commands, and other context, read the
 current implementation plan and its design artifacts:
 
-- Plan: `specs/012-review-remediation/plan.md`
-- Spec: `specs/012-review-remediation/spec.md` (incl. Clarifications, Session 2026-05-31)
-- Research / decisions: `specs/012-review-remediation/research.md` (R1–R8)
-- Data model: `specs/012-review-remediation/data-model.md` (transient-state removals; no persisted-schema change)
-- Contracts: `specs/012-review-remediation/contracts/{dialog-ui,theme}.md`
-- Quickstart: `specs/012-review-remediation/quickstart.md` (A1–A13 automated, M1–M8 manual, H1–H4 honesty)
+- Plan: `specs/014-fix-dialog-positioning/plan.md`
+- Spec: `specs/014-fix-dialog-positioning/spec.md` (incl. Clarifications, Session 2026-05-31)
+- Research / decisions: `specs/014-fix-dialog-positioning/research.md` (R1–R4)
+- Contracts: `specs/014-fix-dialog-positioning/contracts/dialog-positioning.md` (P1–P6 layout, S1–S3 stacking)
+- Quickstart: `specs/014-fix-dialog-positioning/quickstart.md` (A1–A3 automated, M1–M9 manual, H1–H3 honesty)
+- (No `data-model.md` — presentation-only fix.)
 
-012 acts on `REVIEW.md` (repo review, commit `9dedf17`). Five threads: (1) **adopt Bits UI's
-`Dialog`** in `SuggestDialog` (controlled `open` from the store, rendered **inline / no Portal**,
-preserving `.modal`/`.modal-overlay` classes + `data-*` hooks) and delete the hand-rolled focus-trap /
-Esc / backdrop / scroll-lock in `App.svelte` + the dialog's focus/scroll `$effect`s — making the
-already-declared `bits-ui` dep genuinely **used** (true-by-use). (NB: 012 also removed
-`@internationalized/date` as "unused" — but it is a **required `bits-ui` peer dependency**
-(`^3.8.1`) once `Dialog` is imported, which broke the clean-install build; **013 restored it**.)
-(2) **Pre-paint theme resolution** — inline `<script>` in `index.html`
-resolves `sift.v1`→`.view.theme` (system via `matchMedia`) to an **always-explicit**
-`data-theme`, killing the FOUC; a new pure `resolveTheme()` (test-first) + a `matchMedia` listener
-land in `theme.ts`; the `@media (prefers-color-scheme: dark)` CSS block is **deleted** so the dark
-palette lives in **one** `[data-theme="dark"]` block (#4+#5 in one stroke). (3) `submitForm`
-**delegates** to `addNote`/`updateNote` (DRY + makes them UI-reachable, #2). (4) Remove write-only
-`SuggestStatus`/`SuggestState.status` scaffolding (#3, YAGNI). (5) Governance/doc honesty: **commit
-the constitution** (narrow `.gitignore` to un-ignore only `.specify/memory/constitution.md`), fix
-the stale `theme.ts` comment + CSS spec-tags, keep `CLAUDE.md` truthful. No persisted-schema change
-(`sift.v1` v1). **Out of scope** (review says leave): store snapshot pattern (#6), folder layout,
-hand-rolled i18n, `data-*` test attrs, shipped specs, ceremony-scaling levers.
+014 fixes a **visual regression from 012**: Bits UI's `Dialog` renders `Dialog.Overlay`
+(`.modal-overlay`) and `Dialog.Content` (`.modal`) as **inline siblings**, but the CSS
+(`src/styles/app.css:686–712`) assumes `.modal` is the *child* of a flex-centering `.modal-overlay`
+(panel only `position: relative`). With no flex parent, the panel drops into normal page flow (below
+`<Footer />`) and the backdrop is an empty dim layer → mis-positioned/mis-stacked on all breakpoints.
+**Fix (decided over revert):** re-style `.modal` to self-center as its own fixed, top-layer element —
+`position: fixed; inset: 0; margin: auto; height: fit-content; z-index: 101` — keeping
+`width:100%; max-width:460px; max-height:90dvh; overflow:auto`; `.modal-overlay` stays the fixed
+`z-index:100` backdrop. **Bits UI retained** (no revert; 012's focus-trap/Esc/outside-click/scroll-lock/
+focus-return preserved). **Presentation-only**: CSS (and markup only if strictly needed), no domain/
+scoring/arrangement/persisted-state (`sift.v1` v1) change; `.modal`/`.modal-overlay` classes + `data-*`
+test hooks preserved (FR-009). Breakpoint-agnostic (no media query targets the modal). Layout verified
+manually (jsdom has no layout engine); behavior/contract tests stay green.
 
-Prior features: `specs/011-suggest-form-css/` (equal-width Cancel/Send via `btn--half` +
+Prior features: `specs/013-fix-bits-ui-peerdep/` (restored `@internationalized/date` as a **required
+`bits-ui` peer dep** that 012 wrongly dropped as "unused", breaking the clean-install build; added the
+Constitution **Build gate**, v2.1.0; merged PR #15), `specs/012-review-remediation/` (codebase-health:
+adopted Bits UI `Dialog` in `SuggestDialog` rendered **inline/no Portal** + deleted the hand-rolled
+focus-trap/Esc/scroll-lock; pre-paint theme FOUC fix via `resolveTheme()` + one `[data-theme="dark"]`
+palette; `submitForm` delegates to `addNote`/`updateNote`; removed `SuggestStatus` scaffolding;
+committed the constitution; merged PRs #13–#14), `specs/011-suggest-form-css/` (equal-width Cancel/Send via `btn--half` +
 `flex:1 1 0`; merged PR #12), `specs/010-save-status-indicator/` (save-status indicator hidden→editing→saved +
 header/footer polish; merged PR #11), `specs/001-sift-mvp/` (frozen MVP), `specs/009-group-ordering/` (locked Group-mode
 `arrange()` ordering with regression tests; merged PR #10), `specs/008-group-by-dimension/`

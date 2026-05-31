@@ -684,22 +684,29 @@ header {
 
 /* ---- Suggest-a-feature modal (custom accessible overlay) ---- */
 .modal-overlay {
+  /* Full-viewport dim backdrop. Bits UI renders this as a SIBLING of .modal (not its
+     parent), so it no longer centers the panel — it is purely the backdrop layer (014).
+     The screen-edge gutter and centering now live on .modal itself. */
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4);
   z-index: 100;
 }
 .modal {
-  position: relative;
+  /* Self-centering fixed top-layer panel (014). Because Bits UI emits .modal as a sibling
+     of .modal-overlay rather than a child, the panel can't rely on a flex parent to center
+     it. `inset` + `margin: auto` distribute the free space on every side (centering on both
+     axes without a parent or transforms); the inset doubles as the screen-edge gutter on
+     small viewports. z-index sits above the backdrop (100). */
+  position: fixed;
+  inset: var(--space-4);
+  margin: auto;
+  height: fit-content;
+  z-index: 101;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: var(--space-5);
-  width: 100%;
   max-width: 460px;
   /* dvh so the dialog fits short landscape / collapsing chrome. */
   max-height: 90vh;
