@@ -26,7 +26,6 @@
     "vitest": "3.2.4"
   },
   "dependencies": {
-    "@internationalized/date": "^3.12.1",
     "bits-ui": "^2.18.1",
     "svelte": "^5.55.7"
   },

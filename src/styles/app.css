@@ -1,8 +1,8 @@
 /* Single CSS entry for the phase-2 (Svelte) build. Tailwind v4 utilities + the
    semantic design tokens migrated from the MVP's tokens.css. Weight is always
    conveyed by dot-count AND color (Principle V); colors meet WCAG AA against the
-   surfaces in both themes. Light is the default; dark via prefers-color-scheme
-   (theme=system) or an explicit [data-theme="dark"] (US2 toggle). */
+   surfaces in both themes. Light is the default; dark applies via an explicit
+   [data-theme="dark"] resolved pre-paint (system → light/dark). */
 
 @import "tailwindcss";
 
@@ -19,7 +19,7 @@
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
   /* Relative base so the UI honors the user's browser/OS text-size preference
-     (15/16 = default 15px) — M3/FR-010 (006). */
+     (15/16 = default 15px). */
   --font-size: 0.9375rem;
   --line: 1.5;
 
@@ -41,37 +41,14 @@
   --accent: #3a6ea5;
   --focus: #3a6ea5;
 
-  /* Save-status dot (010): green = saved, amber = editing. */
+  /* Save-status dot: green = saved, amber = editing. */
   --status-saved: var(--advantage);
   --status-editing: #c08a00;
 }
 
-/* Dark palette, shared by OS-preference (theme=system) and explicit toggle. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #1b1b19;
-    --surface: #242421;
-    --surface-2: #2d2d2a;
-    --border: #3a3a36;
-    --text: #ece8e1;
-    --text-muted: #a8a89f;
-    --text-faint: #7c7c74;
-
-    --advantage: #6fcf97;
-    --disadvantage: #e0897e;
-    --neutral: #a8a89f;
-    --leader-bg: #21342a;
-    --leader-border: #6fcf97;
-
-    --accent: #79a9d6;
-    --focus: #79a9d6;
-
-    --status-saved: var(--advantage);
-    --status-editing: #e0b34d;
-  }
-}
-
-/* Explicit dark override regardless of OS preference. */
+/* Dark palette — single source of truth. The theme is always resolved to an explicit
+   data-theme (system → light/dark) pre-paint, so one [data-theme="dark"] block covers both
+   the OS-preference and the explicit-toggle cases. */
 :root[data-theme="dark"] {
   --bg: #1b1b19;
   --surface: #242421;
@@ -109,14 +86,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Visible focus for keyboard users everywhere (FR-011). */
+/* Visible focus for keyboard users everywhere. */
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* Respect reduced motion globally; component transitions also gate on it (FR-017). */
+/* Respect reduced motion globally; component transitions also gate on it. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -150,14 +127,14 @@ body {
   max-width: 1100px;
   margin: 0 auto;
   /* Honor device safe-area insets so content clears the notch / rounded corners in
-     both orientations — M6/FR-004 (006). max() keeps the comfortable padding on
+     both orientations. max() keeps the comfortable padding on
      non-notched screens. Requires viewport-fit=cover (index.html). */
   padding: max(var(--space-6), env(safe-area-inset-top))
     max(var(--space-4), env(safe-area-inset-right)) var(--space-5)
     max(var(--space-4), env(safe-area-inset-left));
   /* Full-height column so the header stays at the top and the footer is pinned
      to the bottom even when the board is short (sticky-footer layout). dvh tracks the
-     dynamic viewport as browser chrome collapses/expands — M7/FR-007 (006). */
+     dynamic viewport as browser chrome collapses/expands. */
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
@@ -180,7 +157,7 @@ header {
 .header__brand {
   margin-bottom: var(--space-1);
 }
-/* Brand row (010): favicon + wordmark on the left, Suggest button on the right. */
+/* Brand row: favicon + wordmark on the left, Suggest button on the right. */
 .header__brandmain {
   display: flex;
   align-items: center;
@@ -227,7 +204,7 @@ header {
   min-width: 0;
 }
 /* Pencil cue that the dilemma title is editable — decorative, always visible (not
-   hover-gated, M9), brightens when the field is focused. (006 UI refinement.) */
+   hover-gated), brightens when the field is focused. */
 .header__edit {
   flex: none;
   color: var(--text-faint);
@@ -283,7 +260,7 @@ header {
   padding: var(--space-1) 0;
   text-decoration: underline;
   text-underline-offset: 2px;
-  /* Standalone action button — give it a finger-sized hit area (M4/FR-001, 006). */
+  /* Standalone action button — give it a finger-sized hit area. */
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -312,7 +289,7 @@ header {
   flex: 1;
 }
 /* When the toolbar wraps on narrow widths, drop the flex spacer so it can't claim an
-   empty row and strand the Add-choice button — FR-019/M1·M4·M5 (006). The row already
+   empty row and strand the Add-choice button. The row already
    wraps via .toolbar__row { flex-wrap: wrap }. */
 @media (max-width: 719px) {
   .toolbar__spacer {
@@ -320,8 +297,7 @@ header {
   }
   /* On small screens give the Add-choice button, each toolbar action toggle, and each
      config segmented control its own full-width row (Add choice, Group, Sort, Sort-by
-     Weight|Type, Direction Asc|Desc). The language toggle keeps its natural width.
-     (006 mobile refinement.) */
+     Weight|Type, Direction Asc|Desc). The language toggle keeps its natural width. */
   .toolbar [data-action="add-choice"],
   .toolbar .toggle,
   .toolbar__row .seg:not(.langtoggle) {
@@ -337,7 +313,7 @@ header {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: var(--space-2) var(--space-3);
-  /* Touch-target floor — M4/FR-001 (006). */
+  /* Touch-target floor. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -367,7 +343,7 @@ header {
   align-items: center;
   gap: var(--space-2);
 }
-/* Save-status dot (010): decorative cue; the text label carries the meaning (Constitution V). */
+/* Save-status dot: decorative cue; the text label carries the meaning (Constitution V). */
 .status-dot {
   width: 0.5rem;
   height: 0.5rem;
@@ -391,7 +367,7 @@ header {
   border: none;
   padding: var(--space-1) var(--space-3);
   border-left: 1px solid var(--border);
-  /* Touch-target floor — M4/FR-001 (006). */
+  /* Touch-target floor. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -435,7 +411,7 @@ header {
   gap: var(--space-1);
 }
 /* Pencil cue that the choice name is editable — decorative, always visible (not
-   hover-gated, M9), brightens when the field is focused. (006 UI refinement.) */
+   hover-gated), brightens when the field is focused. */
 .choice__edit {
   flex: none;
   color: var(--text-faint);
@@ -466,7 +442,7 @@ header {
   color: var(--text-faint);
   padding: var(--space-1);
   border-radius: 6px;
-  /* Touch-target floor — the box grows, the glyph stays centered (M4/FR-001, 006). */
+  /* Touch-target floor — the box grows, the glyph stays centered. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -506,7 +482,7 @@ header {
   padding-right: 0;
   border-radius: 6px;
   cursor: pointer;
-  /* Comfortable tap target for the click-to-edit row — M4/FR-001 (006). */
+  /* Comfortable tap target for the click-to-edit row. */
   min-height: 44px;
 }
 /* Left cluster: the type sign followed by the note text (grows so text wraps). */
@@ -546,7 +522,7 @@ header {
 }
 .note__text {
   flex: 1;
-  /* Wrap long content / unbroken tokens instead of forcing horizontal scroll — M2/FR-011 (006). */
+  /* Wrap long content / unbroken tokens instead of forcing horizontal scroll. */
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -554,7 +530,7 @@ header {
   color: var(--text-faint);
   font-style: italic;
 }
-/* Always-visible per-point remove ✕ (007). Reuses .iconbtn for the 44px touch floor,
+/* Always-visible per-point remove ✕. Reuses .iconbtn for the 44px touch floor,
    de-emphasized resting color, focus ring, and @media(hover)-gated emphasis. Seated at
    the row's right edge after the meta cluster; centered against the baseline-aligned row. */
 .note__remove {
@@ -655,13 +631,13 @@ header {
   min-height: 64px;
   resize: vertical;
 }
-/* Touch-target floor for the choice <select> — M4/FR-001 (006). */
+/* Touch-target floor for the choice <select>. */
 .form select {
   min-height: 44px;
 }
 /* When a field is focused and the on-screen keyboard scrolls it into view, keep a
    little breathing room so it isn't flush against the keyboard or a screen edge —
-   M8/FR-008 (006). CSS-only, so focus/caret are never disturbed (FR-017). */
+   CSS-only, so focus/caret are never disturbed. */
 .header__title,
 .choice__title,
 .form,
@@ -670,7 +646,7 @@ header {
   scroll-margin-block: var(--space-5);
 }
 /* On narrow widths the inline form goes full-width and its controls stack, so each is
-   comfortably tappable (M8/FR-018, 006). The actions row keeps its buttons inline. */
+   comfortably tappable. The actions row keeps its buttons inline. */
 @media (max-width: 719px) {
   .form__row:not(.form__row--actions) > * {
     flex-basis: 100%;
@@ -689,7 +665,7 @@ header {
   margin-top: auto;
   padding-top: var(--space-3);
   /* Clear the bottom safe-area inset (home indicator) so the links stay visible and
-     tappable — M6/FR-005, FR-020 (006). */
+     tappable. */
   padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
   border-top: 1px solid var(--border);
   color: var(--text-faint);
@@ -725,7 +701,7 @@ header {
   padding: var(--space-5);
   width: 100%;
   max-width: 460px;
-  /* dvh so the dialog fits short landscape / collapsing chrome — M7·M10 (006). */
+  /* dvh so the dialog fits short landscape / collapsing chrome. */
   max-height: 90vh;
   max-height: 90dvh;
   overflow: auto;
@@ -757,7 +733,7 @@ header {
   font-size: 1.1rem;
   padding: var(--space-1);
   border-radius: 6px;
-  /* Touch-target floor — M4/FR-001 (006). */
+  /* Touch-target floor. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -795,7 +771,7 @@ header {
 }
 /* Cancel + Send share the action row equally — each ≈50% minus its share of the gap.
    Zero flex-basis makes the split ignore label width, so the two stay equal-width across
-   languages (011, FR-001/003). */
+   languages. */
 .modal__actions .btn--half {
   flex: 1 1 0;
 }
@@ -805,13 +781,13 @@ header {
   font-size: 0.82rem;
 }
 
-/* Focus visibility for keyboard users (FR-032). */
+/* Focus visibility for keyboard users. */
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
-/* ---- Hover emphasis, gated to true pointer devices — M9/FR-002, FR-003 (006) ----
+/* ---- Hover emphasis, gated to true pointer devices ----
    Hover only ever *raises emphasis*; every one of these affordances is also a real
    button/link with the global :focus-visible outline above, so it stays reachable by
    tap and keyboard. Gating behind (hover: hover) prevents stuck-hover artifacts after

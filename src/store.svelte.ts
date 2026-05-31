@@ -8,7 +8,6 @@ import type {
   AppState,
   Choice,
   Direction,
-  EditTarget,
   GroupKey,
   Lang,
   NoteDraft,
@@ -34,7 +33,7 @@ export function emptyDraft(): SuggestionDraft {
 }
 
 export function emptySuggest(): SuggestState {
-  return { open: false, draft: emptyDraft(), status: 'idle' };
+  return { open: false, draft: emptyDraft() };
 }
 
 export function emptyDilemma(): AppState {
@@ -254,35 +253,25 @@ export function setFormText(text: string): void {
   });
 }
 
-/** Commit the form. New notes keep the form open (FR-010); edits close it. */
+/**
+ * Commit the form. Delegates the note mutation to addNote/updateNote (the single source of
+ * note-commit logic — keeps them live and avoids duplication, 012/FR-010) and keeps only the
+ * form lifecycle here: new notes keep the form open with text cleared but type/weight preserved
+ * (FR-010); edits close the form.
+ */
 export function submitForm(): void {
-  update((d) => {
-    const editing: EditTarget | null = d.editing;
-    const draft = d.draft;
-    if (!editing || !draft) return;
-    if (!draft.text.trim()) return;
-    const c = findChoice(d, editing.choiceId);
-    if (!c) return;
-    if (editing.kind === 'new') {
-      c.notes.push({
-        id: newId(),
-        text: draft.text.trim(),
-        type: draft.type,
-        weight: normalizeWeight(draft.type, draft.weight),
-      });
-      d.draft = { text: '', type: draft.type, weight: draft.weight };
-    } else {
-      const n = c.notes.find((x) => x.id === editing.noteId);
-      if (n) {
-        n.text = draft.text.trim();
-        n.type = draft.type;
-        n.weight = normalizeWeight(draft.type, draft.weight);
-      }
-      d.editing = null;
-      d.draft = null;
-    }
-    touch(d);
-  });
+  const { editing, draft } = getState();
+  if (!editing || !draft) return;
+  if (!draft.text.trim()) return;
+  if (editing.kind === 'new') {
+    addNote(editing.choiceId, draft);
+    update((d) => {
+      if (d.draft) d.draft = { text: '', type: draft.type, weight: draft.weight };
+    });
+  } else {
+    updateNote(editing.choiceId, editing.noteId, draft);
+    closeForm();
+  }
 }
 
 // ---- Lifecycle (US2 of MVP) ----
@@ -318,7 +307,7 @@ export function canSend(draft: SuggestionDraft): boolean {
 
 export function openSuggest(): void {
   update((d) => {
-    d.suggest = { open: true, draft: emptyDraft(), status: 'idle' };
+    d.suggest = { open: true, draft: emptyDraft() };
   });
 }
 

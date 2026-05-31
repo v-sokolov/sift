@@ -5,6 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Sift - a quiet way to weigh a decision</title>
+    <!-- Pre-paint theme resolution (012, FR-006/007): set an explicit light/dark attribute
+         before first paint so the saved theme never flashes. Reads the persisted theme from
+         localStorage['sift.v1']; resolves 'system'/missing/malformed via the OS preference;
+         wrapped so any failure falls back to light and never throws. -->
+    <script>
+      (function () {
+        try {
+          var theme = 'system';
+          var raw = localStorage.getItem('sift.v1');
+          if (raw) {
+            var t = JSON.parse(raw);
+            if (t && t.view && (t.view.theme === 'dark' || t.view.theme === 'light')) {
+              theme = t.view.theme;
+            }
+          }
+          var resolved =
+            theme === 'dark' || theme === 'light'
+              ? theme
+              : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.dataset.theme = resolved;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>
