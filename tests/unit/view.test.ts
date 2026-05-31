@@ -114,3 +114,74 @@ describe('arrange — sorted', () => {
     expect(ids(out[0].notes)).toEqual(['nu', 'd3', 'd1', 'a1', 'a3']);
   });
 });
+
+// 009 — lock the Group-mode ordering contract (specs/009-group-ordering/contracts/
+// group-ordering.md). These assert the behaviour already shipped in 008 and are expected to
+// pass with no production code change (FR-010); a red here is a genuine regression.
+//
+// Fixture exercises every weight (3,2,1) in BOTH kinds plus a neutral, so within-section
+// 3→2→1 ordering is fully checked (the `mixed` fixture only has weights 3 and 1).
+const typeFull = choice([
+  note('a3', 'advantage', 3),
+  note('a2', 'advantage', 2),
+  note('a1', 'advantage', 1),
+  note('d1', 'disadvantage', 1),
+  note('d2', 'disadvantage', 2),
+  note('d3', 'disadvantage', 3),
+  note('nu', 'neutral', null),
+]);
+
+describe('arrange — group ordering locked (009)', () => {
+  it('Type: Adv(3→2→1) → Disadv(3→2→1) → Neutral(creation order) [FR-001/002/003]', () => {
+    const out = arrange(typeFull, prefs({ mode: 'grouped', groupKey: 'type' }));
+    expect(out.map((s) => s.label)).toEqual(['advantage', 'disadvantage', 'neutral']);
+    expect(ids(out[0].notes)).toEqual(['a3', 'a2', 'a1']);
+    expect(ids(out[1].notes)).toEqual(['d3', 'd2', 'd1']);
+    expect(ids(out[2].notes)).toEqual(['nu']);
+  });
+
+  it('Weight: sections 3→2→1→weightless, types mixed in creation order [FR-004/005]', () => {
+    const out = arrange(typeFull, prefs({ mode: 'grouped', groupKey: 'weight' }));
+    expect(out.map((s) => s.label)).toEqual([3, 2, 1, 'weightless']);
+    expect(ids(out[0].notes)).toEqual(['a3', 'd3']); // weight 3, creation order, types mixed
+    expect(ids(out[1].notes)).toEqual(['a2', 'd2']); // weight 2
+    expect(ids(out[2].notes)).toEqual(['a1', 'd1']); // weight 1
+    expect(ids(out[3].notes)).toEqual(['nu']); // weightless (0)
+  });
+
+  it('Weight: an absent weight value yields no section [FR-006 weight-side]', () => {
+    const noTwo = choice([note('a3', 'advantage', 3), note('d1', 'disadvantage', 1)]);
+    const out = arrange(noTwo, prefs({ mode: 'grouped', groupKey: 'weight' }));
+    expect(out.map((s) => s.label)).toEqual([3, 1]); // no `2`, no `weightless`
+  });
+
+  it('Weight: a choice with no neutral points has no weightless section [FR-006]', () => {
+    const noNeutral = choice([note('a3', 'advantage', 3), note('d3', 'disadvantage', 3)]);
+    const out = arrange(noNeutral, prefs({ mode: 'grouped', groupKey: 'weight' }));
+    expect(out.map((s) => s.label)).toEqual([3]);
+  });
+
+  it('deterministic & stable: repeated arrange() gives identical structure [FR-007]', () => {
+    for (const groupKey of ['type', 'weight'] as const) {
+      const p = prefs({ mode: 'grouped', groupKey });
+      const a = arrange(typeFull, p).map((s) => [s.label, ids(s.notes)]);
+      const b = arrange(typeFull, p).map((s) => [s.label, ids(s.notes)]);
+      expect(a).toEqual(b);
+    }
+  });
+
+  it('pure & total: input untouched, every note in exactly one section [FR-008]', () => {
+    const before = typeFull.notes;
+    const beforeIds = ids(before);
+    for (const groupKey of ['type', 'weight'] as const) {
+      const out = arrange(typeFull, prefs({ mode: 'grouped', groupKey }));
+      // input array identity and element order preserved (no mutation)
+      expect(typeFull.notes).toBe(before);
+      expect(ids(typeFull.notes)).toEqual(beforeIds);
+      // union of section notes === input notes, no drops, no duplicates
+      const emitted = out.flatMap((s) => ids(s.notes));
+      expect(emitted.slice().sort()).toEqual(beforeIds.slice().sort());
+      expect(new Set(emitted).size).toBe(emitted.length);
+    }
+  });
+});

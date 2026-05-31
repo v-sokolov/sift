@@ -1,33 +1,31 @@
 <!-- SPECKIT START -->
-## Active feature: Group by Dimension & Add-Point Placement (`008-group-by-dimension`)
+## Active feature: Group Ordering — Confirm & Document (`009-group-ordering`)
 
 For technologies, project structure, shell commands, and other context, read the
 current implementation plan and its design artifacts:
 
-- Plan: `specs/008-group-by-dimension/plan.md`
-- Spec: `specs/008-group-by-dimension/spec.md` (incl. Clarifications, Session 2026-05-31)
-- Research / decisions: `specs/008-group-by-dimension/research.md` (R1–R10)
-- Data model: `specs/008-group-by-dimension/data-model.md` (additive `groupKey`; widened `Section.label`)
-- Contracts: `specs/008-group-by-dimension/contracts/` (`arrange-grouping.md`, `group-toolbar.md`, `addpoint-order.md`)
-- Quickstart: `specs/008-group-by-dimension/quickstart.md` (on-device acceptance matrix)
+- Plan: `specs/009-group-ordering/plan.md`
+- Spec: `specs/009-group-ordering/spec.md` (incl. Clarifications, Session 2026-05-31)
+- Research / decisions: `specs/009-group-ordering/research.md` (R1–R3)
+- Data model: `specs/009-group-ordering/data-model.md` (no change — restates Section/ordering rules)
+- Contracts: `specs/009-group-ordering/contracts/group-ordering.md` (locked `arrange()` ordering)
+- Quickstart: `specs/009-group-ordering/quickstart.md` (on-device + test acceptance matrix)
 
-008 fixes the Group control + a small layout nudge, on the 004/006/007 Svelte stack.
-**(US1, P1) Group by dimension** — Group mode wrongly showed an **Asc/Desc** control and
-hardcoded grouping by type. Add `ViewPrefs.groupKey: 'type' | 'weight'` (default `'type'`) +
-`setGroupKey()`, and rewrite the `grouped` branch of pure `arrange()`: **type** → Adv/Disadv/
-Neutral (weighted sections heaviest-first, neutral creation-order — the prior default);
-**weight** → sections per weight 3→2→1 (mixing types) + a trailing weightless/neutral section,
-all creation-order. `Section.label` widens to `NoteType | Weight | 'weightless' | null`. Toolbar's
-grouped row shows a **Type/Weight** `.seg` (reusing `toolbar.type`/`toolbar.weight`) instead of
-Asc/Desc; **Sort mode unchanged**. New i18n: `toolbar.groupBy`, `toolbar.groupKeyAria`,
-`group.weight` (`Weight {n}`), `group.weightless` (EN/UK parity). Persistence is additive — missing/
-invalid `groupKey` defaults to `'type'` on load, **no `schemaVersion` bump** (like `lang`).
-**(US2, P2) Add point above score** — swap `<Summary/>` and `<AddEditForm/>` order in `App.svelte`.
-**No new deps; no scoring/data-model change** (FR-015). TDD per Principle IV: `view.test.ts` grouped
-cases migrated to the `groupKey` contract + new By-Weight cases; persistence default-on-load test;
-Toolbar component test (Group shows Type/Weight not Asc/Desc) — all written to fail first.
+009 is a **regression-protection** pass: it locks Group mode's ordering, which already ships
+(008), with explicit fail-first tests and **no expected production code change** (FR-010).
+**(US1, P1)** Pin the `arrange()` contract — **Type** → Advantages (weight 3→2→1) → Disadvantages
+(3→2→1) → Neutral (creation order); **Weight** → sections 3→2→1→weightless(0), empties omitted,
+members creation-order with types mixed; deterministic/stable on re-render; every point in exactly
+one section; no mutation. Key nuance (research R2): the "no empty section" guarantee (FR-006) is
+enforced in **`arrange`** for Weight mode but in the **renderer** (`ChoiceCard.svelte`) for Type
+mode (which returns empty type sections). Work is confined to `tests/unit/view.test.ts`
+(strengthen Type full-3→2→1 + Weight full-3→2→1→0 + determinism/purity cases), optionally one
+ChoiceCard empty-section test via `tests/svelte.ts`. If a test goes red, it is a genuine regression
+to fix per the contract — not a behaviour change.
 
-Prior features: `specs/001-sift-mvp/` (frozen MVP), `specs/002-post-mvp-improvements/`
+Prior features: `specs/001-sift-mvp/` (frozen MVP), `specs/008-group-by-dimension/`
+(Group by Type/Weight dimension + Add-point above score; merged PR #9),
+`specs/002-post-mvp-improvements/`
 (UA/EN i18n, suggest-a-feature, footer, README), `specs/003-github-pages-hosting/`
 (GitHub Pages deploy), `specs/004-phase2-ui-rebuild/` (Svelte 5 + Tailwind v4 + Bits UI
 rebuild; merged PR #5), `specs/005-ui-copy-refinements/` (header intro, score-formula
