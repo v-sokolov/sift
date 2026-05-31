@@ -1,7 +1,15 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 2.0.0
-- Bump rationale: MAJOR — Principle III is redefined. The hard "no UI framework and no
+- Version change: 2.0.0 → 2.1.0 (latest)
+- Bump rationale (2.1.0): MINOR — materially expanded guidance. Added a "Build gate" to
+  Development Workflow & Quality Gates: the production build (`yarn build`) MUST succeed,
+  verified against a clean dependency install, before work is done. Motivated by 013 — a
+  `bits-ui` peer dependency removed in 012 passed `tsc` + `vitest` but broke `vite build` on
+  CI's clean install. No principle added/removed/redefined; the type-check + test gate is
+  unchanged, this adds a parallel build gate. Templates: no change required (Constitution
+  Check reads dynamically).
+- Prior — Version change: 1.0.0 → 2.0.0
+- Bump rationale (2.0.0): MAJOR — Principle III is redefined. The hard "no UI framework and no
   runtime dependencies" ban is replaced with a "minimal, justified dependencies" rule that
   permits a UI framework and headless component libraries for the phase-2 UI rebuild
   (004-phase2-ui-rebuild). This is a backward-incompatible principle redefinition per the
@@ -131,6 +139,13 @@ is a baseline, not an enhancement.
   `/speckit-analyze` is used to cross-check artifacts before implementation.
 - TDD gate (Principle IV): tests precede implementation and MUST pass; the type-check
   (`tsc`) and test suite (`vitest`) MUST be green before work is considered done.
+- Build gate: the production build (`yarn build` → `svelte-check` + `vite build`) MUST
+  succeed before work is considered done. A green type-check and test suite do NOT by
+  themselves prove the app builds or deploys — an unsatisfied transitive/peer dependency,
+  a bundler resolution error, or a build-only failure can pass `tsc` + `vitest` yet break
+  the build (e.g. 013: a `bits-ui` peer dependency removed as "unused" passed both gates but
+  broke `vite build`). The build MUST be verified against a **clean dependency install** (as
+  CI does), since a stale `node_modules` can mask a missing declared dependency.
 - Commits are made in small, logical increments with clear messages.
 - Every plan's "Constitution Check" MUST be evaluated against these principles; violations
   MUST be justified in the plan's Complexity Tracking or the design MUST be simplified.
@@ -146,4 +161,4 @@ time (the plan's Constitution Check) and during `/speckit-analyze`; constitution
 are treated as blocking and are resolved by adjusting the spec, plan, or tasks — not by
 diluting a principle.
 
-**Version**: 2.0.0 | **Ratified**: 2026-05-30 | **Last Amended**: 2026-05-30
+**Version**: 2.1.0 | **Ratified**: 2026-05-30 | **Last Amended**: 2026-05-31
