@@ -791,8 +791,13 @@ header {
 }
 .modal__actions {
   display: flex;
-  justify-content: flex-end;
   gap: var(--space-2);
+}
+/* Cancel + Send share the action row equally — each ≈50% minus its share of the gap.
+   Zero flex-basis makes the split ignore label width, so the two stay equal-width across
+   languages (011, FR-001/003). */
+.modal__actions .btn--half {
+  flex: 1 1 0;
 }
 .modal__fallback {
   margin: 0;

@@ -104,10 +104,10 @@
         </label>
       {/each}
       <div class="modal__actions">
-        <button type="button" class="btn" data-action="close-suggest" onclick={closeSuggest}
+        <button type="button" class="btn btn--half" data-action="close-suggest" onclick={closeSuggest}
           >{t(lang, 'suggest.cancel')}</button
         >
-        <button type="submit" class="btn btn--primary" data-action="suggest-send" disabled={sendDisabled}
+        <button type="submit" class="btn btn--primary btn--half" data-action="suggest-send" disabled={sendDisabled}
           >{t(lang, 'suggest.send')}</button
         >
       </div>
