@@ -15,8 +15,10 @@ current implementation plan and its design artifacts:
 `Dialog`** in `SuggestDialog` (controlled `open` from the store, rendered **inline / no Portal**,
 preserving `.modal`/`.modal-overlay` classes + `data-*` hooks) and delete the hand-rolled focus-trap /
 Esc / backdrop / scroll-lock in `App.svelte` + the dialog's focus/scroll `$effect`s — making the
-already-declared `bits-ui` dep genuinely **used** (true-by-use); **remove unused
-`@internationalized/date`**. (2) **Pre-paint theme resolution** — inline `<script>` in `index.html`
+already-declared `bits-ui` dep genuinely **used** (true-by-use). (NB: 012 also removed
+`@internationalized/date` as "unused" — but it is a **required `bits-ui` peer dependency**
+(`^3.8.1`) once `Dialog` is imported, which broke the clean-install build; **013 restored it**.)
+(2) **Pre-paint theme resolution** — inline `<script>` in `index.html`
 resolves `sift.v1`→`.view.theme` (system via `matchMedia`) to an **always-explicit**
 `data-theme`, killing the FOUC; a new pure `resolveTheme()` (test-first) + a `matchMedia` listener
 land in `theme.ts`; the `@media (prefers-color-scheme: dark)` CSS block is **deleted** so the dark
@@ -45,7 +47,7 @@ control; Clear preserves theme; merged PR #8).
 Phase-2 (004) rebuilds the UI on **Svelte 5 (runes) + Tailwind v4 + Bits UI** (headless
 component lib; chosen over Melt UI because the offline registry lacked it — research R9). Bits UI
 was declared in 004 but only **genuinely adopted in 012** (its `Dialog` powers `SuggestDialog`);
-it is permitted by **Constitution v2.0.0**
+it is permitted by **Constitution v2.1.0**
 Principle III (minimal, justified runtime deps), still bounded by Principle II (no
 backend/network/telemetry; `localStorage` `sift.v1` only). The rebuild **reuses the pure
 core verbatim** — `src/{scoring,view,types,ids,mailto,config,persistence}.ts` + `src/i18n/*`
