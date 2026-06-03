@@ -10,7 +10,9 @@ export const uk: Record<string, string> = {
 
   // Toolbar
   'toolbar.addChoice': '＋ Додати варіант',
-  'toolbar.maxChoices': 'Максимум 4 варіанти',
+  'toolbar.maxChoices': 'Максимум {n} варіантів',
+  'toolbar.manyChoices':
+    'Багато варіантів можуть ускладнити зважування — менше часто дає більше ясності.',
   'toolbar.group': 'Групувати',
   'toolbar.sort': 'Сортувати',
   'toolbar.saved': 'Збережено',

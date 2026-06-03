@@ -1,6 +1,16 @@
 <!--
 Sync Impact Report
-- Version change: 2.0.0 → 2.1.0 (latest)
+- Version change: 2.1.0 → 2.2.0 (latest)
+- Bump rationale (2.2.0): MINOR — scope re-scope per feature 015-six-choices. The
+  scope-discipline constraint "a single active dilemma with 2–4 choices" widens to
+  "2–6 choices", and Principle IV's invariant example updates to match ("e.g. 2–6
+  choices"). This exercises the documented "out of scope until explicitly re-scoped"
+  path (015 spec/plan are the explicit re-scope); no principle is added, removed, or
+  redefined. Note: the same scope line's "English only" wording remains stale vs the
+  shipped EN/UA i18n (002) — deliberately untouched here to keep the amendment minimal;
+  candidate for a future PATCH. Templates: no change required (Constitution Check reads
+  dynamically).
+- Prior — Version change: 2.0.0 → 2.1.0
 - Bump rationale (2.1.0): MINOR — materially expanded guidance. Added a "Build gate" to
   Development Workflow & Quality Gates: the production build (`yarn build`) MUST succeed,
   verified against a clean dependency install, before work is done. Motivated by 013 — a
@@ -96,7 +106,7 @@ dependencies and a strict separation of concerns rather than an absolute ban.
 
 Domain logic — scoring and note arrangement — MUST be implemented as pure, side-effect-free
 functions. State mutations MUST be typed and MUST enforce the data invariants (e.g.
-2–4 choices, neutral notes carry no weight). Test-Driven Development is mandatory:
+2–6 choices, neutral notes carry no weight). Test-Driven Development is mandatory:
 tests are written first and MUST fail before implementation, following red-green-refactor.
 Pure logic and persistence MUST have unit tests; behavior changes MUST be accompanied by
 tests. Code MUST NOT merge with failing tests or type errors.
@@ -129,7 +139,7 @@ is a baseline, not an enhancement.
   mutations go through typed functions; pure functions isolate scoring and arrangement;
   presentation is organized as small, single-purpose units (components or render functions)
   with a strict separation between state and presentation.
-- Scope discipline: a single active dilemma with 2–4 choices; English only. Anything
+- Scope discipline: a single active dilemma with 2–6 choices; English only. Anything
   beyond (multi-dilemma, sharing, accounts, AI, export) is out of scope until explicitly
   re-scoped, consistent with Principles I and II.
 
@@ -161,4 +171,4 @@ time (the plan's Constitution Check) and during `/speckit-analyze`; constitution
 are treated as blocking and are resolved by adjusting the spec, plan, or tasks — not by
 diluting a principle.
 
-**Version**: 2.1.0 | **Ratified**: 2026-05-30 | **Last Amended**: 2026-05-31
+**Version**: 2.2.0 | **Ratified**: 2026-05-30 | **Last Amended**: 2026-06-03

@@ -11,7 +11,9 @@ export const en: Record<string, string> = {
 
   // Toolbar
   'toolbar.addChoice': '＋ Add choice',
-  'toolbar.maxChoices': 'Maximum 4 choices',
+  'toolbar.maxChoices': 'Maximum {n} choices',
+  'toolbar.manyChoices':
+    'Many choices can make a dilemma harder to weigh — fewer often brings more clarity.',
   'toolbar.group': 'Group',
   'toolbar.sort': 'Sort',
   'toolbar.saved': 'Saved',

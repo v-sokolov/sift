@@ -38,14 +38,27 @@ beforeEach(() => {
   setState(emptyDilemma());
 });
 
-describe('choice count invariants (2..4)', () => {
-  test('addChoice stops at MAX_CHOICES (4)', () => {
+describe('choice count invariants (2..6)', () => {
+  test('addChoice grows to 5 and 6, then stops at MAX_CHOICES', () => {
     expect(getState().dilemma.choices).toHaveLength(2);
     addChoice();
     addChoice();
     expect(getState().dilemma.choices).toHaveLength(4);
-    addChoice(); // no-op at max
-    expect(getState().dilemma.choices).toHaveLength(4);
+    addChoice(); // 5th now allowed (015, FR-001)
+    expect(getState().dilemma.choices).toHaveLength(5);
+    addChoice(); // 6th allowed
+    expect(getState().dilemma.choices).toHaveLength(6);
+    addChoice(); // no-op at max (FR-002)
+    expect(getState().dilemma.choices).toHaveLength(6);
+  });
+
+  test('removeChoice from a full 6-board re-enables adding (FR-002)', () => {
+    for (let i = 0; i < 4; i += 1) addChoice();
+    expect(getState().dilemma.choices).toHaveLength(6);
+    removeChoice(getState().dilemma.choices[5].id);
+    expect(getState().dilemma.choices).toHaveLength(5);
+    addChoice();
+    expect(getState().dilemma.choices).toHaveLength(6);
   });
 
   test('removeChoice stops at MIN_CHOICES (2)', () => {
@@ -60,6 +73,16 @@ describe('choice count invariants (2..4)', () => {
     openAddForm(thirdId);
     expect(getState().editing?.choiceId).toBe(thirdId);
     removeChoice(thirdId);
+    expect(getState().editing).toBeNull();
+    expect(getState().draft).toBeNull();
+  });
+
+  test('removeChoice clears the form if it targeted a removed 6th choice (015, FR-003)', () => {
+    for (let i = 0; i < 4; i += 1) addChoice();
+    const sixthId = getState().dilemma.choices[5].id;
+    openAddForm(sixthId);
+    expect(getState().editing?.choiceId).toBe(sixthId);
+    removeChoice(sixthId);
     expect(getState().editing).toBeNull();
     expect(getState().draft).toBeNull();
   });
