@@ -32,12 +32,12 @@ beforeEach(() => {
 });
 
 describe('US1 — weigh a decision and see a quiet score', () => {
-  it('adds a choice and shows the live count 3 / 4', () => {
+  it('adds a choice and shows the live count 3 / 6', () => {
     addChoice();
     flushSync();
     expect(container.querySelectorAll('.choice')).toHaveLength(3);
     // The live count is shown inside the Add-choice control.
-    expect(container.querySelector('[data-action="add-choice"]')!.textContent).toContain('3 / 4');
+    expect(container.querySelector('[data-action="add-choice"]')!.textContent).toContain('3 / 6');
   });
 
   it('computes score +2 with for 3 / against 1', () => {

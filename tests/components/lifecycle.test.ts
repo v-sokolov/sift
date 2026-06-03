@@ -64,10 +64,12 @@ describe('US2 — persistence & lifecycle', () => {
     expect(getState().dilemma.choices).toHaveLength(MIN_CHOICES);
   });
 
-  it('cannot add beyond the maximum of 4 choices (I9)', () => {
+  it('cannot add beyond the maximum of 6 choices (I9, 015)', () => {
     addChoice();
     addChoice();
-    addChoice(); // would be the 5th
+    addChoice();
+    addChoice();
+    addChoice(); // would be the 7th
     expect(getState().dilemma.choices).toHaveLength(MAX_CHOICES);
   });
 });

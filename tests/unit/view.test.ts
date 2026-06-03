@@ -30,6 +30,27 @@ const mixed = choice([
 
 const ids = (notes: Note[]): string[] => notes.map((n) => n.id);
 
+// 015 (FR-003/SC-004): regression lock — arrange() is a per-Choice pure function, so its
+// Sort/Group ordering guarantees (009) must hold identically for a 5th/6th Choice. May
+// pass on first run (count-agnostic by construction); locks the contract, not red-first.
+describe('arrange — parity on a 6-choice board (015)', () => {
+  const sixthChoice: Choice = { ...mixed, id: 'c6', title: 'Choice 6' };
+
+  it.each([
+    ['default', prefs({ mode: 'default' })],
+    ['grouped by type', prefs({ mode: 'grouped', groupKey: 'type' })],
+    ['grouped by weight', prefs({ mode: 'grouped', groupKey: 'weight' })],
+    ['sorted by weight desc', prefs({ mode: 'sorted', sortKey: 'weight', direction: 'desc' })],
+    ['sorted by type asc', prefs({ mode: 'sorted', sortKey: 'type', direction: 'asc' })],
+  ] as const)('%s — identical sections whether the notes live on choice 1 or choice 6', (_label, p) => {
+    const first = arrange(mixed, p);
+    const sixth = arrange(sixthChoice, p);
+    expect(sixth.map((s) => [s.label, ids(s.notes)])).toEqual(
+      first.map((s) => [s.label, ids(s.notes)]),
+    );
+  });
+});
+
 describe('arrange — default', () => {
   it('keeps creation order in one flat section', () => {
     const out = arrange(mixed, prefs({ mode: 'default' }));

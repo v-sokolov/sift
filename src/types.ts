@@ -19,7 +19,7 @@ export interface Choice {
 export interface Dilemma {
   id: string;
   title: string; // the question; '' → ghost placeholder
-  choices: Choice[]; // length constrained 2..4
+  choices: Choice[]; // length constrained 2..6
   createdAt: number;
   updatedAt: number;
 }
@@ -94,4 +94,4 @@ export interface PersistedV1 {
 }
 
 export const MIN_CHOICES = 2;
-export const MAX_CHOICES = 4;
+export const MAX_CHOICES = 6;

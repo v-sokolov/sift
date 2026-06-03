@@ -84,6 +84,41 @@ describe('groupKey persistence (008)', () => {
   });
 });
 
+describe('choice-count range 2..6 (015, FR-004/FR-005, contract B3)', () => {
+  function withChoices(n: number): AppState {
+    const s = seedState();
+    while (s.dilemma.choices.length < n) {
+      s.dilemma.choices.push({ id: `c${s.dilemma.choices.length + 1}`, title: `C${s.dilemma.choices.length + 1}`, notes: [] });
+    }
+    return s;
+  }
+
+  it('round-trips a 5-choice board verbatim under the unchanged sift.v1 key', () => {
+    const s = withChoices(5);
+    flushSave(s);
+    expect(STORAGE_KEY).toBe('sift.v1');
+    const out = load();
+    expect(out).not.toBeNull();
+    expect(out!.dilemma.choices).toHaveLength(5);
+    expect(out!.dilemma).toEqual(s.dilemma);
+  });
+
+  it('round-trips a 6-choice board verbatim', () => {
+    const s = withChoices(6);
+    flushSave(s);
+    const out = load();
+    expect(out).not.toBeNull();
+    expect(out!.dilemma.choices).toHaveLength(6);
+    expect(out!.dilemma).toEqual(s.dilemma);
+  });
+
+  it('rejects a 7-choice board (hand-edited storage) → null, never throws', () => {
+    const s = withChoices(7);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view: s.view }));
+    expect(load()).toBeNull();
+  });
+});
+
 describe('defensive load (P4)', () => {
   it('returns null when key is missing', () => {
     expect(load()).toBeNull();

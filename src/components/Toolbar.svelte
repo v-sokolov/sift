@@ -79,7 +79,9 @@
       class="btn btn--primary"
       data-action="add-choice"
       disabled={atMax}
-      title={atMax ? t(lang, "toolbar.maxChoices") : undefined}
+      title={atMax
+        ? t(lang, "toolbar.maxChoices", { n: String(MAX_CHOICES) })
+        : undefined}
       onclick={addChoice}
       >{t(lang, "toolbar.addChoice")} {n} / {MAX_CHOICES}</button
     >
@@ -96,6 +98,15 @@
       onclick={toggleSort}>{t(lang, "toolbar.sort")}</button
     >
   </div>
+
+  <!-- 015 (FR-012): quiet complexity hint while the board has 4–6 choices. Informational
+       only — plain always-visible text near the Add-choice control; never blocks adding,
+       never labels an individual choice (research R5). -->
+  {#if n >= 4}
+    <p class="toolbar__hint" data-hint="many-choices">
+      {t(lang, "toolbar.manyChoices")}
+    </p>
+  {/if}
 
   {#if showConfig}
     <div class="toolbar__row">

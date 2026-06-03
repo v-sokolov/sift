@@ -1,31 +1,48 @@
 <!-- SPECKIT START -->
-## Active feature: Fix Suggest-Dialog Positioning (`014-fix-dialog-positioning`)
+## Active feature: Extend Choices to Six Options (`015-six-choices`)
 
 For technologies, project structure, shell commands, and other context, read the
 current implementation plan and its design artifacts:
 
-- Plan: `specs/014-fix-dialog-positioning/plan.md`
-- Spec: `specs/014-fix-dialog-positioning/spec.md` (incl. Clarifications, Session 2026-05-31)
-- Research / decisions: `specs/014-fix-dialog-positioning/research.md` (R1–R4)
-- Contracts: `specs/014-fix-dialog-positioning/contracts/dialog-positioning.md` (P1–P6 layout, S1–S3 stacking)
-- Quickstart: `specs/014-fix-dialog-positioning/quickstart.md` (A1–A3 automated, M1–M9 manual, H1–H3 honesty)
-- (No `data-model.md` — presentation-only fix.)
+- Plan: `specs/015-six-choices/plan.md`
+- Spec: `specs/015-six-choices/spec.md` (incl. Clarifications, Session 2026-06-03)
+- Research / decisions: `specs/015-six-choices/research.md` (R1–R4)
+- Data model: `specs/015-six-choices/data-model.md` (constraint change only)
+- Contracts: `specs/015-six-choices/contracts/choice-layout.md` (B1–B4 behavior, L1–L5 layout, S1–S3 stability)
+- Quickstart: `specs/015-six-choices/quickstart.md` (A1–A3 automated, M1–M10 manual, H1–H3 honesty)
 
-014 fixes a **visual regression from 012**: Bits UI's `Dialog` renders `Dialog.Overlay`
-(`.modal-overlay`) and `Dialog.Content` (`.modal`) as **inline siblings**, but the CSS
-(`src/styles/app.css:686–712`) assumes `.modal` is the *child* of a flex-centering `.modal-overlay`
-(panel only `position: relative`). With no flex parent, the panel drops into normal page flow (below
-`<Footer />`) and the backdrop is an empty dim layer → mis-positioned/mis-stacked on all breakpoints.
-**Fix (decided over revert):** re-style `.modal` to self-center as its own fixed, top-layer element —
-`position: fixed; inset: 0; margin: auto; height: fit-content; z-index: 101` — keeping
-`width:100%; max-width:460px; max-height:90dvh; overflow:auto`; `.modal-overlay` stays the fixed
-`z-index:100` backdrop. **Bits UI retained** (no revert; 012's focus-trap/Esc/outside-click/scroll-lock/
-focus-return preserved). **Presentation-only**: CSS (and markup only if strictly needed), no domain/
-scoring/arrangement/persisted-state (`sift.v1` v1) change; `.modal`/`.modal-overlay` classes + `data-*`
-test hooks preserved (FR-009). Breakpoint-agnostic (no media query targets the modal). Layout verified
-manually (jsdom has no layout engine); behavior/contract tests stay green.
+015 raises the per-board Choice cap **4 → 6** (`MAX_CHOICES`, `src/types.ts:97`; min stays 2),
+adds **balanced wrapping** for 5–6 Choices, and adds a **complexity hint at 4–6 Choices**
+(FR-012, clarified 2026-06-03): one muted always-visible sentence near the Add-choice control
+(`data-hint="many-choices"`, new i18n key `toolbar.manyChoices` EN/UA, visible iff
+`choices.length >= 4`, informational only — never blocks adding, no tooltip, no per-card
+badge, no persisted/dismissal state; jsdom-testable, SC-005/B5). The cap is a single constant
+consumed by the store guard (`store.svelte.ts:136`), the `sift.v1` validator
+(`persistence.ts:92`), and the Toolbar "Add choice n / MAX" control — `'choice.placeholder':
+'Choice {n}'` already covers Choices 5–6, but **`'toolbar.maxChoices'` hardcodes "Maximum 4
+choices"** (`en.ts:14`/`uk.ts`, disabled-button `title` at `Toolbar.svelte:82`) → parameterize
+to `'Maximum {n} choices'` (R5). Layout
+is **pure CSS** (clarified 2026-06-03, FR-011 — no script-computed layout values, no markup
+diff): inside the existing `@media (min-width:720px)` block, count-conditional overrides
+`.choices:has(> .choice:nth-child(5))` and `.summary:has(> .sum:nth-child(5))` switch both
+grids to `repeat(3,1fr)` → effective columns **2→2, 3→3, 4→4, 5→3 (3+2), 6→3 (3+3)**;
+single column <720px; **bit-identical 2–4 layouts** (override can't match <5 cards). ⚠ The
+`.summary` selector must count `.sum` cells, not bare children — the formula caption is a
+grid child (bare `:nth-child(5)` would falsely wrap a 4-Choice board). `--choice-count`
+keeps the raw count for the unchanged base rule; `.summary` sibling-grid alignment holds
+because both grids carry matching rules. `#app` stays `max-width:1100px` → six-across
+intentionally never renders (R2). **No storage change** (widened range is a strict
+superset; 7+ rejected → default board). Requires a **constitution amendment**: scope "2–4
+choices" → "2–6" + Principle IV example, v2.1.0 → **v2.2.0** (the documented "explicitly
+re-scoped" path). Wrap geometry verified manually (jsdom resolves neither `:has()`-vs-grid
+nor track sizing); automated tests cover gating/persistence/lifecycle boundaries only.
+Gates: tsc + vitest + clean-install build.
 
-Prior features: `specs/013-fix-bits-ui-peerdep/` (restored `@internationalized/date` as a **required
+Prior features: `specs/014-fix-dialog-positioning/` (re-styled `.modal` to self-center as a
+fixed top-layer element — `position:fixed; inset:0; margin:auto; height:fit-content;
+z-index:101` over the `z-index:100` backdrop — fixing 012's Bits UI inline-sibling
+regression that dropped the panel below `<Footer />`; Bits UI retained; merged PR #16),
+`specs/013-fix-bits-ui-peerdep/` (restored `@internationalized/date` as a **required
 `bits-ui` peer dep** that 012 wrongly dropped as "unused", breaking the clean-install build; added the
 Constitution **Build gate**, v2.1.0; merged PR #15), `specs/012-review-remediation/` (codebase-health:
 adopted Bits UI `Dialog` in `SuggestDialog` rendered **inline/no Portal** + deleted the hand-rolled

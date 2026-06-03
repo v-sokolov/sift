@@ -336,6 +336,14 @@ header {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
+/* 015 (FR-012): quiet complexity hint shown while the board has 4–6 choices.
+   Always-visible plain text (never tooltip-only); muted like .saved, but kept at
+   --text-muted for WCAG AA in both themes. */
+.toolbar__hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
 .saved {
   color: var(--text-faint);
   font-size: 0.85rem;
@@ -385,7 +393,11 @@ header {
   cursor: not-allowed;
 }
 
-/* ---- Choice columns (responsive at 720px, research R4) ---- */
+/* ---- Choice columns (responsive at 720px, research R4) ----
+   015: count-conditional override — boards with 5+ choices wrap at 3 per row
+   (5 → 3+2, 6 → 3+3) instead of cramming ever-narrower columns; 2–4 boards keep
+   the one-column-per-choice rule below, untouched. Pure CSS (FR-011): the
+   matching .summary:has() rule keeps the score cells column-aligned. */
 .choices {
   display: grid;
   gap: var(--space-4);
@@ -394,6 +406,15 @@ header {
 @media (min-width: 720px) {
   .choices {
     grid-template-columns: repeat(var(--choice-count, 2), 1fr);
+    /* Equal-height cards: every row sizes to the tallest card on the board, so all
+       choices read as uniform tiles that grow together with their points. Cards in a
+       row already stretch (grid default); 1fr auto-rows extend that across the
+       wrapped rows of a 5–6-choice board. Not applied to the <720px single-column
+       stack, where each card should hug its own content. */
+    grid-auto-rows: 1fr;
+  }
+  .choices:has(> .choice:nth-child(5)) {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 .choice {
@@ -556,6 +577,12 @@ header {
 @media (min-width: 720px) {
   .summary {
     grid-template-columns: repeat(var(--choice-count, 2), 1fr);
+  }
+  /* 015: mirror the .choices 5+ wrap so score cells stay under their cards.
+     Counts .sum cells specifically — .summary__formula is also a grid child,
+     so a bare :nth-child(5) would falsely wrap a 4-choice board (contract L2). */
+  .summary:has(> .sum:nth-child(5)) {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 .sum {
