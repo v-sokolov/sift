@@ -12,7 +12,7 @@ export const uk: Record<string, string> = {
   'toolbar.addChoice': '＋ Додати варіант',
   'toolbar.maxChoices': 'Максимум {n} варіантів',
   'toolbar.manyChoices':
-    'Багато варіантів можуть ускладнити зважування — менше часто дає більше ясності.',
+    'Багато варіантів можуть ускладнити зважування - менше часто дає більше ясності.',
   'toolbar.group': 'Групувати',
   'toolbar.sort': 'Сортувати',
   'toolbar.saved': 'Збережено',
@@ -77,8 +77,12 @@ export const uk: Record<string, string> = {
   'form.typeDisadvantage': '− недолік',
   'form.typeNeutral': '~ нейтральне',
 
-  // Clear confirmation
+  // Destructive-action confirmations (Clear since 002; choice removal + shared dialog since 016)
   'confirm.clear': 'Очистити це рішення? Це не можна скасувати.',
+  'confirm.removeChoice': 'Видалити "{name}" і всі його пункти? Це не можна скасувати.',
+  'confirm.cancel': 'Скасувати',
+  'confirm.removeAction': 'Видалити',
+  'confirm.clearAction': 'Очистити',
 
   // Footer (US3)
   'footer.inspiredPre': 'Натхненна книжкою ',

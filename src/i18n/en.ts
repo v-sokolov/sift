@@ -13,7 +13,7 @@ export const en: Record<string, string> = {
   'toolbar.addChoice': '＋ Add choice',
   'toolbar.maxChoices': 'Maximum {n} choices',
   'toolbar.manyChoices':
-    'Many choices can make a dilemma harder to weigh — fewer often brings more clarity.',
+    'Many choices can make a dilemma harder to weigh - fewer often brings more clarity.',
   'toolbar.group': 'Group',
   'toolbar.sort': 'Sort',
   'toolbar.saved': 'Saved',
@@ -78,8 +78,12 @@ export const en: Record<string, string> = {
   'form.typeDisadvantage': '− disadvantage',
   'form.typeNeutral': '~ neutral',
 
-  // Clear confirmation
+  // Destructive-action confirmations (Clear since 002; choice removal + shared dialog since 016)
   'confirm.clear': "Clear this dilemma? This can't be undone.",
+  'confirm.removeChoice': 'Remove "{name}" and all its points? This can\'t be undone.',
+  'confirm.cancel': 'Cancel',
+  'confirm.removeAction': 'Remove',
+  'confirm.clearAction': 'Clear',
 
   // Footer (US3)
   'footer.inspiredPre': 'Inspired by the ',

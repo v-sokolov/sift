@@ -744,6 +744,17 @@ header {
   gap: var(--space-3);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
 }
+/* 016: shared destructive-action confirmation — same .modal placement/top-layer rules,
+   just narrower (a one-sentence question doesn't need the form width). The message IS the
+   accessible title (one-sentence dialog), so it renders calmer than a heading. */
+.modal--confirm {
+  max-width: 360px;
+}
+.modal--confirm .modal__title {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: var(--line);
+}
 .modal__title {
   margin: 0;
   font-size: 1.2rem;

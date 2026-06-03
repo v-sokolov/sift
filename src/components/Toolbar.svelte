@@ -14,6 +14,7 @@
     toggleSort,
   } from "../store.svelte";
   import { t } from "../i18n";
+  import ConfirmDialog from "./ConfirmDialog.svelte";
 
   const THEME_KEY: Record<Theme, string> = {
     system: "theme.system",
@@ -37,8 +38,11 @@
         : "",
   );
 
+  // 016: Clear confirms through the shared in-app dialog (FR-010) — the product's last
+  // native browser prompt is gone; the clearDilemma mutation itself is untouched.
+  let confirmingClear = $state(false);
   function clear() {
-    if (window.confirm(t(lang, "confirm.clear"))) clearDilemma();
+    confirmingClear = true;
   }
 </script>
 
@@ -107,6 +111,17 @@
       {t(lang, "toolbar.manyChoices")}
     </p>
   {/if}
+
+  <ConfirmDialog
+    open={confirmingClear}
+    message={t(lang, "confirm.clear")}
+    confirmLabel={t(lang, "confirm.clearAction")}
+    onConfirm={() => {
+      confirmingClear = false;
+      clearDilemma();
+    }}
+    onCancel={() => (confirmingClear = false)}
+  />
 
   {#if showConfig}
     <div class="toolbar__row">
