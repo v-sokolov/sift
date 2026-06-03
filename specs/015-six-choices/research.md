@@ -122,8 +122,8 @@ adding.
 
 **Proposed wording** (final tone check at implementation; gentle observation, no
 imperative, no "too many" judgment — Constitution I):
-- EN: `'toolbar.manyChoices': 'Many choices can make a dilemma harder to weigh — fewer often brings more clarity.'`
-- UA: `'toolbar.manyChoices': 'Багато варіантів можуть ускладнити зважування — менше часто дає більше ясності.'`
+- EN: `'toolbar.manyChoices': 'Many choices can make a dilemma harder to weigh - fewer often brings more clarity.'`
+- UA: `'toolbar.manyChoices': 'Багато варіантів можуть ускладнити зважування - менше часто дає більше ясності.'`
 
 **Threshold**: visible at 4, 5, 6; hidden at 2–3 (user-clarified: warn from 4 up, i.e.
 from the moment the board crosses into "getting crowded", one step before the old cap).

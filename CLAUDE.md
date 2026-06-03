@@ -1,42 +1,48 @@
 <!-- SPECKIT START -->
-## Active feature: Extend Choices to Six Options (`015-six-choices`)
+## Active feature: Confirm Removing a Choice with Points (`016-confirm-remove-choice`)
 
 For technologies, project structure, shell commands, and other context, read the
 current implementation plan and its design artifacts:
 
-- Plan: `specs/015-six-choices/plan.md`
-- Spec: `specs/015-six-choices/spec.md` (incl. Clarifications, Session 2026-06-03)
-- Research / decisions: `specs/015-six-choices/research.md` (R1–R4)
-- Data model: `specs/015-six-choices/data-model.md` (constraint change only)
-- Contracts: `specs/015-six-choices/contracts/choice-layout.md` (B1–B4 behavior, L1–L5 layout, S1–S3 stability)
-- Quickstart: `specs/015-six-choices/quickstart.md` (A1–A3 automated, M1–M10 manual, H1–H3 honesty)
+- Plan: `specs/016-confirm-remove-choice/plan.md`
+- Spec: `specs/016-confirm-remove-choice/spec.md` (incl. Clarifications, Session 2026-06-03)
+- Research / decisions: `specs/016-confirm-remove-choice/research.md` (R1–R3)
+- Contracts: `specs/016-confirm-remove-choice/contracts/remove-confirmation.md` (B1–B6, D1–D4 dialog, S1–S3)
+- Quickstart: `specs/016-confirm-remove-choice/quickstart.md` (A1–A3, M1–M6 manual, H1–H3 honesty)
+- (No `data-model.md` — no entity/persisted-state change.)
 
-015 raises the per-board Choice cap **4 → 6** (`MAX_CHOICES`, `src/types.ts:97`; min stays 2),
-adds **balanced wrapping** for 5–6 Choices, and adds a **complexity hint at 4–6 Choices**
-(FR-012, clarified 2026-06-03): one muted always-visible sentence near the Add-choice control
-(`data-hint="many-choices"`, new i18n key `toolbar.manyChoices` EN/UA, visible iff
-`choices.length >= 4`, informational only — never blocks adding, no tooltip, no per-card
-badge, no persisted/dismissal state; jsdom-testable, SC-005/B5). The cap is a single constant
-consumed by the store guard (`store.svelte.ts:136`), the `sift.v1` validator
-(`persistence.ts:92`), and the Toolbar "Add choice n / MAX" control — `'choice.placeholder':
-'Choice {n}'` already covers Choices 5–6, but **`'toolbar.maxChoices'` hardcodes "Maximum 4
-choices"** (`en.ts:14`/`uk.ts`, disabled-button `title` at `Toolbar.svelte:82`) → parameterize
-to `'Maximum {n} choices'` (R5). Layout
-is **pure CSS** (clarified 2026-06-03, FR-011 — no script-computed layout values, no markup
-diff): inside the existing `@media (min-width:720px)` block, count-conditional overrides
-`.choices:has(> .choice:nth-child(5))` and `.summary:has(> .sum:nth-child(5))` switch both
-grids to `repeat(3,1fr)` → effective columns **2→2, 3→3, 4→4, 5→3 (3+2), 6→3 (3+3)**;
-single column <720px; **bit-identical 2–4 layouts** (override can't match <5 cards). ⚠ The
-`.summary` selector must count `.sum` cells, not bare children — the formula caption is a
-grid child (bare `:nth-child(5)` would falsely wrap a 4-Choice board). `--choice-count`
-keeps the raw count for the unchanged base rule; `.summary` sibling-grid alignment holds
-because both grids carry matching rules. `#app` stays `max-width:1100px` → six-across
-intentionally never renders (R2). **No storage change** (widened range is a strict
-superset; 7+ rejected → default board). Requires a **constitution amendment**: scope "2–4
-choices" → "2–6" + Principle IV example, v2.1.0 → **v2.2.0** (the documented "explicitly
-re-scoped" path). Wrap geometry verified manually (jsdom resolves neither `:has()`-vs-grid
-nor track sizing); automated tests cover gating/persistence/lifecycle boundaries only.
-Gates: tsc + vitest + clean-install build.
+016 guards the ✕ remove control: a Choice with **≥1 point** (any type, incl. neutral-only)
+asks before removal; an **empty Choice keeps today's instant one-click removal** (count
+read at click time). Mechanism (clarified 2026-06-03, R1): a **shared
+`ConfirmDialog.svelte` on Bits UI `Dialog`** — inline/no-portal (012 pattern), reusing the
+**014 placement CSS verbatim** (`.modal-overlay` z-100 backdrop + `.modal` fixed/inset-0/
+margin-auto/fit-content z-101) plus a narrow `.modal--confirm` modifier; focus-trap, Esc-
+decline, outside-click-decline, focus-return, and **background scroll-lock** come from the
+primitive (verified 012). **Board Clear migrates onto the same dialog** (FR-010) —
+`window.confirm` count goes 1 → 0 (B6: tests assert the spy is never called; AlertDialog
+rejected — it blocks outside-click dismissal, which the spec requires as decline). Call
+sites own open state (ChoiceCard ✕ gate, Toolbar Clear); `removeChoice`/`clearDilemma`
+mutations **unchanged** (decline = never called → no-op incl. no persist notification).
+i18n: `confirm.removeChoice` interpolates the display name (`choice.title` or existing
+`choice.placeholder`) — EN 'Remove "{name}" and all its points? This can't be undone.' /
+UA 'Видалити "{name}" і всі його пункти? Це не можна скасувати.' (no point-count — UA
+pluralization, R2) + Cancel/Remove/Clear action labels. No persisted state (FR-008).
+Tests (R3, TDD red-first): DOM-driven `tests/components/remove-choice.test.ts` — dialog
+buttons, Esc, deep-equal decline no-op (H2), empty-skip, Clear migration incl. negative
+`window.confirm` assertion (H3). Placement/scroll-lock geometry manual only (M1/M2/M4 —
+jsdom has no layout engine, 014 precedent).
+
+## Prior feature: Extend Choices to Six Options (`015-six-choices`, merged PR #17)
+
+- Spec & artifacts: `specs/015-six-choices/` (spec incl. Clarifications, research R1–R5,
+  contracts B1–B5/L1–L6/S1–S3, quickstart; tasks 16/18 — T011/T017 manual sweeps pending)
+
+015 raised the Choice cap **4 → 6** (`MAX_CHOICES`; min 2; constitution re-scoped to
+v2.2.0), wrapped 5–6-Choice boards via pure CSS `:has()` overrides (3+2 / 3+3 at ≥720px,
+`grid-auto-rows:1fr` equal-height cards, `.summary` mirrored with a `.sum`-scoped selector,
+2–4 layouts bit-identical), parameterized `toolbar.maxChoices` to "Maximum {n} choices",
+and added the muted **complexity hint** at 4–6 Choices (`data-hint="many-choices"`,
+`toolbar.manyChoices` EN/UA — dash later flattened to "-", post-merge copy edit).
 
 Prior features: `specs/014-fix-dialog-positioning/` (re-styled `.modal` to self-center as a
 fixed top-layer element — `position:fixed; inset:0; margin:auto; height:fit-content;

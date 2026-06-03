@@ -5,6 +5,7 @@
   import { getState, removeChoice, renameChoice } from '../store.svelte';
   import { t } from '../i18n';
   import NoteRow from './NoteRow.svelte';
+  import ConfirmDialog from './ConfirmDialog.svelte';
 
   let { choice, index }: { choice: Choice; index: number } = $props();
 
@@ -13,6 +14,18 @@
   let placeholder = $derived(t(lang, 'choice.placeholder', { n: String(index + 1) }));
   let canRemove = $derived(s.dilemma.choices.length > MIN_CHOICES);
   let sections = $derived(arrange(choice, s.view));
+
+  // 016: removing a choice that holds points asks first (the count is read at click
+  // time); an empty choice keeps the instant one-click removal. The store mutation is
+  // untouched — declining simply never calls it (contract B1–B3).
+  let confirming = $state(false);
+  function onRemoveClick() {
+    if (choice.notes.length > 0) {
+      confirming = true;
+    } else {
+      removeChoice(choice.id);
+    }
+  }
 
   const GROUP_KEY: Record<NoteType, string> = {
     advantage: 'group.advantage',
@@ -49,9 +62,20 @@
       title={canRemove ? t(lang, 'choice.remove') : t(lang, 'choice.removeDisabled')}
       aria-label={t(lang, 'choice.removeAria')}
       disabled={!canRemove}
-      onclick={() => removeChoice(choice.id)}>✕</button
+      onclick={onRemoveClick}>✕</button
     >
   </div>
+
+  <ConfirmDialog
+    open={confirming}
+    message={t(lang, 'confirm.removeChoice', { name: choice.title || placeholder })}
+    confirmLabel={t(lang, 'confirm.removeAction')}
+    onConfirm={() => {
+      confirming = false;
+      removeChoice(choice.id);
+    }}
+    onCancel={() => (confirming = false)}
+  />
 
   {#if choice.notes.length === 0}
     <div class="empty">{t(lang, 'choice.empty')}</div>
