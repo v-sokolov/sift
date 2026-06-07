@@ -132,6 +132,11 @@ export function load(): { dilemma: Dilemma; view: ViewPrefs } | null {
   if (view.groupKey !== 'type' && view.groupKey !== 'weight') {
     view.groupKey = 'type';
   }
+  // 018: rankByTotal is additive too — a missing/non-boolean value defaults to false, so
+  // pre-018 saves load unchanged without a schemaVersion bump (R4).
+  if (typeof view.rankByTotal !== 'boolean') {
+    view.rankByTotal = false;
+  }
   return { dilemma: parsed.dilemma, view: parsed.view };
 }
 

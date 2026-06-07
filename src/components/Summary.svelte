@@ -1,17 +1,36 @@
 <script lang="ts">
+  import { flip } from 'svelte/animate';
   import { getState } from '../store.svelte';
   import { againstTotal, choiceScore, forTotal, leaders } from '../scoring';
+  import { orderedChoices } from '../view';
   import { t } from '../i18n';
 
   let s = $derived(getState());
   let lang = $derived(s.view.lang);
   let choices = $derived(s.dilemma.choices);
   let ldrs = $derived(leaders(choices));
+  // 018: score cells follow the same Rank order as the cards so they stay column-aligned.
+  let ordered = $derived(orderedChoices(choices, s.view.rankByTotal));
+
+  // Reorder animation, gated on reduced-motion (FR-008); jsdom has no matchMedia.
+  const prefersReduced =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const flipMs = prefersReduced ? 0 : 200;
 
   function signed(n: number): string {
     if (n > 0) return `+${n}`;
     if (n < 0) return `−${Math.abs(n)}`;
     return '0';
+  }
+
+  // 018: sign of the score drives both the cell tint (.sum--*) and the score-text colour
+  // (.sum__score--*). Supplementary to the +/−/0 text (Principle V).
+  function sign(n: number): 'positive' | 'negative' | 'neutral' {
+    if (n > 0) return 'positive';
+    if (n < 0) return 'negative';
+    return 'neutral';
   }
 </script>
 
@@ -20,13 +39,16 @@
   style="--choice-count:{choices.length}"
   aria-label={t(lang, 'summary.aria')}
 >
-  {#each choices as c (c.id)}
-    <div class="sum{ldrs.has(c.id) ? ' sum--leader' : ''}">
-      <div class="sum__score">{signed(choiceScore(c))}</div>
+  {#each ordered as c (c.id)}
+    <div
+      class="sum sum--{sign(choiceScore(c))}{ldrs.has(c.id) ? ' sum--leader' : ''}"
+      animate:flip={{ duration: flipMs }}
+    >
+      <div class="sum__score sum__score--{sign(choiceScore(c))}">{signed(choiceScore(c))}</div>
       <div class="sum__totals">
         {t(lang, 'summary.totals', { for: String(forTotal(c)), against: String(againstTotal(c)) })}
       </div>
     </div>
   {/each}
-  <p class="summary__formula">{t(lang, 'summary.formula')}</p>
+  <p class="summary__formula callout">{t(lang, 'summary.formula')}</p>
 </section>

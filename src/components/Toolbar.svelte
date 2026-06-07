@@ -11,6 +11,7 @@
     setLang,
     setSortKey,
     toggleGroup,
+    toggleRank,
     toggleSort,
   } from "../store.svelte";
   import { t } from "../i18n";
@@ -79,6 +80,7 @@
         ></span>{statusLabel}{/if}</span
     >
     <span class="toolbar__spacer"></span>
+    <!-- 018: Add-choice sits on the settings row, pinned to the right by the spacer. -->
     <button
       class="btn btn--primary"
       data-action="add-choice"
@@ -89,25 +91,40 @@
       onclick={addChoice}
       >{t(lang, "toolbar.addChoice")} {n} / {MAX_CHOICES}</button
     >
-    <button
-      class="btn toggle"
-      data-action="toggle-group"
-      aria-pressed={mode === "grouped"}
-      onclick={toggleGroup}>{t(lang, "toolbar.group")}</button
-    >
-    <button
-      class="btn toggle"
-      data-action="toggle-sort"
-      aria-pressed={mode === "sorted"}
-      onclick={toggleSort}>{t(lang, "toolbar.sort")}</button
-    >
   </div>
 
-  <!-- 015 (FR-012): quiet complexity hint while the board has 4–6 choices. Informational
-       only — plain always-visible text near the Add-choice control; never blocks adding,
-       never labels an individual choice (research R5). -->
+  <!-- 018: the view controls on their own row, pinned right — card-level "Rank" (choices)
+       left of a divider; point-level Group/Sort right under a "Points" label. -->
+  <div class="toolbar__row toolbar__row--views">
+    <div class="toolbar__views">
+      <span class="scope">{t(lang, "toolbar.scopeChoices")}</span>
+      <button
+        class="btn toggle"
+        data-action="toggle-rank"
+        aria-pressed={s.view.rankByTotal}
+        onclick={toggleRank}>{t(lang, "toolbar.rank")}</button
+      >
+      <span class="toolbar__divider" aria-hidden="true"></span>
+      <span class="scope">{t(lang, "toolbar.scopePoints")}</span>
+      <button
+        class="btn toggle"
+        data-action="toggle-group"
+        aria-pressed={mode === "grouped"}
+        onclick={toggleGroup}>{t(lang, "toolbar.group")}</button
+      >
+      <button
+        class="btn toggle"
+        data-action="toggle-sort"
+        aria-pressed={mode === "sorted"}
+        onclick={toggleSort}>{t(lang, "toolbar.sort")}</button
+      >
+    </div>
+  </div>
+
+  <!-- 015 (FR-012) / 018: the complexity hint as a full-width quote callout under the
+       controls. Informational only — shown at 4–6 choices, never blocks adding. -->
   {#if n >= 4}
-    <p class="toolbar__hint" data-hint="many-choices">
+    <p class="toolbar__hint callout" data-hint="many-choices">
       {t(lang, "toolbar.manyChoices")}
     </p>
   {/if}

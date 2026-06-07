@@ -183,3 +183,32 @@ describe('debounce (P2/P3)', () => {
     setItem.mockRestore();
   });
 });
+
+// 018 (US1, FR-007/R4) — rankByTotal is additive view state: round-trips, and a payload
+// missing it (or with a non-boolean) defaults to false without rejecting the save.
+describe('rankByTotal persistence (018)', () => {
+  it('P1: round-trips a stored rankByTotal=true', () => {
+    const s = seedState();
+    s.view.rankByTotal = true;
+    flushSave(s);
+    expect(load()!.view.rankByTotal).toBe(true);
+  });
+
+  it('P2: defaults a missing rankByTotal to false (legacy save loads, board not lost)', () => {
+    const s = seedState();
+    const view = { ...s.view } as unknown as Record<string, unknown>;
+    delete view.rankByTotal;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view }));
+    const out = load();
+    expect(out).not.toBeNull();
+    expect(out!.dilemma.title).toBe('Which job?');
+    expect(out!.view.rankByTotal).toBe(false);
+  });
+
+  it('P2: defaults a non-boolean rankByTotal to false', () => {
+    const s = seedState();
+    const view = { ...s.view, rankByTotal: 'yes' };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view }));
+    expect(load()!.view.rankByTotal).toBe(false);
+  });
+});
