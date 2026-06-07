@@ -252,19 +252,6 @@ header {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.linklike {
-  background: transparent;
-  border: none;
-  color: var(--accent);
-  font-size: 0.9rem;
-  padding: var(--space-1) 0;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  /* Standalone action button — give it a finger-sized hit area. */
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
 .header__title::placeholder {
   color: var(--text-faint);
   font-weight: 500;
@@ -300,11 +287,27 @@ header {
      Weight|Type, Direction Asc|Desc). The language toggle keeps its natural width. */
   .toolbar [data-action="add-choice"],
   .toolbar .toggle,
+  .toolbar__views,
   .toolbar__row .seg:not(.langtoggle) {
     flex-basis: 100%;
   }
   /* Full-width segs split their buttons evenly so they read as a real segmented row. */
   .toolbar__row .seg:not(.langtoggle) button {
+    flex: 1;
+  }
+  /* The vertical divider reads as clutter once the row stacks; hide it on narrow. */
+  .toolbar__divider {
+    display: none;
+  }
+  /* Language / Theme / Clear split the settings row into equal thirds (gaps from the
+     row's gap). flex-basis:0 so all three grow from zero and end up the same width. */
+  .toolbar__row > .langtoggle,
+  .toolbar [data-action="cycle-theme"],
+  .toolbar [data-action="clear"] {
+    flex: 1 1 0;
+  }
+  /* Each language button (EN / UA) fills half of the (now third-width) toggle. */
+  .langtoggle button {
     flex: 1;
   }
 }
@@ -317,7 +320,7 @@ header {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  min-height: 46px;
 }
 .btn[disabled] {
   opacity: 0.5;
@@ -331,6 +334,32 @@ header {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
+}
+/* 018: card-level Rank (a native checkbox) + "Choices"/"Points" scope labels, set off
+   from the point-level Group/Sort by a thin vertical divider so the two axes read as
+   distinct (Choices [Rank] │ Points [Group][Sort]). */
+.scope {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.toolbar__divider {
+  width: 1px;
+  align-self: stretch;
+  min-height: 1.5rem;
+  background: var(--border);
+}
+/* 018: the view-controls cluster (Rank | Group | Sort + scope labels). Inline on wide
+   screens (pushed right by the spacer); at ≤1024px it wraps to its own full-width row so
+   the controls aren't crammed against the left cluster. */
+.toolbar__views {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+/* 018: the view controls live on their own row, left-aligned. */
+.toolbar__row--views {
+  justify-content: flex-start;
 }
 .count {
   color: var(--text-muted);
@@ -379,7 +408,7 @@ header {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  min-height: 46px;
 }
 .seg button:first-child {
   border-left: none;
@@ -413,9 +442,18 @@ header {
        stack, where each card should hug its own content. */
     grid-auto-rows: 1fr;
   }
-  .choices:has(> .choice:nth-child(5)) {
+  .choices:has(> .choice-cell:nth-child(5)) {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+/* 018: each card is wrapped in a .choice-cell so it can carry animate:flip (Svelte only
+   allows animate on the keyed each's element child, not a component). The wrapper is the
+   grid item; the card fills it so the 015 equal-height (grid-auto-rows:1fr) is preserved. */
+.choice-cell {
+  display: flex;
+}
+.choice-cell > .choice {
+  flex: 1 1 auto;
 }
 .choice {
   background: var(--surface);
@@ -591,6 +629,27 @@ header {
   padding: var(--space-2);
   border-top: 2px solid transparent;
 }
+/* 018: tint each score cell by sign — a soft translucent wash (theme-aware via
+   color-mix over the page background) + a sign-coloured 2px top border, mirroring the
+   leader cell. The leader rule below comes last so the top choice keeps its distinct,
+   stronger highlight even though it is also a positive cell. */
+.sum--positive,
+.sum--negative,
+.sum--neutral {
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.sum--positive {
+  background: color-mix(in srgb, var(--advantage) 12%, transparent);
+  border-top-color: var(--advantage);
+}
+.sum--negative {
+  background: color-mix(in srgb, var(--disadvantage) 12%, transparent);
+  border-top-color: var(--disadvantage);
+}
+.sum--neutral {
+  background: color-mix(in srgb, var(--neutral) 12%, transparent);
+  border-top-color: var(--neutral);
+}
 .sum--leader {
   background: var(--leader-bg);
   border-top-color: var(--leader-border);
@@ -602,8 +661,18 @@ header {
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
-.sum--leader .sum__score {
-  color: var(--leader-border);
+/* 018: colour the score by sign — reuses the semantic advantage/disadvantage/neutral
+   tokens (AA-tuned in both themes). Supplementary to the +/−/0 text (Principle V). The
+   sign colour wins on the leader cell too (the old leader-only override is gone); the
+   leader cell keeps its background tint. */
+.sum__score--positive {
+  color: var(--advantage);
+}
+.sum__score--negative {
+  color: var(--disadvantage);
+}
+.sum__score--neutral {
+  color: var(--neutral);
 }
 .sum__totals {
   font-size: 0.85rem;
@@ -616,6 +685,22 @@ header {
   text-align: center;
   color: var(--text-muted);
   font-size: 0.85rem;
+}
+
+/* 018 (FR-015): quote-style callout for informational captions — a soft surface, italic
+   muted text, rounded + padded. Shared by the complexity hint and the score-formula
+   caption; the base classes keep their muted colour + 0.85rem size. */
+.callout {
+  /* Span the full width of the parent container. */
+  width: 100%;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  font-style: italic;
+}
+/* The formula callout reads left-aligned, not centred. */
+.summary__formula.callout {
+  text-align: left;
 }
 
 /* ---- Add/edit form ---- */
@@ -838,9 +923,6 @@ header {
    tap and keyboard. Gating behind (hover: hover) prevents stuck-hover artifacts after
    a tap on touch devices and documents that nothing here is hover-only. */
 @media (hover: hover) and (pointer: fine) {
-  .linklike:hover {
-    color: var(--text);
-  }
   .iconbtn:hover {
     color: var(--text);
     background: var(--surface-2);

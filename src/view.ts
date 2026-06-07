@@ -2,6 +2,7 @@
 // render. Never mutates the choice. See contracts/view.md.
 
 import type { Choice, Direction, Note, NoteType, ViewPrefs, Weight } from './types';
+import { choiceScore } from './scoring';
 
 export interface Section {
   // null = flat list; NoteType = grouped-by-type; Weight = a by-weight section;
@@ -82,4 +83,18 @@ export function arrange(choice: Choice, prefs: ViewPrefs): Section[] {
     };
   }
   return [{ label: null, notes: stableSort(notes, cmp) }];
+}
+
+/**
+ * 018 — display order of Choice cards. When `rankByTotal` is false, returns the choices
+ * unchanged (authoring order). When true, returns a NEW array ordered by `choiceScore`
+ * descending, with ties broken by original index so the order is stable and deterministic
+ * (FR-002/003). Pure — never mutates the input array or any Choice (FR-006).
+ */
+export function orderedChoices(choices: Choice[], rankByTotal: boolean): Choice[] {
+  if (!rankByTotal) return choices;
+  return choices
+    .map((c, i) => ({ c, i, score: choiceScore(c) }))
+    .sort((a, b) => b.score - a.score || a.i - b.i)
+    .map((x) => x.c);
 }

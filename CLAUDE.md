@@ -1,15 +1,48 @@
 <!-- SPECKIT START -->
-## Active feature: Confirm Removing a Choice with Points (`016-confirm-remove-choice`)
+## Active feature: Sort Choices by Total & Colour-Code Scores (`018-sort-color-scores`)
 
 For technologies, project structure, shell commands, and other context, read the
 current implementation plan and its design artifacts:
 
-- Plan: `specs/016-confirm-remove-choice/plan.md`
-- Spec: `specs/016-confirm-remove-choice/spec.md` (incl. Clarifications, Session 2026-06-03)
-- Research / decisions: `specs/016-confirm-remove-choice/research.md` (R1–R3)
-- Contracts: `specs/016-confirm-remove-choice/contracts/remove-confirmation.md` (B1–B6, D1–D4 dialog, S1–S3)
-- Quickstart: `specs/016-confirm-remove-choice/quickstart.md` (A1–A3, M1–M6 manual, H1–H3 honesty)
-- (No `data-model.md` — no entity/persisted-state change.)
+- Plan: `specs/018-sort-color-scores/plan.md`
+- Spec: `specs/018-sort-color-scores/spec.md` (incl. Clarifications, Session 2026-06-07)
+- Research / decisions: `specs/018-sort-color-scores/research.md` (R1–R7)
+- Contracts: `specs/018-sort-color-scores/contracts/sort-color-scores.md` (O1–O6 order law, C1–C4 colour, T1–T3 mutation, P1–P2, S1–S3, M1–M5 manual)
+- Data model: `specs/018-sort-color-scores/data-model.md` (one field: `ViewPrefs.rankByTotal`)
+- Quickstart: `specs/018-sort-color-scores/quickstart.md` (A1–A2, M1–M5 manual, P/H honesty)
+
+018 adds two independent presentation changes. **(US1) Rank** — an opt-in toolbar
+**toggle button** (off by default, styled like Group/Sort, label "Rank by score") re-orders
+Choice cards highest-total-first, **display-only** (FR-006) and **persisted**. Mechanism: new persisted `rankByTotal: boolean`
+on `ViewPrefs` (additive, defensive-default `false` on load — the 008 `groupKey` precedent,
+**no `schemaVersion` bump**); new `toggleRank()` view mutation (preference, so it persists
+via the channel but does NOT `touch()` save-status, like `toggleGroup`); a single **pure**
+helper **`orderedChoices(choices, rankByTotal)`** in `view.ts` (stable sort by `choiceScore`
+**desc**, ties by original index; identity when off) consumed by **both** `App.svelte`
+(`.choices`) and `Summary.svelte` (`.sum`) so the two column-aligned CSS grids reorder in
+lockstep (R2). Placeholder index stays the **stored** index via `indexOf` so untitled
+"Choice N" labels don't renumber on sort (R3). Reorder uses `animate:flip`, reduced-motion-
+gated (R6). **(US2) Colour-coded scores** — `.sum__score` coloured by sign via a modifier
+class reusing the **existing** palette tokens `--advantage`/`--disadvantage`/`--neutral`
+(both themes; zero new vars); the old `.sum--leader .sum__score` green override is **removed**
+so sign colour wins on the leader cell (leader bg tint kept). Each cell is also tinted by
+sign (`.sum--positive/--negative/--neutral`: soft `color-mix` bg + sign-coloured top border,
+FR-017); `.sum--leader` is applied last so the top choice stays distinct. `signed()` keeps the +/−/0
+text so colour is supplementary (Principle V, FR-011). **No new runtime dependency** (native
+toggle button + pure sort + CSS) — deliberately avoids the 013 clean-install failure mode
+(unlike 017). Toolbar gains scope labels + divider: `Choices [Rank by score] │ Points
+[Group][Sort]` (Add-choice moved to its own row beside the complexity hint). `animate:flip`
+needed an `Element.prototype.getAnimations` stub in `tests/setup.ts` (jsdom lacks the Web
+Animations API). New i18n: `toolbar.rank`/`scopeChoices`/`scopePoints` (EN/UA). Tests
+(R7, TDD red-first): `tests/unit/view.test.ts` (O1–O6), `tests/unit/persistence.test.ts`
+(P1–P2), `tests/components/{store,toolbar}.test.ts` (T1–T3, S1–S3), new
+`tests/components/sort-color.test.ts` (O2/C1–C4). AA contrast (incl. leader cell), flip
+smoothness, reduced-motion, alignment = manual only (M1–M5; jsdom has no layout engine).
+
+## Prior feature: Confirm Removing a Choice with Points (`016-confirm-remove-choice`, merged PR #18)
+
+- Spec & artifacts: `specs/016-confirm-remove-choice/` (spec incl. Clarifications, research
+  R1–R3, contracts B1–B6/D1–D4/S1–S3, quickstart; T011 manual sweep M1–M6 pending)
 
 016 guards the ✕ remove control: a Choice with **≥1 point** (any type, incl. neutral-only)
 asks before removal; an **empty Choice keeps today's instant one-click removal** (count

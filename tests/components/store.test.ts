@@ -30,6 +30,7 @@ import {
   submitForm,
   subscribePersist,
   toggleGroup,
+  toggleRank,
   toggleSort,
   updateNote,
 } from '../../src/store.svelte';
@@ -316,5 +317,33 @@ describe('render-only mutations do not notify the persistence channel', () => {
     closeForm(); // another mutation
     expect(saves).toBe(2);
     off();
+  });
+});
+
+// 018 (US1) — toggleRank is a preference mutation: it flips the flag and persists, but
+// (like toggleGroup/setSortKey) it must NOT touch() — no updatedAt bump, no save-status flip.
+describe('toggleRank (018)', () => {
+  test('T1: flips view.rankByTotal', () => {
+    expect(getState().view.rankByTotal).toBe(false);
+    toggleRank();
+    expect(getState().view.rankByTotal).toBe(true);
+    toggleRank();
+    expect(getState().view.rankByTotal).toBe(false);
+  });
+
+  test('T2: fires the persist channel', () => {
+    let saves = 0;
+    const off = subscribePersist(() => (saves += 1));
+    toggleRank();
+    expect(saves).toBe(1);
+    off();
+  });
+
+  test('T3: does not touch save-status or updatedAt', () => {
+    expect(getState().status).toBe('hidden');
+    const before = getState().dilemma.updatedAt;
+    toggleRank();
+    expect(getState().status).toBe('hidden');
+    expect(getState().dilemma.updatedAt).toBe(before);
   });
 });

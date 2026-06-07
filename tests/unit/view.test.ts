@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Choice, Note, NoteType, ViewPrefs, Weight } from '../../src/types';
-import { arrange } from '../../src/view';
+import { arrange, orderedChoices } from '../../src/view';
 
 function note(id: string, type: NoteType, weight: Weight | null): Note {
   return { id, text: id, type, weight };
@@ -14,6 +14,7 @@ function prefs(p: Partial<ViewPrefs>): ViewPrefs {
     sortKey: 'weight',
     direction: 'desc',
     groupKey: 'type',
+    rankByTotal: false,
     theme: 'system',
     lang: 'en',
     ...p,
@@ -204,5 +205,50 @@ describe('arrange — group ordering locked (009)', () => {
       expect(emitted.slice().sort()).toEqual(beforeIds.slice().sort());
       expect(new Set(emitted).size).toBe(emitted.length);
     }
+  });
+});
+
+// 018 (US1) — orderedChoices: pure display-order helper. Stable sort by choiceScore
+// descending; identity when off; never mutates input. See contracts O1–O6.
+describe('orderedChoices — rank Choices by total (018)', () => {
+  const mk = (id: string, notes: Note[]): Choice => ({ id, title: id, notes });
+  const adv = (id: string, w: Weight): Note => note(id, 'advantage', w);
+  const dis = (id: string, w: Weight): Note => note(id, 'disadvantage', w);
+
+  const c5 = mk('c5', [adv('a', 3), adv('b', 2)]); // +5
+  const c3 = mk('c3', [adv('c', 3)]); // +3
+  const c0 = mk('c0', []); // 0
+  const cNeg = mk('cNeg', [dis('d', 2)]); // −2
+  const idsOf = (cs: Choice[]): string[] => cs.map((c) => c.id);
+
+  it('O1: returns original order when rankByTotal is false', () => {
+    const input = [c0, c5, c3];
+    expect(idsOf(orderedChoices(input, false))).toEqual(['c0', 'c5', 'c3']);
+  });
+
+  it('O2/O4: orders by score descending; negative sinks below zero/positive', () => {
+    expect(idsOf(orderedChoices([c0, c5, cNeg, c3], true))).toEqual(['c5', 'c3', 'c0', 'cNeg']);
+  });
+
+  it('O3: ties keep original relative order (stable)', () => {
+    const c3a = mk('c3a', [adv('x', 3)]);
+    const c3b = mk('c3b', [adv('y', 3)]);
+    expect(idsOf(orderedChoices([c3a, c3b], true))).toEqual(['c3a', 'c3b']);
+    expect(idsOf(orderedChoices([c3b, c3a], true))).toEqual(['c3b', 'c3a']);
+  });
+
+  it('O5: pure — does not mutate the input array or its order', () => {
+    const input = [c0, c5, c3];
+    const snapshot = idsOf(input);
+    orderedChoices(input, true);
+    expect(idsOf(input)).toEqual(snapshot);
+  });
+
+  it('O6: handles empty, single, and all-equal lists', () => {
+    expect(orderedChoices([], true)).toEqual([]);
+    expect(idsOf(orderedChoices([c3], true))).toEqual(['c3']);
+    const e1 = mk('e1', []);
+    const e2 = mk('e2', []);
+    expect(idsOf(orderedChoices([e1, e2], true))).toEqual(['e1', 'e2']);
   });
 });

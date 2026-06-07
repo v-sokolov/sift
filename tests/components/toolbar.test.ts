@@ -215,3 +215,41 @@ describe('US1 — Sort mode is unchanged (FR-012)', () => {
     expect(groupKeyBtn('type')).toBeNull();
   });
 });
+
+// 018 (US1) — the Rank control: a toggle button styled like Group/Sort, left of a divider
+// behind a "Choices" scope label, with Group/Sort under a "Points" label. Pressing it sets
+// view.rankByTotal (aria-pressed reflects it).
+describe('US1 — Rank toggle (018)', () => {
+  const rankBtn = () =>
+    container.querySelector('[data-action="toggle-rank"]') as HTMLButtonElement;
+
+  it('S2: renders a toggle button reflecting rankByTotal via aria-pressed', () => {
+    const btn = rankBtn();
+    expect(btn).not.toBeNull();
+    expect(btn.classList.contains('toggle')).toBe(true);
+    expect(btn.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('S2: pressing it sets view.rankByTotal and reflects back', () => {
+    rankBtn().click();
+    flushSync();
+    expect(getState().view.rankByTotal).toBe(true);
+    expect(rankBtn().getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('S1/S3: shows localized Rank + Choices/Points scope labels', () => {
+    const lang = getState().view.lang;
+    const text = container.querySelector('.toolbar')?.textContent ?? '';
+    expect(text).toContain(t(lang, 'toolbar.rank'));
+    expect(text).toContain(t(lang, 'toolbar.scopeChoices'));
+    expect(text).toContain(t(lang, 'toolbar.scopePoints'));
+  });
+
+  it('S3: localizes in UA too', () => {
+    setLang('uk');
+    flushSync();
+    const text = container.querySelector('.toolbar')?.textContent ?? '';
+    expect(text).toContain(t('uk', 'toolbar.rank'));
+    expect(text).toContain(t('uk', 'toolbar.scopeChoices'));
+  });
+});

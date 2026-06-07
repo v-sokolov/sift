@@ -46,6 +46,7 @@ export interface ViewPrefs {
   sortKey: SortKey; // Sort mode only
   direction: Direction; // Sort mode only
   groupKey: GroupKey; // Group mode only (008); default 'type'
+  rankByTotal: boolean; // 018: when true, Choice cards display highest-score-first (display-only)
   theme: Theme;
   lang: Lang; // active interface language
 }

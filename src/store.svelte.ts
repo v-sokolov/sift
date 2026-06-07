@@ -51,6 +51,7 @@ export function emptyDilemma(): AppState {
       sortKey: 'weight',
       direction: 'desc',
       groupKey: 'type',
+      rankByTotal: false,
       theme: 'system',
       lang: DEFAULT_LANG,
     },
@@ -353,6 +354,17 @@ export function setDirection(direction: Direction): void {
 export function setGroupKey(key: GroupKey): void {
   update((d) => {
     d.view.groupKey = key;
+  });
+}
+
+/**
+ * 018: toggle ranking Choice cards by total. A preference (display-only) — like
+ * toggleGroup/setSortKey it persists via update()'s channel but does NOT touch(), so it
+ * never stamps updatedAt or flips the save-status indicator.
+ */
+export function toggleRank(): void {
+  update((d) => {
+    d.view.rankByTotal = !d.view.rankByTotal;
   });
 }
 

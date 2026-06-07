@@ -18,8 +18,8 @@
         />
         <h1 class="header__wordmark">Sift</h1>
       </span>
-      <button class="linklike" data-action="open-suggest" onclick={openSuggest}
-        >{t(lang, 'suggest.open')}</button
+      <button class="btn" data-action="open-suggest" onclick={openSuggest}
+        >{t(lang, 'suggest.open')} <span aria-hidden="true">💡</span></button
       >
     </div>
     <p class="header__tagline">{t(lang, 'header.tagline')}</p>
