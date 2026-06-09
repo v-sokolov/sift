@@ -1,7 +1,7 @@
-# Phase 1 Data Model: Sift MVP
+# Data Model: Sift MVP
 
-Derived from spec Key Entities (Dilemma, Choice, Note, View Settings) and the design
-doc §3. All types are plain TypeScript; nothing here implies a backend or DB.
+Entities: Dilemma, Choice, Note, View Settings. Plain TypeScript; nothing implies a
+backend or DB.
 
 ## Type definitions
 
@@ -39,7 +39,7 @@ interface ViewPrefs {
   mode: ViewMode;        // default 'default'
   sortKey: SortKey;      // used when mode === 'sorted'; default 'weight'
   direction: Direction;  // used when mode === 'grouped' | 'sorted'; default 'desc'
-  theme: 'system' | 'light' | 'dark'; // default 'system' (R7)
+  theme: 'system' | 'light' | 'dark'; // default 'system'
 }
 
 interface AppState {
@@ -49,7 +49,6 @@ interface AppState {
   lastSavedAt: number | null; // drives the quiet "Saved" indicator
 }
 
-// When creating a new note the noteId is absent; when editing it is present.
 type EditTarget =
   | { kind: 'new';  choiceId: string }
   | { kind: 'edit'; choiceId: string; noteId: string };
@@ -75,7 +74,7 @@ interface PersistedV1 {
 - `ViewPrefs` is global (one per app), applies to all choices simultaneously (FR-022).
 - Score/forTotal/againstTotal are **derived, never stored** (FR-015) — see contracts/scoring.md.
 
-## Validation & invariants
+## Invariants
 
 | # | Invariant | Source |
 |---|-----------|--------|
@@ -83,30 +82,26 @@ interface PersistedV1 {
 | I2 | `note.weight === null` ⟺ `note.type === 'neutral'` | FR-008, FR-011 |
 | I3 | `note.weight ∈ {1,2,3}` when `type ∈ {advantage, disadvantage}` | FR-008 |
 | I4 | Neutral notes excluded from all totals/score | FR-014 |
-| I5 | `view.sortKey` only meaningful when `mode === 'sorted'`; `direction` only when `mode ∈ {grouped, sorted}` | FR-019–021 |
+| I5 | `view.sortKey` meaningful only when `mode === 'sorted'`; `direction` only when `mode ∈ {grouped, sorted}` | FR-019–021 |
 | I6 | Default render order = array (creation) order; ties in sort fall back to it | FR-018, FR-021 |
 | I7 | `updatedAt` bumped on every mutation; `createdAt` set once | persistence/UX |
-| I8 | Removing a choice forbidden when `choices.length === 2` | FR-004 (edge case) |
+| I8 | Removing a choice forbidden when `choices.length === 2` | FR-004 |
 | I9 | Adding a choice forbidden when `choices.length === 4` | FR-004 |
 
-## State transitions / lifecycle
+## Lifecycle
 
 ```text
-[App boot]
-   └─ load("sift.v1")
-        ├─ valid    → restore Dilemma + ViewPrefs
-        └─ missing/invalid → emptyDilemma() (2 starter choices, blank title)
+[App boot] load("sift.v1")
+   ├─ valid           → restore Dilemma + ViewPrefs
+   └─ missing/invalid → emptyDilemma() (2 starter choices, blank title)
 
-[Empty default]  ── add note / edit title / add choice ──▶  [Active]
-[Active]         ── Clear (confirm) ─────────────────────▶  [Empty default]
-[any mutation]   ── update() ─▶ recompute derived ─▶ render ─▶ debounced save(400ms)
+[Empty default] ── add note / edit title / add choice ──▶ [Active]
+[Active]        ── Clear (confirm) ─────────────────────▶ [Empty default]
+[any mutation]  ── update() ─▶ recompute derived ─▶ render ─▶ debounced save(400ms)
 [tab hidden/unload] ─▶ flush save immediately
 ```
 
-`emptyDilemma()` produces: blank title, two `Choice`s with empty titles (ghost
-placeholders "Choice 1"/"Choice 2"), no notes, and `view` reset to ALL defaults
-(`mode:'default'`, `sortKey:'weight'`, `direction:'desc'`, `theme:'system'`).
-
-> Note: Clear is the only "start over" action in v1 and **erases everything** — question,
-> choices, notes, view mode/key/direction, AND theme — back to the default state (FR-027).
-> There is no separate "new dilemma" action; multi-dilemma management is deferred.
+`emptyDilemma()` produces a blank title, two `Choice`s with empty titles (ghost
+placeholders), no notes, and `view` reset to ALL defaults. Clear is the only "start over"
+action in v1 and erases everything — question, choices, notes, view mode/key/direction,
+AND theme — back to default (FR-027). Multi-dilemma management is deferred.

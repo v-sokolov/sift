@@ -106,20 +106,11 @@ discipline to the JS-driven flip.
 **Alternatives considered**: CSS-only transition (rejected — FLIP on reordering keyed lists
 is what Svelte's `animate:` is for; hand-rolling is more code).
 
-## R7 — Test strategy (red-first)
+## R7 — Test strategy
 
-**Decision**: TDD per Principle IV.
-- **Pure** (`tests/unit/view.test.ts`): `orderedChoices` — descending order, stable ties
-  (equal totals keep original order), `rank=false` returns identity, negative sorts below
-  positive, empty/single list. (`tests/unit/persistence.test.ts`): `rankByTotal` round-trips
-  `true`; an old payload without it loads as `false`.
-- **State/DOM** (`tests/components/store.test.ts`): `toggleRank` flips the flag, fires the
-  persist channel, and does **not** flip the save-status indicator (it is a preference, not
-  a content edit — the 010 `touch()` rule). (`toolbar.test.ts`): Rank checkbox renders, sits
-  left of the divider with the "Choices" scope label, toggles the store. (new
-  `sort-color.test.ts`): with Rank on, rendered card/score DOM order reflects descending
-  totals; `.sum__score` carries the sign class matching +/−/0.
-- **Manual only** (quickstart): real colour contrast (AA) in both themes incl. leader cell,
-  flip smoothness, reduced-motion suppression, persistence across reload, summary↔card
-  column alignment after sort. jsdom has no layout/contrast/animation engine (014/016
-  precedent).
+**Decision**: Automatable behaviour lives in `tests/unit/view.test.ts` (`orderedChoices`:
+O1–O6), `tests/unit/persistence.test.ts` (P1–P2), `tests/components/store.test.ts` (T1–T3),
+`tests/components/toolbar.test.ts` (S1–S3), and `tests/components/sort-color.test.ts` (O2 +
+C1–C4 in rendered DOM). Real colour contrast (AA, incl. leader cell), flip smoothness,
+reduced-motion suppression, and summary↔card column alignment are **manual only** (M1–M5) —
+jsdom has no layout/contrast/animation engine (014/016 precedent).

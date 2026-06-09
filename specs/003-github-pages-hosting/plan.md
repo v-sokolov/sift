@@ -76,11 +76,8 @@ deploy is the most direct realization of "load from static hosting" in Principle
 ```text
 specs/003-github-pages-hosting/
 ├── plan.md              # This file
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output (config/workflow "entities")
-├── quickstart.md        # Phase 1 output (enable + verify steps)
-├── contracts/           # Phase 1 output (deploy-workflow + base-path contracts)
-└── tasks.md             # Phase 2 output (/speckit-tasks — NOT created here)
+├── spec.md              # Condensed spec (Shipped)
+└── contracts/           # Live deploy contracts (deploy-workflow + base-path)
 ```
 
 ### Source Code (repository root)

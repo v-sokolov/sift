@@ -66,4 +66,4 @@ hover-only control — "remove point" — is deferred to **007** with an always-
 - **No-regression**: the entire existing `tests/unit/*` and `tests/components/*` suite must pass
   unchanged — that is the contract for FR-016/FR-017.
 - Everything else (touch sizes, safe-area, keyboard avoidance, orientation, contrast-on-device)
-  is verified by emulation/computation/on-device per `quickstart.md` — **not** asserted in jsdom.
+  is verified by emulation/computation/on-device (see spec "Verification") — **not** asserted in jsdom.

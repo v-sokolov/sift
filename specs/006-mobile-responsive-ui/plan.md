@@ -42,7 +42,7 @@ length units (`dvh`), `@media (hover/pointer)` media queries, `scroll-margin`/`s
 (e.g. the `index.html` viewport meta contains `viewport-fit=cover`; presence of the
 safe-area/`dvh`/touch-floor CSS in the built stylesheet). Pixel-level responsive, touch,
 keyboard-avoidance, safe-area, and orientation behaviors are **not** observable in jsdom and
-are verified by responsive emulation + computation + on-device spot checks (quickstart.md),
+are verified by responsive emulation + computation + on-device spot checks (see spec "Verification"),
 consistent with the spec's Assumptions and prior features' approach.
 
 **Target Platform**: static SPA on GitHub Pages (003); evergreen mobile + desktop browsers;
@@ -74,7 +74,7 @@ Evaluated against **Constitution v2.0.0** (`.specify/memory/constitution.md`).
 | **I. Calm Over Features** | ✅ PASS | No new product features; this is responsive/accessibility polish on the existing surface. The "remove point" idea was explicitly deferred to a separate feature (Clarifications) to keep this scope clean. |
 | **II. Client-Side & Private** | ✅ PASS | Pure CSS + one HTML attribute. No backend, network, telemetry, or data egress; app stays offline-capable; no new persisted datum. |
 | **III. Deliberate Simplicity** | ✅ PASS | Zero new dependencies — the simplest possible delivery. Standard CSS features, no JS for layout, no new abstractions (YAGNI). Keeps state/presentation separation intact (only presentation changes). |
-| **IV. Pure Core, Test-First (NON-NEGOTIABLE)** | ✅ PASS (with note) | No domain logic or behavior changes, so no new pure-core tests are required; the obligation is that **all existing unit + component tests stay green** (FR-016/FR-017) and that the type-check + suite are green at merge. New assertable guards are added where jsdom can observe them (viewport meta, CSS-presence); inherently visual/responsive criteria are verified by emulation + on-device checks per quickstart.md, since they are not unit-testable. This is a deliberate, documented limit, not a TDD waiver. |
+| **IV. Pure Core, Test-First (NON-NEGOTIABLE)** | ✅ PASS (with note) | No domain logic or behavior changes, so no new pure-core tests are required; the obligation is that **all existing unit + component tests stay green** (FR-016/FR-017) and that the type-check + suite are green at merge. New assertable guards are added where jsdom can observe them (viewport meta, CSS-presence); inherently visual/responsive criteria are verified by emulation + on-device checks (see spec "Verification"), since they are not unit-testable. This is a deliberate, documented limit, not a TDD waiver. |
 | **V. Accessibility by Default** | ✅ PASS | Directly advances this principle: enforces touch-target sizing, guarantees no hover-only access (M9), keeps keyboard focus parity (`:focus-visible`), honors text-scaling and safe-areas, and preserves WCAG AA in both themes. |
 
 **Result: PASS** — no violations. **Complexity Tracking is empty.**
@@ -86,15 +86,15 @@ Evaluated against **Constitution v2.0.0** (`.specify/memory/constitution.md`).
 ```text
 specs/006-mobile-responsive-ui/
 ├── plan.md              # This file
-├── spec.md              # Feature spec (with Clarifications)
-├── research.md          # Phase 0 output (R1–R10: responsive technique decisions)
-├── data-model.md        # Phase 1 output (no data changes; CSS surface summary)
-├── quickstart.md        # Phase 1 output (verify steps + on-device acceptance matrix)
-├── contracts/           # Phase 1 output
-│   ├── responsive.md    # Per-dimension CSS technique contract (M1–M12 → mechanism → check)
-│   └── components.md     # Concrete per-file markup/class/CSS changes + no-hover-only audit
-└── tasks.md             # Phase 2 output (/speckit-tasks — NOT created here)
+├── spec.md              # Feature spec (condensed)
+└── contracts/
+    ├── responsive.md    # Per-dimension CSS technique contract (M1–M12 → mechanism → check)
+    └── components.md    # Concrete per-file markup/class/CSS changes + no-hover-only audit
 ```
+
+> Condensed 2026-06-09: `research.md` (R1–R10 technique decisions), `data-model.md`
+> (no data changes), `quickstart.md`, `tasks.md`, and `checklists/` were removed once the
+> feature shipped; their conclusions are folded into the spec and the two contracts.
 
 ### Source Code (repository root)
 

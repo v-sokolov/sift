@@ -32,31 +32,20 @@ mutation). This contract restates and **locks** the `mode === 'grouped'` orderin
 - Pure & deterministic: identical inputs → identical output (labels and member order) across
   repeated calls and reloads.
 
-## Test assertions (fail-first — `tests/unit/view.test.ts`)
+## Regression coverage
 
-Existing 008 cases are retained. 009 adds/strengthens:
+Locked in `tests/unit/view.test.ts` against fixture
+`typeFull = [a3(adv,3), a2(adv,2), a1(adv,1), d1(dis,1), d2(dis,2), d3(dis,3), nu(neu,null)]`:
 
-Fixture `typeFull` = `[a3(adv,3), a2(adv,2), a1(adv,1), d1(dis,1), d2(dis,2), d3(dis,3), nu(neu,null)]`:
+- **Type**: labels `['advantage','disadvantage','neutral']`; Adv `['a3','a2','a1']`,
+  Disadv `['d3','d2','d1']`, Neutral `['nu']`.
+- **Weight**: labels `[3, 2, 1, 'weightless']`; `3:['a3','d3']`, `2:['a2','d2']`, `1:['a1','d1']`,
+  `'weightless':['nu']` (types mixed, creation order).
+- **Empty-weight omission**: a choice with only weight-3 and -1 notes → labels `[3, 1, 'weightless']`.
+- **Determinism + purity**: two successive `arrange` calls give equal `[label, ids]`; `choice.notes`
+  identity and order unchanged.
+- **Renderer guard** (`tests/components/group-ordering.test.ts`): a no-neutral choice hides the
+  Neutral section in the rendered ChoiceCard (FR-006).
 
-1. **Type — full 3→2→1 within each section**:
-   `arrange(typeFull, {mode:'grouped', groupKey:'type'})` →
-   labels `['advantage','disadvantage','neutral']`; section[0] ids `['a3','a2','a1']`;
-   section[1] ids `['d3','d2','d1']`; section[2] ids `['nu']`.
-2. **Weight — full 3→2→1→weightless, types mixed in creation order**:
-   `arrange(typeFull, {mode:'grouped', groupKey:'weight'})` →
-   labels `[3, 2, 1, 'weightless']`; section `3` ids `['a3','d3']`; section `2` ids `['a2','d2']`;
-   section `1` ids `['a1','d1']`; `'weightless'` ids `['nu']`.
-3. **Determinism / stability**: two successive `arrange(...)` calls on the same input return
-   equal `[label, ids]` structures for both `groupKey` values (no reshuffle).
-4. **Purity**: `choice.notes` array identity and order are unchanged after `arrange` (both
-   dimensions).
-5. **Weight — empty weight omitted**: a choice with only weight-3 and weight-1 notes yields labels
-   `[3, 1, 'weightless']` (no `2` section).
-
-Renderer-level (only if not already covered by existing ChoiceCard tests):
-
-6. **Type — no-neutral choice hides the Neutral section** in the rendered ChoiceCard (FR-006),
-   confirming the empty section `arrange` returns is not displayed.
-
-All assertions MUST pass against current `src/view.ts` / `ChoiceCard.svelte` with **no production
-code change**. Any failing assertion indicates a real regression to fix by restoring this contract.
+All pass against current `src/view.ts` / `ChoiceCard.svelte` with **no production code change**; any
+failure is a real regression to fix by restoring this contract.

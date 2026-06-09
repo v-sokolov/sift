@@ -14,6 +14,21 @@ guarantees and the structural hooks that must be preserved, without prescribing 
 - `data-*` hooks used by tests (`data-action="close-suggest"`, `data-action="suggest-form"`,
   `data-field="suggest-*"`, `data-action="suggest-send"`, etc.) are unchanged.
 
+## Placement rule (PROTECTED ANCHOR — cited by 016 as "014 placement CSS")
+
+The panel self-centers as its own fixed top-layer element over the backdrop:
+
+- `.modal` — `position: fixed; inset: 0; margin: auto; height: fit-content;
+  z-index: 101` (plus the preserved `width: 100%; max-width: 460px;
+  max-height: 90dvh; overflow: auto`).
+- `.modal-overlay` — fixed full-viewport backdrop at `z-index: 100`.
+
+With `position: fixed; inset: 0` the containing block is the viewport and all four
+offsets are 0; a constrained `width`/`height` plus `margin: auto` distributes the free
+space equally on every side — centering on **both** axes without a flex parent or
+transform. `height: fit-content` lets the panel shrink to its content so there is
+vertical free space to distribute. No media query (nothing else targets the modal).
+
 ## Layout contract (when the dialog is open)
 
 | ID | Guarantee |
@@ -24,6 +39,12 @@ guarantees and the structural hooks that must be preserved, without prescribing 
 | P4 | The panel is anchored to the viewport (fixed) — it does not scroll with the page or appear in normal flow below other content, regardless of page length or scroll position. |
 | P5 | Panel width is fluid up to `max-width: 460px`, with edge gutter on small viewports so it never touches screen edges. |
 | P6 | On viewports shorter than the panel, the panel is bounded to `max-height: 90dvh` and scrolls its content internally while staying centered. |
+
+Rejected alternatives: `transform: translate(-50%,-50%)` centering (subpixel text
+softening; fussier with internal scroll — kept only as a browser-quirk fallback);
+re-nesting `.modal` inside `.modal-overlay` (fights Bits UI's sibling design);
+portalling to `<body>` (012 deliberately renders inline); reverting the 012 rebuild
+(loses accessibility wins for a far larger change).
 
 ## Stacking contract
 

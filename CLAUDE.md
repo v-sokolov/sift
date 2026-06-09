@@ -1,8 +1,23 @@
 <!-- SPECKIT START -->
-## Active feature: Sort Choices by Total & Colour-Code Scores (`018-sort-color-scores`)
+## Active feature: Review & Compact Existing Specs (`019-compact-specs`)
 
-For technologies, project structure, shell commands, and other context, read the
-current implementation plan and its design artifacts:
+A **documentation-only** maintenance feature: compact all 17 shipped spec folders (~15k lines)
+**in place** with a two-tier treatment — **FREEZE** the cosmetic specs (005, 011) to a single
+archived stub; **CONDENSE** the other 15 (cut process scaffolding — `tasks.md`/`checklists/`/
+`quickstart.md` — trim prose, remove redundancy vs this `CLAUDE.md` index). A pre-built **anchor
+inventory** guarantees zero loss of cross-referenced decision context (FR-007: research `R*`,
+contract laws `O*/C*/B*/…`, named patterns like "012 pattern"/"014 placement CSS"/"008 groupKey
+precedent", governance amendments). 018 condensed conservatively (still recent); folders kept in
+place, 017 gap untouched; diff confined to `specs/**` + this index. No source/test/build/dep change.
+
+- Plan: `specs/019-compact-specs/plan.md`
+- Spec: `specs/019-compact-specs/spec.md` (incl. Clarifications, Session 2026-06-09)
+- Research / decisions: `specs/019-compact-specs/research.md` (R1–R8: tiering, anchor inventory, stub/marker, git-reversibility)
+- Contracts: `specs/019-compact-specs/contracts/compaction.md` (T1–T3 tier, A1–A3 anchor, F1–F3 freeze, C1–C4 condense, S1–S2 banner, B1–B4 boundary)
+- Data model: `specs/019-compact-specs/data-model.md` (tier table for all 17 folders + per-tier file-treatment rule)
+- Quickstart: `specs/019-compact-specs/quickstart.md` (SC-001 size, SC-002 anchor check, SC-005 source-untouched)
+
+## Just shipped: Sort Choices by Total & Colour-Code Scores (`018-sort-color-scores`, merged PR #19)
 
 - Plan: `specs/018-sort-color-scores/plan.md`
 - Spec: `specs/018-sort-color-scores/spec.md` (incl. Clarifications, Session 2026-06-07)

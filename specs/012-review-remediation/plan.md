@@ -15,7 +15,8 @@ dark-palette CSS collapse to one block**; (3) **de-duplicate the note-commit pat
 `submitForm` delegate to `addNote`/`updateNote`; (4) **remove the write-only `SuggestStatus`**
 scaffolding; (5) governance/doc honesty — **commit the constitution** (narrow `.gitignore`) and
 keep `CLAUDE.md` + the two named stale comments honest. Technical approach is detailed in
-[research.md](./research.md) (R1–R8); test-first per Principle IV ([R8](./research.md)).
+[research.md](./research.md) (R1–R3); the note-commit, `SuggestStatus`, `.gitignore`, doc, and
+test-first decisions are summarized in `spec.md`.
 
 ## Technical Context
 
@@ -65,16 +66,15 @@ changed, so no version bump is needed.)
 ```text
 specs/012-review-remediation/
 ├── plan.md              # This file
-├── spec.md              # Feature spec (with resolved Clarification)
-├── research.md          # Phase 0 — R1–R8 decisions
-├── data-model.md        # Phase 1 — type/state deltas (no persisted-schema change)
-├── quickstart.md        # Phase 1 — verification matrix (automated + manual)
-├── contracts/
-│   ├── dialog-ui.md      # SuggestDialog/Bits UI markup + behavior contract
-│   └── theme.md          # Pre-paint theme resolution + resolveTheme contract
-└── checklists/
-    └── requirements.md  # Spec quality checklist
+├── spec.md              # Condensed shipped summary
+├── research.md          # R1–R3 design decisions (R4–R8 folded into spec)
+└── contracts/
+    ├── dialog-ui.md     # SuggestDialog/Bits UI markup + behavior contract
+    └── theme.md         # Pre-paint theme resolution + resolveTheme contract
 ```
+
+*(Condensed 2026-06-09: `tasks.md`, `quickstart.md`, `checklists/`, and `data-model.md` removed;
+their content is summarized in `spec.md`.)*
 
 ### Source Code (repository root) — files this feature touches
 
@@ -108,14 +108,12 @@ the one spec-level clarification (bits-ui in-or-out) was settled in `spec.md` Cl
 
 ## Phase 1 — Design & Contracts
 
-- [data-model.md](./data-model.md) — the `SuggestState`/`SuggestStatus` deltas; confirmation that
-  `PersistedV1` (schemaVersion 1) is unchanged.
 - [contracts/dialog-ui.md](./contracts/dialog-ui.md) — the markup + behavior contract the rebuilt
   dialog must honor (class hooks, `data-*`, role/aria, focus, Esc, dismiss, scroll-lock).
 - [contracts/theme.md](./contracts/theme.md) — `resolveTheme` truth table + the pre-paint /
   attribute-always-explicit contract.
-- [quickstart.md](./quickstart.md) — automated + manual verification matrix.
-- Agent context: `CLAUDE.md` active-feature section repointed to this plan (done in this phase).
+- The `SuggestState`/`SuggestStatus` deltas and the note-commit refactor are summarized in
+  `spec.md`; `PersistedV1` (schemaVersion 1) is unchanged (no migration).
 
 ## Complexity Tracking
 

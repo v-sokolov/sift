@@ -71,17 +71,18 @@ testable intent), honored even absent a formal constitution:
 
 ```text
 specs/001-sift-mvp/
-├── plan.md              # This file (/speckit-plan command output)
-├── research.md          # Phase 0 output (/speckit-plan command)
-├── data-model.md        # Phase 1 output (/speckit-plan command)
-├── quickstart.md        # Phase 1 output (/speckit-plan command)
-├── contracts/           # Phase 1 output (/speckit-plan command)
-│   ├── state-store.md       # Store API + AppState shape
-│   ├── scoring.md           # Pure scoring function signatures + invariants
-│   ├── view.md              # Pure note-arrangement function signatures
-│   └── persistence.md       # localStorage schema, key, versioning, debounce
-└── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
+├── plan.md              # This file
+├── spec.md              # Condensed shipped summary (parity-contract reference)
+├── data-model.md        # Domain entities + invariants (parity contract)
+└── contracts/           # Behavioural laws reused verbatim by the Phase-2 rebuild
+    ├── state-store.md       # Store API + AppState shape
+    ├── scoring.md           # Pure scoring function signatures + laws
+    ├── view.md              # Pure note-arrangement function signatures
+    └── persistence.md       # localStorage schema, key, versioning, debounce
 ```
+
+> Condensed 2026-06-09: `research.md`, `quickstart.md`, `tasks.md`, and `checklists/`
+> were removed; their still-relevant decisions live in `spec.md` and `contracts/*`.
 
 ### Source Code (repository root)
 

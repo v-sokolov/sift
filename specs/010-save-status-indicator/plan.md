@@ -87,7 +87,7 @@ toolbar/header/footer markup + CSS. No new files in `src/` except a small type a
 
 ### Post-Design Re-check (after Phase 1)
 
-Re-evaluated after data-model/contracts: design keeps `status` runtime-only (no schema bump),
+Re-evaluated after the contracts: design keeps `status` runtime-only (no schema bump),
 mutates only the typed store, and adds no dependency. All five principles still PASS. No new
 violations introduced.
 
@@ -97,16 +97,15 @@ violations introduced.
 
 ```text
 specs/010-save-status-indicator/
+├── spec.md              # Condensed shipped summary (what/why/decisions)
 ├── plan.md              # This file
-├── research.md          # Phase 0 — decisions R1–R7
-├── data-model.md        # Phase 1 — SaveStatus + AppState.status (runtime-only); transitions
-├── quickstart.md        # Phase 1 — on-device + test acceptance matrix
-├── contracts/
-│   ├── save-status.md   # Phase 1 — status state machine + store/persistence API contract
-│   └── ui-presentation.md  # Phase 1 — header layout + footer copy contract
-└── checklists/
-    └── requirements.md  # Spec quality checklist (from /speckit-specify)
+└── contracts/
+    ├── save-status.md   # Status state machine + store/persistence API contract (authoritative)
+    └── ui-presentation.md  # Indicator render + header layout + footer copy contract
 ```
+
+> Condensed 2026-06-09: `research.md` (decisions R1–R8), `data-model.md`, `quickstart.md`,
+> `tasks.md`, and `checklists/` were folded into `spec.md` + the contracts and removed.
 
 ### Source Code (repository root)
 

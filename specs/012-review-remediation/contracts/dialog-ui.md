@@ -64,10 +64,9 @@ events, which jsdom supports). Because the dialog renders **inline (no Portal)**
 container-scoped queries continue to work; queries that previously targeted hand-rolled structure
 are updated to the Bits UI structure while asserting the same observable behavior.
 
-**jsdom feasibility (analyze F1)**: the event-driven rows (open, focus-on-open, Esc-close +
-focus-return, backdrop/outside-close, disabled-Send, mailto handoff) are jsdom-drivable and stay
-automated. The **Tab focus-trap** and **background scroll-lock** rows depend on Bits UI's
-`FocusScope`/`ScrollLock`, which may need visibility/layout jsdom doesn't provide; if they cannot
-be driven in jsdom, those two assertions move to the manual matrix (quickstart M6). The behavioral
-*contract* is unchanged — only the verification venue (automated vs. manual) may shift for those
-two rows.
+**jsdom feasibility**: the event-driven rows (open, focus-on-open, Esc-close + focus-return,
+backdrop/outside-close, disabled-Send, mailto handoff) are jsdom-drivable and stay automated. The
+**Tab focus-trap** and **background scroll-lock** rows depend on Bits UI's `FocusScope`/`ScrollLock`,
+which may need visibility/layout jsdom doesn't provide; if they cannot be driven in jsdom, those
+two assertions are verified manually. The behavioral *contract* is unchanged — only the
+verification venue (automated vs. manual) may shift for those two rows.

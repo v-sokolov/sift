@@ -41,20 +41,14 @@ export interface Section {
 - Empty sections may be returned; the renderer skips any labelled section with zero notes (see
   `group-toolbar.md` / ChoiceCard render guard). Implementations MAY omit empties directly.
 
-## Test assertions (fail-first — `tests/unit/view.test.ts`)
+## Test assertions (`tests/unit/view.test.ts`)
 
-Using the existing `mixed` fixture `[a1(adv,1), d3(dis,3), nu(neu,null), a3(adv,3), d1(dis,1)]`:
+Fixture `mixed = [a1(adv,1), d3(dis,3), nu(neu,null), a3(adv,3), d1(dis,1)]`:
 
-1. **Type, section order**: `arrange(mixed, {mode:'grouped', groupKey:'type'})` →
-   labels `['advantage','disadvantage','neutral']`.
-2. **Type, within-section heaviest-first**: section[0].notes ids `['a3','a1']`;
-   section[1].notes ids `['d3','d1']`; section[2].notes ids `['nu']`.
-   *(Replaces the old direction-driven cases — direction no longer affects grouping.)*
-3. **Type ignores direction**: same result for `direction:'asc'` and `direction:'desc'`.
-4. **Weight, section order**: `arrange(mixed, {mode:'grouped', groupKey:'weight'})` →
-   labels `[3, 2, 1, 'weightless']` (empty weight sections, if any, filtered/absent).
-5. **Weight buckets mix types**: the `3` section contains `['d3','a3']` (creation order);
-   the `1` section contains `['a1','d1']`; `'weightless'` contains `['nu']`.
-6. **Weight, all-neutral choice**: a choice of only neutral notes → a single `'weightless'`
-   section, no numbered sections.
-7. **Purity**: `choice.notes` array identity/order unchanged after `arrange`.
+- **Type**: labels `['advantage','disadvantage','neutral']`; section notes
+  `['a3','a1'] / ['d3','d1'] / ['nu']` (weighted heaviest-first, Neutral creation order);
+  same result for `direction:'asc'` and `'desc'` (direction ignored in grouped mode).
+- **Weight**: labels `[3, 2, 1, 'weightless']` (empties absent); `3` section
+  `['d3','a3']`, `1` section `['a1','d1']`, `'weightless'` `['nu']` (creation order, types
+  mixed). All-neutral choice → single `'weightless'` section, no numbered sections.
+- **Purity**: `choice.notes` identity/order unchanged after `arrange`.

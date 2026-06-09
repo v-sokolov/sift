@@ -57,7 +57,7 @@ function onRemoveKeydown(e: KeyboardEvent) {
 
 | Selector | Edit | Requirement |
 |---|---|---|
-| `.note` | ensure the row lays out text + meta + remove button cleanly (the row is already `display:flex; justify-content:space-between; min-height:44px`). Add the remove button into that flow with appropriate gap; it MUST NOT overlap the tap area used for editing. | FR-012, M4 |
+| `.note` | ensure the row lays out text + meta + remove button cleanly (the row is already `display:flex; justify-content:space-between; min-height:44px`). Add the remove button into that flow with appropriate gap; it MUST NOT overlap the tap area used for editing. | FR-012 |
 | `.note__remove` (uses `.iconbtn`) | reuse existing `.iconbtn` rules (006 gives `min-block-size:44px; min-inline-size:44px`, inline-flex centering, `:focus-visible` ring, `@media (hover)`-gated emphasis). Resting state de-emphasized (`color: var(--text-faint)` or similar). | FR-012, FR-013, SC-006 |
 
 > No new hover rule outside the existing `@media (hover: hover) and (pointer: fine)` block; the
@@ -80,5 +80,5 @@ Parity / no-blank / no-raw-key unit tests already enforce presence in both catal
   (FR-008); activating ✕ (click or key) does NOT open the edit form (FR-010); the ✕ exposes the
   localized `note.removeAria` label (FR-009); after removing a weighted advantage the choice's
   derived score/totals update (FR-005/SC-004).
-- **Not jsdom-assertable** (→ quickstart manual matrix): 44px physical target (FR-012/SC-006),
-  on-device hover emphasis, visual de-emphasis at rest.
+- **Not jsdom-assertable** (manual): 44px physical target (FR-012/SC-006), on-device hover
+  emphasis, visual de-emphasis at rest.

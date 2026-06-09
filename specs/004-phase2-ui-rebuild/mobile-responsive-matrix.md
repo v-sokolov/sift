@@ -1,10 +1,8 @@
 # Mobile & Responsive UI — Requirements Matrix
 
-**Feature**: Phase-2 UI Rebuild (`004-phase2-ui-rebuild`)
+> **Status: Shipped — condensed 2026-06-09**
 
-**Created**: 2026-05-30
-
-**Status**: Draft — abstract layer
+**Feature**: Phase-2 UI Rebuild (`004-phase2-ui-rebuild`) — abstract, device-agnostic layer
 
 ## Purpose
 

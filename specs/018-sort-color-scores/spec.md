@@ -1,10 +1,8 @@
 # Feature Specification: Sort Choices by Total & Colour-Code Scores
 
-**Feature Branch**: `018-sort-color-scores`
+> **Status: Shipped — condensed 2026-06-09**
 
-**Created**: 2026-06-07
-
-**Status**: Draft
+Merged as PR #19. Branch `018-sort-color-scores`.
 
 **Input**: User description: "Add card sorting by their total - can be useful for more than two choices present. Highlight negative | positive | neutral (zero) scores with different colours"
 
@@ -35,63 +33,27 @@
 
 ### User Story 1 - Rank Choices by their total score (Priority: P1)
 
-A person comparing several Choices wants the strongest option to surface to the top
-without manually scanning every card. They turn on a "sort by total" control and the
-Choice cards reorder so the highest-scoring Choice appears first and the lowest last.
-This is especially valuable when three to six Choices are on the board and visual
-ranking by eye is hard.
+A person comparing several Choices turns on a "sort by total" control and the Choice cards
+reorder so the highest-scoring Choice appears first and the lowest last. Especially valuable
+on three-to-six-Choice boards where ranking by eye is hard. This is the headline request and
+the larger behavioural change.
 
-**Why this priority**: This is the headline request and the larger behavioural change.
-It directly improves decision-making on busy boards (the stated "more than two choices"
-case) and is the part most likely to need design/animation care.
-
-**Independent Test**: Add three or more Choices with different point sets so their totals
-differ, enable sort-by-total, and confirm the cards are ordered highest-total-first.
-Toggle it off and confirm the original order returns. Delivers value on its own even
-without colour-coding.
-
-**Acceptance Scenarios**:
-
-1. **Given** a board with Choices whose totals are 5, −2, and 3, **When** sort-by-total is
-   enabled, **Then** the cards are displayed in the order 5, 3, −2 (highest first).
-2. **Given** sort-by-total is enabled, **When** the user adds or removes a point that
-   changes a Choice's total, **Then** the cards re-order to reflect the new totals.
-3. **Given** sort-by-total is enabled, **When** the user disables it, **Then** the cards
-   return to their original (pre-sort) order.
-4. **Given** two Choices have the same total, **When** sort-by-total is enabled, **Then**
-   their relative order is stable and predictable (their original relative order is kept).
-5. **Given** sort-by-total was enabled, **When** the user reloads the page, **Then** the
-   sort preference is remembered and the cards are still ranked.
+**Acceptance (A1)**: With totals 5, −2, 3, enabling Rank displays cards as 5, 3, −2 (highest
+first). Editing a point that changes a total re-orders live. Disabling Rank restores the
+original (pre-sort) order. Equal totals keep their original relative order (stable). The Rank
+preference survives reload.
 
 ---
 
 ### User Story 2 - Read a score's meaning at a glance via colour (Priority: P2)
 
-A person glancing at the board wants to instantly tell whether a Choice is net-positive,
-net-negative, or neutral. Each Choice's total score is shown in a distinct colour:
-positive totals in one colour, negative in another, and a zero/neutral total in a third
-muted colour.
+Each Choice's total score is shown in a distinct colour by sign: positive in one colour,
+negative in another, zero/neutral in a third muted colour. Polish that speeds comprehension,
+independent of sorting (the board is usable without it).
 
-**Why this priority**: Valuable polish that speeds comprehension, but smaller in scope
-and independent of sorting. The board is already usable without it, so it ranks below
-ranking.
-
-**Independent Test**: Create Choices with a positive total, a negative total, and a zero
-total, and confirm each score is rendered in its corresponding colour in both light and
-dark themes. Delivers value with or without sort-by-total.
-
-**Acceptance Scenarios**:
-
-1. **Given** a Choice with a total greater than zero, **When** the board is displayed,
-   **Then** its total score is shown in the positive colour.
-2. **Given** a Choice with a total less than zero, **When** the board is displayed,
-   **Then** its total score is shown in the negative colour.
-3. **Given** a Choice with a total of exactly zero (no points, or points that cancel out),
-   **When** the board is displayed, **Then** its total score is shown in the neutral colour.
-4. **Given** either theme is active, **When** a score is colour-coded, **Then** the colour
-   is legible against that theme's background.
-5. **Given** a score changes sign after an edit, **When** the total updates, **Then** its
-   colour updates to match the new sign.
+**Acceptance (A2)**: A total > 0 shows the positive colour, < 0 the negative colour, exactly
+0 the neutral colour — legible in both themes. A score changing sign after an edit updates
+its colour to match.
 
 ---
 

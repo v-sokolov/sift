@@ -44,7 +44,7 @@ Below 720px both grids stay single-column (unchanged). Effective columns: **2→
 worst width already shipped today (4 columns at a 720px viewport ≈ 165px/card).
 
 **Testing note**: jsdom resolves neither `:has()` matching against grid layout nor track
-sizing, so this rule is verified manually (quickstart M2–M7); automated tests cover the
+sizing, so this rule is verified manually (resize sweep); automated tests cover the
 behavior half (gating/persistence/lifecycle). Consistent with 014's manual-layout approach.
 
 **Alternatives considered**:

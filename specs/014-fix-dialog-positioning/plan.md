@@ -69,16 +69,14 @@ clean install (authoritative).
 ```text
 specs/014-fix-dialog-positioning/
 ├── plan.md              # This file
-├── spec.md              # Feature spec
-├── research.md          # Phase 0 — positioning technique decision
-├── quickstart.md        # Phase 1 — manual cross-breakpoint verification + regression checks
-├── contracts/
-│   └── dialog-positioning.md   # Phase 1 — the positioning/stacking contract
-└── checklists/
-    └── requirements.md  # Spec quality checklist
+├── spec.md              # Feature spec (condensed)
+└── contracts/
+    └── dialog-positioning.md   # Positioning/stacking contract (incl. protected placement-CSS anchor)
 ```
 
-(No `data-model.md` — this feature has no data model; presentation-only.)
+(No `data-model.md` — this feature has no data model; presentation-only. The Phase 0
+research and Phase 1 quickstart/checklist were folded into the spec & contract on the
+2026-06-09 condense.)
 
 ### Source Code (repository root)
 
