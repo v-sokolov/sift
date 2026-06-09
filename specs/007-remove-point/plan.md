@@ -66,16 +66,15 @@ edits, 1 store edit, 2 i18n keys, plus tests
 ```text
 specs/007-remove-point/
 ├── plan.md              # This file
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output (no data changes — documents why)
-├── quickstart.md        # Phase 1 output (manual acceptance matrix)
-├── contracts/           # Phase 1 output (component + store contracts)
-│   ├── remove-point.md
-│   └── clear-preferences.md
-├── checklists/
-│   └── requirements.md  # from /speckit-specify (all items pass)
-└── tasks.md             # Phase 2 output (/speckit-tasks — NOT created here)
+├── spec.md              # Shipped spec (condensed 2026-06-09)
+└── contracts/           # Component + store contracts
+    ├── remove-point.md
+    └── clear-preferences.md
 ```
+
+> Note: `research.md`, `data-model.md`, `quickstart.md`, `checklists/`, and `tasks.md` were
+> removed in the 2026-06-09 condensation; their load-bearing decisions are folded into `spec.md`
+> and the contracts.
 
 ### Source Code (repository root)
 

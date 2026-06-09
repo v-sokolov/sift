@@ -38,11 +38,3 @@ setState({ ...emptyDilemma(), dilemma: restored?.dilemma ?? …, view: { ...view
 
 - Stored language always overrides detection (FR-004).
 - First visit / no valid stored language → detection (FR-002), default `en`.
-
-## Tests (write first — extend `tests/unit/persistence.test.ts`)
-
-- Round-trip: write state with `lang:'uk'` → load → `view.lang === 'uk'`.
-- Old payload (no `lang`) → `load()` still returns the board/view (not null); `lang` unset so
-  boot detection applies.
-- Invalid `lang` value → payload still accepted; `lang` unset.
-- Existing MVP persistence tests still pass unchanged (FR-020).

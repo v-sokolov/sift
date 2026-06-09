@@ -82,11 +82,8 @@ specs/018-sort-color-scores/
 ├── spec.md              # Feature spec (+ Clarifications 2026-06-07)
 ├── research.md          # Phase 0 — R1–R7
 ├── data-model.md        # Phase 1 — ViewPrefs delta
-├── quickstart.md        # Phase 1 — setup + manual sweep
-├── contracts/
-│   └── sort-color-scores.md   # O1–O6 order law, C1–C4 colour, T1–T3 mutation, P1–P2, S1–S3
-└── checklists/
-    └── requirements.md  # spec quality checklist (from /speckit-specify)
+└── contracts/
+    └── sort-color-scores.md   # O1–O6 order law, C1–C5 colour, T1–T3 mutation, P1–P2, S1–S3, M1–M5
 ```
 
 ### Source Code (repository root)

@@ -80,20 +80,18 @@ PASS.)*
 
 ### Documentation (this feature)
 
+> **Condensed 2026-06-09**: this feature shipped. Per-task tracking
+> (`tasks.md`), the requirements checklist, `quickstart.md`, `data-model.md`, and the
+> `render-regions` contract were folded into `spec.md` and the retained contracts and removed.
+
 ```text
 specs/002-post-mvp-improvements/
 ├── plan.md              # This file (/speckit-plan output)
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output
-├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output
-│   ├── i18n.md
-│   ├── suggestion.md
-│   ├── persistence-migration.md
-│   └── render-regions.md
-├── checklists/
-│   └── requirements.md  # from /speckit-specify
-└── tasks.md             # Phase 2 output (/speckit-tasks — NOT created here)
+├── research.md          # Phase 0 output (condensed)
+└── contracts/           # surviving laws (i18n / suggestion / persistence-migration)
+    ├── i18n.md
+    ├── suggestion.md
+    └── persistence-migration.md
 ```
 
 ### Source Code (repository root)

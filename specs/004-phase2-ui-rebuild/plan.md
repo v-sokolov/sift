@@ -1,183 +1,84 @@
 # Implementation Plan: Phase-2 UI Rebuild
 
-**Branch**: `004-phase2-ui-rebuild` | **Date**: 2026-05-30 | **Spec**: [spec.md](./spec.md)
+> **Status: Shipped — condensed 2026-06-09**
 
-**Input**: Feature specification from `/specs/004-phase2-ui-rebuild/spec.md`
+Condensed to the unique architecture rationale. The shipped WHAT/WHY lives in
+[`spec.md`](./spec.md); the decision log is [`research.md`](./research.md) (R1–R9); the
+contracts hold the durable architecture (`contracts/{store,components,theming,motion}.md`,
+[`data-model.md`](./data-model.md), [`mobile-responsive-matrix.md`](./mobile-responsive-matrix.md)).
 
-## Summary
+## Stack
 
-Rebuild Sift's presentation layer on **Svelte 5 (runes) + Tailwind v4 + a headless
-component library (Melt UI preferred, Bits UI fallback)**, tested with Vitest. The rebuild
-changes **no product behavior**: the framework-agnostic pure core — `scoring.ts`, `view.ts`,
-`types.ts`, `persistence.ts`, `mailto.ts`, `config.ts`, `ids.ts`, `i18n/` — is **reused
-verbatim** (its existing unit tests are the parity contract). Only the imperative store
-(`state.ts`) and the imperative DOM renderers (`render/*`, `main.ts`, `styles/*`) are
-replaced: the store becomes a Svelte-runes module preserving every mutation signature and
-invariant, and each render region becomes a Svelte component using `bind:value` (which
-structurally eliminates the focus-loss problem that motivated the rebuild). The work adds
-full dark/light theming with pre-paint, headless-primitive keyboard accessibility, a fluid
-responsive layout, calm `prefers-reduced-motion`-aware motion, and complete project
-metadata + an MIT `LICENSE`.
+TypeScript 5.x strict + **Svelte 5 (runes)** + **Tailwind v4** (`@tailwindcss/vite`, build-
+time, zero runtime) + **Bits UI 2.18.1** (headless primitives; peer `@internationalized/date`).
+Vite 5 (kept — `@sveltejs/vite-plugin-svelte` pinned `^4` so the 003 deploy is unaffected),
+Vitest on jsdom via a local `tests/svelte.ts` helper. Storage unchanged: `localStorage`
+`sift.v1` (`PersistedV1`, `schemaVersion: 1`). Single client-side SPA on GitHub Pages, offline-
+capable, no backend/network/telemetry.
 
-This plan is enabled by **Constitution v2.0.0**, whose amended Principle III permits a
-framework + minimal, justified runtime dependencies bounded by Principle II
-(client-side/private). See the Constitution Check below.
+## Architecture rationale (R1–R9)
 
-## Technical Context
-
-**Language/Version**: TypeScript 5.x (strict) + Svelte 5 (runes mode); ESNext modules.
-
-**Primary Dependencies** (runtime, all client-side, zero network/egress):
-- **Svelte 5** — reactive compiler; ~few-KB runtime; `$state`/`$derived` remove manual
-  re-render and the focus-loss bug.
-- **Headless component library — Bits UI 2.18.1** — accessible component-API primitives
-  (Select, Dialog/AlertDialog, Popover, Toggle Group, form/Textarea). Chosen over Melt UI
-  during implementation because the offline registry lacks `@melt-ui/svelte`; Bits UI was the
-  documented research-R3 fallback (see R9). Peer: `@internationalized/date`.
-- **Tailwind v4** via `@tailwindcss/vite` — build-time utility CSS, CSS-first `@theme`
-  tokens; **no runtime cost**.
-
-**Build tooling (dev)**: Vite 5, `@sveltejs/vite-plugin-svelte`, `@tailwindcss/vite`,
-`svelte-check` (Svelte+TS typecheck), TypeScript, Vitest. Component tests via
-`@testing-library/svelte` + jsdom (research R6) — reuses the existing jsdom setup, no
-browser-runner dependency.
-
-**Storage**: browser `localStorage` only, existing key `sift.v1` (`PersistedV1`,
-`schemaVersion: 1`) — **unchanged**, so boards saved by the current app load intact.
-Theme already lives in `ViewPrefs.theme` and is persisted today.
-
-**Testing**: Vitest. Pure-logic unit tests (`scoring`, `view`, `persistence`, `mailto`,
-`i18n`) carry over **unedited** (parity guarantee). DOM-behavior tests (`tests/dom/*`) are
-re-expressed as Svelte component tests (`tests/components/*`).
-
-**Target Platform**: static single-page web app on GitHub Pages (feature 003); evergreen
-desktop + mobile browsers; offline-capable.
-
-**Project Type**: single client-side web project (no backend, no API).
-
-**Performance Goals**: smooth 60fps micro-interactions; first paint applies the correct
-theme with no flash (pre-paint inline snippet); modest bundle (framework runtime + headless
-lib + Tailwind output) — calm app, no heavy deps.
-
-**Constraints**: no backend / no network / no telemetry (Constitution II); usable with no
-horizontal scroll from ~320px to ≥1440px; WCAG AA contrast in both themes; honor
-`prefers-reduced-motion`.
-
-**Scale/Scope**: one screen, one active dilemma, 2–4 choices; ~8–10 Svelte components +
-a small set of `ui/` headless wrappers; one new runes store; theming + motion utilities.
+- **R1 — Reuse pure core verbatim (parity strategy).** Treat `types/scoring/view/ids/mailto/
+  config/persistence/i18n` as frozen, in place, with `tests/unit/*` unedited. *Rationale:* zero
+  functional regression + saved-board compat are cheapest when the behavior-defining logic is
+  not rewritten; keeps Constitution IV trivially satisfied. The rebuild is a presentation +
+  store swap, not a logic rewrite.
+- **R2 — Runes store replaces the imperative store.** `state.ts` → `store.svelte.ts`,
+  `$state`-backed, **same mutation names/signatures/invariants**. *Rationale:* runes give
+  reactivity + `bind:value` (the focus-loss fix) while a 1:1 API port keeps the behavioral
+  surface identical so component tests mirror the old DOM tests; `theme` already modeled, no
+  schema change.
+- **R3 — Headless lib: Melt UI preferred, Bits UI fallback, shadcn reference-only.** Thin
+  `components/ui/*` wrappers so the app depends on a Sift-local surface. *Rationale:* headless/
+  ownable primitives supply ARIA + focus management (Principle V) while Sift owns the calm
+  bespoke styling; installed deps, no copy-into-repo (Principle III).
+- **R4 — Tailwind v4, CSS-first `@theme` tokens.** Migrate `tokens.css` into a `@theme` block;
+  light/dark via CSS custom properties on a `<html>` attribute. *Rationale:* build-time only
+  (no runtime cost, Principle II/III); one token source of truth makes AA-contrast tuning
+  explicit; speeds the fluid responsive work.
+- **R5 — No-flash pre-paint theme.** Inline `<script>` in `index.html` reads
+  `sift.v1.view.theme` (fallback `system`→`prefers-color-scheme`→light) and sets `<html>`
+  synchronously before mount; `theme.ts` owns runtime + a `matchMedia` listener. *Rationale:*
+  pre-paint is the only way to satisfy "no wrong-theme flash"; reading the existing key avoids
+  a second persisted datum.
+- **R6 — Component tests on jsdom, not a browser runner.** `@testing-library`-style on the
+  existing jsdom Vitest setup; re-express each `tests/dom/*` as `tests/components/*` + add
+  theme/a11y suites. *Rationale:* minimum dev deps, fast, runner-only (no Playwright/CI
+  surface) for a one-screen app; role/label queries push tests toward a11y.
+  `vitest-browser-svelte` is the documented heavier fallback.
+- **R7 — Built-in Svelte motion, reduced-motion gated.** `svelte/transition` (`fade`/`scale`/
+  `slide`) for form/dialog/popover, `animate:flip` for note reorder; a reactive
+  `prefersReducedMotion` helper suppresses non-essential motion. *Rationale:* motion ships in
+  the language at ~0 KB and covers all needs on-brand; an animation library would violate
+  "minimal justified deps."
+- **R8 — Full `package.json` metadata + MIT `LICENSE`.** Name/description/version/author(name+
+  URL)/repository/homepage(003 Pages URL)/keywords/`license: MIT`; LICENSE © Vitalii Sokolov;
+  email stays mailto-only. *Rationale:* completes FR-019/FR-020; MIT keeps the project open
+  while the author retains copyright.
+- **R9 — Offline-install adaptation (impl reality).** Public npm blocked (GlobalProtect
+  content-filter); only the Wix mirror reachable, which lacks `@melt-ui/svelte` and
+  `@testing-library/svelte`. Adaptations, all within documented fallbacks: component lib →
+  **Bits UI 2.18.1** (R3 fallback); testing → local `tests/svelte.ts` helper (Svelte `mount()`
+  + cached testing-library); `vite-plugin-svelte` pinned `^4` (stay on Vite 5); `yarn.lock`
+  gitignored (a wixpress-pinned lock breaks the public GitHub Pages CI — the 003 gotcha).
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+Evaluated against **Constitution v2.0.0**. **PASS, no violations** — Complexity Tracking
+empty (the framework adoption is governed by amended Principle III, not a deviation).
 
-Evaluated against **Constitution v2.0.0** (`.specify/memory/constitution.md`).
+- **I Calm Over Features** — no new product features; motion bounded by calm ethos + reduced-
+  motion.
+- **II Client-Side & Private** — Svelte/Bits UI/Tailwind are build-time/client-only; no
+  backend, network, telemetry, or egress; data stays in `localStorage`. The hard boundary
+  every dep was checked against.
+- **III Deliberate Simplicity (v2.0.0)** — amended to permit a framework + minimal justified
+  deps; each justified (Svelte fixes focus-loss + manual re-render; Bits UI = ownable a11y
+  primitives; Tailwind = build-time). Pure core stays dependency-free. Would FAIL under v1.0.0.
+- **IV Pure Core, Test-First (NON-NEGOTIABLE)** — pure core reused with passing tests; store
+  invariants preserved; new components built test-first; type-check + green suite is the gate.
+- **V Accessibility by Default** — headless primitives supply ARIA + focus management; weight
+  shown by dot count + color (never color alone); Esc closes; full keyboard; AA both themes.
 
-| Principle | Verdict | Notes |
-|-----------|---------|-------|
-| **I. Calm Over Features** | ✅ PASS | No new product features; this is polish. Motion is bounded by the calm ethos (FR-018) and `prefers-reduced-motion` (FR-017); the score stays a gentle aid. |
-| **II. Client-Side & Private** | ✅ PASS | Svelte, Melt/Bits UI, and Tailwind are build-time/client-only and add **no** backend, network call, telemetry, or data egress. App stays offline-capable; data stays in `localStorage` (FR-004). This is the hard boundary every new dependency was checked against. |
-| **III. Deliberate Simplicity (v2.0.0)** | ✅ PASS | Amended Principle III permits a framework + minimal, justified runtime deps. Each dependency is justified: **Svelte** (removes the focus-loss bug + manual re-render wiring; small runtime), **Melt/Bits UI** (accessible, *headless/ownable* primitives — preferred over heavy pre-styled kits; **no** copy-source-into-repo model, so shadcn-svelte is reference-only), **Tailwind v4** (build-time, zero runtime). State/presentation separation is preserved; pure core stays dependency-free. Pre-amendment (v1.0.0) this would have FAILED on "no framework"; v2.0.0 is the authority now. |
-| **IV. Pure Core, Test-First (NON-NEGOTIABLE)** | ✅ PASS | Pure core (`scoring.ts`, `view.ts`) is reused verbatim with its existing passing tests. Store invariants (2–4 choices, neutral⇒null weight) preserved. New components are built test-first (red→green) with component tests; type-check + suite green is the merge gate. |
-| **V. Accessibility by Default** | ✅ PASS | Headless primitives supply ARIA roles + focus management; weight still shown by explicit dot count + color (never color alone); Esc closes form/dialog/popover; full keyboard operability; WCAG AA in both themes (FR-008..FR-013). Directly advances this principle. |
-
-**Result: PASS** — no violations. **Complexity Tracking is empty** (the framework adoption
-is governed by Principle III as amended, not a deviation).
-
-> Note: this gate would not pass under Constitution v1.0.0. It passes only because the
-> constitution was amended to v2.0.0 first. If that amendment is ever reverted, this plan
-> must be revisited.
-
-## Project Structure
-
-### Documentation (this feature)
-
-```text
-specs/004-phase2-ui-rebuild/
-├── plan.md              # This file
-├── research.md          # Phase 0 output (R1–R8)
-├── data-model.md        # Phase 1 output (state/entities, unchanged + Theme)
-├── quickstart.md        # Phase 1 output (setup, verify, parity checklist)
-├── contracts/           # Phase 1 output
-│   ├── store.md         # Runes store public API + invariants (supersedes 001 state-store, API-compatible)
-│   ├── components.md     # Component tree + headless-primitive mapping + a11y behavior
-│   ├── theming.md        # Tokens, pre-paint, toggle, persistence, contrast
-│   └── motion.md         # Transition catalog + reduced-motion contract
-└── tasks.md             # Phase 2 output (/speckit-tasks — NOT created here)
-```
-
-### Source Code (repository root)
-
-**Reused verbatim (pure core — the parity contract; do NOT rewrite):**
-
-```text
-src/
-├── types.ts            # domain types (Theme already present)
-├── scoring.ts          # pure scoring  ── unit tests unchanged
-├── view.ts             # pure arrangement ── unit tests unchanged
-├── ids.ts              # id generation
-├── mailto.ts           # mailto composition ── unit tests unchanged
-├── config.ts           # author identity (email mailto-only, never rendered)
-├── persistence.ts      # localStorage + defensive load ── unit tests unchanged
-└── i18n/
-    ├── index.ts, en.ts, uk.ts   # pure t(lang,key) ── unit tests unchanged
-```
-
-**Replaced (presentation + store):**
-
-```text
-src/
-├── store.svelte.ts     # NEW: Svelte-runes store; replaces state.ts.
-│                       #   Same mutation names/signatures + invariants; reactive $state.
-├── theme.ts            # NEW: resolve system/light/dark, apply to <html>, persist via view.theme
-├── main.ts             # REPLACED: mount App.svelte; boot persistence + lang detect + theme
-├── App.svelte          # NEW: top-level layout/composition
-├── components/         # NEW: replaces render/*
-│   ├── Header.svelte
-│   ├── Toolbar.svelte           # Arrange (Popover) + Group/Sort, lang + theme toggles
-│   ├── ChoiceCard.svelte
-│   ├── NoteRow.svelte
-│   ├── AddEditForm.svelte       # bind:value → no focus loss
-│   ├── Summary.svelte
-│   ├── Footer.svelte
-│   ├── SuggestDialog.svelte     # native-feeling Dialog over mailto (no network)
-│   └── ui/                      # thin wrappers over headless primitives
-│       ├── Select.svelte        # choice selector
-│       ├── Dialog.svelte        # Clear confirm / Suggest shell (AlertDialog)
-│       ├── Popover.svelte       # Arrange config
-│       ├── ToggleGroup.svelte   # Type / Weight / Sort segmented controls
-│       └── Field.svelte         # input/textarea form primitives
-└── styles/
-    └── app.css         # REPLACED: Tailwind v4 entry + @theme tokens (migrated from tokens.css)
-
-index.html              # add pre-paint theme snippet + mount point
-package.json            # full metadata (name/description/author/repo/homepage/keywords) + license:MIT + new deps/scripts
-vite.config.ts          # add svelte + tailwind plugins (keep GITHUB_PAGES base from 003; keep vitest config)
-LICENSE                 # NEW: MIT, © Vitalii Sokolov
-tsconfig.json           # add svelte types if needed
-```
-
-**Tests:**
-
-```text
-tests/
-├── unit/               # UNCHANGED — scoring, view, persistence, mailto, i18n (parity contract)
-└── components/         # NEW — replaces tests/dom/*; Svelte component tests
-    ├── flow.test.ts        # create→choices→notes→group/sort→score (parity of dom/flow)
-    ├── lifecycle.test.ts   # persistence load/clear parity (parity of dom/lifecycle)
-    ├── suggest.test.ts     # suggest dialog → mailto (parity of dom/suggest)
-    ├── i18n.test.ts        # language toggle parity (parity of dom/i18n)
-    ├── theme.test.ts       # NEW — default/toggle/persist/pre-paint
-    └── a11y.test.ts        # NEW — keyboard ops, Esc-to-close, focus, dot-count-not-color-only
-```
-
-**Structure Decision**: Single client-side web project. Keep the **pure core files in their
-current locations** so their existing unit tests pass byte-for-byte (the strongest FR-001 /
-SC-001 / SC-003 guarantee). Replace only the store and the rendering layer, and add the
-theming, motion, metadata, and license artifacts. `tests/dom/*` (which assert against the
-old imperative DOM) are superseded by `tests/components/*`; `tests/unit/*` are untouched.
-
-## Complexity Tracking
-
-> No Constitution violations — this section is intentionally empty. The framework + headless
-> library + Tailwind are permitted by Principle III (v2.0.0) and individually justified in
-> the Constitution Check table above; none requires a deviation.
+> This gate passes only because the constitution was amended to v2.0.0 first. If that
+> amendment is ever reverted, this plan must be revisited.

@@ -35,60 +35,34 @@ export function buildMailto(draft: SuggestionDraft, to: string): string;
   newline, non-ASCII e.g. Cyrillic).
 - `to` is the address from `config.ts`; never appears elsewhere.
 
-## State (see data-model.md)
+## State & flow
 
-`AppState.suggest: { open, draft, status:'idle' }`. Mutations: `openSuggest`, `closeSuggest`,
-`setSuggestField`, `submitSuggest`. `canSend(draft) = name.trim() && description.trim()`.
+`AppState.suggest = { open, draft, status:'idle' }` — **never persisted**. Mutations:
+`openSuggest`, `closeSuggest`, `setSuggestField`, `submitSuggest`. Gate:
+`canSend(draft) = name.trim() !== '' && description.trim() !== ''` (FR-010); `submitSuggest`
+is a no-op unless `canSend`.
 
-> **Note (implementation)**: built as a custom accessible overlay (`role="dialog"`,
-> `aria-modal="true"`), NOT native `<dialog>.showModal()` — jsdom 26 lacks `showModal`.
-> Esc/focus-trap/focus-return/backdrop-close are implemented in `main.ts`; fields carry
-> `data-field` so caret survives the full re-render.
+```
+closed ──openSuggest()──▶ open (empty draft, idle)
+open   ──setSuggestField──▶ open (draft updated)
+open   ──submitSuggest [canSend]──▶ window.location.href = buildMailto(draft, CONTACT_EMAIL) ──▶ closed
+open   ──closeSuggest()/Esc/backdrop──▶ closed (focus returns to trigger)
+```
 
-## Render — `src/render/suggest.ts`
+## Render & a11y (shipped)
 
-- Renders a `<dialog data-region="suggest">` containing a `<form>` with fields: Name*,
-  Description* (textarea), Contact email, GitHub, LinkedIn — all labels/placeholders via
-  `t(lang, …)` (FR-014/FR-013). A Send button (`disabled` unless `canSend`). A quiet
-  **LinkedIn** fallback link (FR-012) and a close control.
-- The maintainer email is **never** rendered as text (I-S2).
-- Markup is produced from state every re-render (declarative), like other regions.
+- A `<form>` with fields Name*, Description* (textarea), Contact email, GitHub, LinkedIn —
+  all labels/placeholders via `t(lang, …)` (FR-013); a Send button `disabled` unless
+  `canSend`; a quiet **LinkedIn** fallback link (FR-012) and a close control. Markup is
+  produced from state every re-render.
+- Built as a **custom accessible overlay** (`role="dialog"`, `aria-modal="true"`), NOT native
+  `<dialog>.showModal()` — jsdom 26 lacks `showModal`. Focus-into-modal on open, focus-return
+  to the trigger on close, Esc-to-close, Tab focus-trap, and backdrop-click close are all in
+  `main.ts` (FR-008). Fields carry `data-field` so the caret survives the full re-render.
 
-## Imperative reconcile (in `main.ts` render side-effect)
+## Invariants
 
-After `renderApp`:
-- if `state.suggest.open` and `dialog.open` is false → `dialog.showModal()`, focus first field;
-- if `!state.suggest.open` and `dialog.open` → `dialog.close()`.
-- Remember the trigger element on open; on close, restore focus to it (FR-008).
-
-## Events (`main.ts`, delegated on `#app` + dialog)
-
-| Trigger | Action |
-|---------|--------|
-| click `[data-action="open-suggest"]` | `openSuggest()` |
-| input on suggest fields (`data-action="suggest-field"`, `data-field`) | `setSuggestField(field, value)` |
-| submit the suggest `<form>` | `preventDefault`; if `canSend`: `window.location.href = buildMailto(draft, CONTACT_EMAIL)`; then `closeSuggest()` |
-| dialog `cancel`/`close` (Esc, backdrop) | `closeSuggest()` |
-| click `[data-action="close-suggest"]` | `closeSuggest()` |
-
-## Acceptance mapping
-
-| Req | Covered by |
-|-----|-----------|
-| FR-007 quiet header entry | `open-suggest` link in `render/header.ts` |
-| FR-008 a11y modal, Esc, focus return | native `<dialog>` + reconcile/focus restore |
-| FR-009 fields | `render/suggest.ts` form |
-| FR-010 Send gating | `canSend`, button `disabled`, `submitSuggest` guard |
-| FR-011 mailto compose, no transmit | `buildMailto` + `window.location` |
-| FR-012 LinkedIn fallback, no email shown | dialog fallback link; I-S2 |
-| FR-013 localized form | `t()` on all labels/placeholders |
-
-## DOM tests (write first)
-
-- Open link → dialog open, focus inside; Esc → closed, focus back on trigger.
-- Send disabled until Name+Description non-whitespace; enabling toggles correctly.
-- Submitting a valid form sets `location.href` to a `mailto:` containing the entered values
-  (stub/spy `window.location`); dialog closes.
-- LinkedIn fallback link present and points to `config.LINKEDIN_URL`; email string absent
-  from DOM.
-- Switching language while open re-labels the form and preserves entered data.
+- **I-S1**: `suggest` is never written to `localStorage`.
+- **I-S2**: the maintainer email **never** appears in rendered DOM text — only inside the
+  generated `mailto:` href.
+- **I-S3**: `submitSuggest` has no effect unless `canSend` is true.

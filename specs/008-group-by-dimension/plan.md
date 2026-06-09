@@ -83,11 +83,8 @@ specs/008-group-by-dimension/
 ├── plan.md              # This file
 ├── research.md          # Phase 0 output
 ├── data-model.md        # Phase 1 output
-├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output (arrange-grouping.md, group-toolbar.md, addpoint-order.md)
-├── checklists/
-│   └── requirements.md  # spec quality checklist (from /speckit-specify)
-└── tasks.md             # Phase 2 output (/speckit-tasks — NOT created here)
+├── spec.md              # Condensed shipped spec (2026-06-09)
+└── contracts/           # Phase 1 output (arrange-grouping.md, group-toolbar.md, addpoint-order.md)
 ```
 
 ### Source Code (repository root)

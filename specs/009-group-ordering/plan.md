@@ -62,15 +62,14 @@ tests. No new files in `src/`.
 
 ```text
 specs/009-group-ordering/
+├── spec.md              # Condensed shipped summary
 ├── plan.md              # This file
-├── research.md          # Phase 0 — behaviour confirmation + empty-section nuance
-├── data-model.md        # Phase 1 — Section shape (unchanged); ordering rules
-├── quickstart.md        # Phase 1 — on-device + test acceptance matrix
-├── contracts/
-│   └── group-ordering.md  # Phase 1 — the locked arrange() ordering contract
-└── checklists/
-    └── requirements.md  # Spec quality checklist (from /speckit-specify)
+└── contracts/
+    └── group-ordering.md  # The locked arrange() ordering contract
 ```
+
+(Phase-0/1 `research.md`, `data-model.md`, `quickstart.md`, and `checklists/` were folded into
+`spec.md` / the contract and removed in the 019 spec-compaction pass.)
 
 ### Source Code (repository root)
 

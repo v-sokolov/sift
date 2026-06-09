@@ -79,11 +79,9 @@ Complexity Tracking entries).
 ```text
 specs/016-confirm-remove-choice/
 ├── plan.md              # This file
-├── research.md          # Phase 0 — R1 mechanism, R2 wording, R3 test strategy
-├── quickstart.md        # Phase 1 — automated + manual verification
-├── contracts/
-│   └── remove-confirmation.md  # Phase 1 — B1–B6 behavior contract
-└── tasks.md             # Phase 2 (/speckit-tasks — NOT created by /speckit-plan)
+├── spec.md              # Condensed shipped spec (R1/R2/R3 decisions folded in)
+└── contracts/
+    └── remove-confirmation.md  # B1–B6 behavior, D1–D4 dialog, S1–S3 stability laws
 (No data-model.md — no entity or persisted-state change; trigger condition reads the
  existing live point count.)
 ```

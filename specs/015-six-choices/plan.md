@@ -39,7 +39,7 @@ re-scopes to 2–6 — exactly the "until explicitly re-scoped" path the constit
 
 **Storage**: Browser `localStorage`, versioned key `sift.v1` (format version unchanged; only the accepted choice-count range widens)
 
-**Testing**: Vitest on jsdom; component tests via local `tests/svelte.ts` mount helper + `@testing-library/dom`; no browser runner → rendered geometry (wrap behavior) is verified manually per quickstart
+**Testing**: Vitest on jsdom; component tests via local `tests/svelte.ts` mount helper + `@testing-library/dom`; no browser runner → rendered geometry (wrap behavior) is verified manually via a resize sweep
 
 **Target Platform**: Static SPA (GitHub Pages), evergreen browsers, offline-capable
 
@@ -67,7 +67,7 @@ re-scopes to 2–6 — exactly the "until explicitly re-scoped" path the constit
 - **IV. Pure Core, Test-First**: PASS. Domain logic is untouched; store guard /
   persistence boundary tests extend to 5, 6, and 7 (reject) and are written failing-first,
   before the constant changes. The CSS wrap rule has no jsdom-testable surface (no layout
-  engine) — geometry is covered by the quickstart manual sweep, consistent with 014. ⚠ The
+  engine) — geometry is covered by a manual resize sweep, consistent with 014. ⚠ The
   principle's invariant example reads "e.g. **2–4 choices**" — see amendment note below.
 - **V. Accessibility by Default**: PASS. No color-only information added; keyboard paths
   unchanged; wrapped rows keep cards at readable widths (that is the point of FR-006);
@@ -95,13 +95,12 @@ re-scopes to 2–6 — exactly the "until explicitly re-scoped" path the constit
 
 ```text
 specs/015-six-choices/
+├── spec.md              # Condensed shipped summary
 ├── plan.md              # This file
-├── research.md          # Phase 0 — R1 wrap strategy, R2 container cap, R3 constitution, R4 persistence
-├── data-model.md        # Phase 1 — constraint change on Board/Choice count (no shape change)
-├── quickstart.md        # Phase 1 — automated + manual verification steps
-├── contracts/
-│   └── choice-layout.md # Phase 1 — L1–L5 layout contract, B1–B4 behavior contract
-└── tasks.md             # Phase 2 (/speckit-tasks — NOT created by /speckit-plan)
+├── research.md          # R1 wrap strategy, R2 container cap, R3 constitution, R4 persistence, R5 hint
+├── data-model.md        # Constraint change on Board/Choice count (no shape change)
+└── contracts/
+    └── choice-layout.md # L1–L6 layout contract, B1–B5 behavior, S1–S3 stability
 ```
 
 ### Source Code (repository root)
