@@ -37,7 +37,7 @@
       >
       <button
         type="button"
-        class="btn btn--primary btn--half"
+        class="btn btn--danger btn--half"
         data-action="confirm-dialog-confirm"
         onclick={onConfirm}>{confirmLabel}</button
       >

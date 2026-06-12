@@ -195,6 +195,24 @@ describe('016 US1 — confirming removes with existing post-removal behavior (B3
   });
 });
 
+describe('022 US5 — CTA colour roles: confirm danger (R5)', () => {
+  it('R5: confirm-dialog confirm button has btn--danger and NOT btn--primary', () => {
+    // Need 3 choices (remove is disabled at MIN_CHOICES=2) and a pointed choice to trigger dialog
+    addChoice(); // 3 choices total
+    const cid = getState().dilemma.choices[0].id;
+    renameChoice(cid, 'TestChoice');
+    addNote(cid, { text: 'x', type: 'advantage', weight: 1 });
+    flushSync();
+    // expandAll() is called inside removeBtns() — it expands all cards then returns the remove buttons
+    removeBtns()[0].click();
+    flushSync();
+    const btn = confirmBtn();
+    expect(btn).not.toBeNull();
+    expect(btn!.classList.contains('btn--danger')).toBe(true);
+    expect(btn!.classList.contains('btn--primary')).toBe(false);
+  });
+});
+
 describe('016 — Clear migrates onto the shared dialog (B6, FR-010, SC-006)', () => {
   const clearBtn = () => container.querySelector('[data-action="clear"]') as HTMLButtonElement;
 

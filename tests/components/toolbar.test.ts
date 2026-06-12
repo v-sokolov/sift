@@ -87,9 +87,18 @@ describe('save-status indicator (010)', () => {
   const statusEl = () => container.querySelector('.saved') as HTMLElement;
   const dot = () => container.querySelector('.saved .status-dot');
 
-  it('is hidden by default — no dot, no label text (FR-008)', () => {
-    expect(dot()).toBeNull();
-    expect(statusEl().textContent?.trim()).toBe('');
+  // 022 supersedes 010 FR-008: instead of rendering nothing, the no-pending-edit
+  // state shows a neutral "Idle" dot + label (EN 'Idle' / UA 'Очікування').
+  it('shows "Idle" + a neutral idle-modifier dot by default (022, supersedes FR-008)', () => {
+    const lang = getState().view.lang;
+    expect(dot()).not.toBeNull();
+    expect(dot()!.classList.contains('status-dot--idle')).toBe(true);
+    expect(statusEl().textContent).toContain(t(lang, 'toolbar.idle'));
+  });
+
+  it('Idle label is localized (EN/UA)', () => {
+    expect(t('en', 'toolbar.idle')).toBe('Idle');
+    expect(t('uk', 'toolbar.idle')).toBe('Очікування');
   });
 
   it('shows "Editing" + an editing-modifier dot after a content edit (FR-003)', () => {
@@ -256,18 +265,70 @@ describe('US1 — Rank toggle (018)', () => {
   });
 });
 
+describe('022 US5 — CTA colour roles: Add-choice (R1)', () => {
+  it('R1: Add-choice button has btn--primary class', () => {
+    const btn = container.querySelector('[data-action="add-choice"]') as HTMLButtonElement;
+    expect(btn).not.toBeNull();
+    expect(btn.classList.contains('btn--primary')).toBe(true);
+  });
+});
+
+describe('022 US5 — CTA colour roles: Add-point submit (R2)', () => {
+  it('R2: Add-point form submit has btn--primary', () => {
+    // Open the form, check the submit button
+    const openBtn = container.querySelector('[data-action="open-add-form"]') as HTMLButtonElement;
+    openBtn.click();
+    flushSync();
+    const submit = container.querySelector('[data-action="form-submit"]') as HTMLButtonElement;
+    expect(submit).not.toBeNull();
+    expect(submit.classList.contains('btn--primary')).toBe(true);
+  });
+});
+
+describe('022 US1 — Group/Sort multi-select seg (T2–T3)', () => {
+  it('T2: Group and Sort buttons are inside a .seg--multi element', () => {
+    const seg = container.querySelector('.seg--multi') as HTMLElement | null;
+    expect(seg).not.toBeNull();
+    expect(seg!.querySelector('[data-action="toggle-group"]')).not.toBeNull();
+    expect(seg!.querySelector('[data-action="toggle-sort"]')).not.toBeNull();
+  });
+
+  it('T3: Group and Sort have independent aria-pressed — toggling one does not affect the other', () => {
+    const groupBtn = container.querySelector('[data-action="toggle-group"]') as HTMLButtonElement;
+    const sortBtn = container.querySelector('[data-action="toggle-sort"]') as HTMLButtonElement;
+    expect(groupBtn.getAttribute('aria-pressed')).toBe('false');
+    expect(sortBtn.getAttribute('aria-pressed')).toBe('false');
+    groupBtn.click();
+    flushSync();
+    expect(groupBtn.getAttribute('aria-pressed')).toBe('true');
+    expect(sortBtn.getAttribute('aria-pressed')).toBe('false');
+  });
+});
+
 // 020 Increment 3 — regression LOCKS for user-directed polish decisions (written after
 // the changes landed, 016 US2 precedent: they pin deliberate choices, not red-first
 // gates). Geometry (grid tiers, space-between, 50% caps) stays manual — jsdom has no
 // layout engine.
 describe('020 polish locks — toolbar structure & accent ownership', () => {
-  it('Add-choice lives in the views row, after the Rank/Group/Sort group', () => {
-    const viewsRow = container.querySelector('.toolbar__row--views')!;
-    const add = viewsRow.querySelector('[data-action="add-choice"]');
-    expect(add).not.toBeNull();
-    // It follows the toggle group within the same row (space-between pins it right).
-    const views = viewsRow.querySelector('.toolbar__views')!;
-    expect(views.compareDocumentPosition(add!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  it('both Add CTAs share .toolbar__add, after the view controls — last before the cards', () => {
+    // Re-pinned 2026-06-12 (3rd revision): Add-choice + Add-point live together in
+    // one .toolbar__add container inside the views row, AFTER the .toolbar__views
+    // cluster, so they render inline-right at ≥800px and wrap below it otherwise.
+    const addWrap = container.querySelector('.toolbar__row--views .toolbar__add')!;
+    expect(addWrap).not.toBeNull();
+    expect(addWrap.querySelector('[data-action="add-choice"]')).not.toBeNull();
+    expect(addWrap.querySelector('[data-action="open-add-form"]')).not.toBeNull();
+    const views = container.querySelector('.toolbar__views')!;
+    expect(views.compareDocumentPosition(addWrap) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('Add container carries a localized scope label like the view fields', () => {
+    const lang = getState().view.lang;
+    const label = container.querySelector('.toolbar__add > .scope')!;
+    expect(label).not.toBeNull();
+    expect(label.textContent).toBe(t(lang, 'toolbar.scopeActions'));
+    expect(t('en', 'toolbar.scopeActions')).toBe('Create');
+    expect(t('uk', 'toolbar.scopeActions')).toBe('Створення');
   });
 
   it('settings row pairs [lang+theme] and [status+Clear], status before Clear', () => {
@@ -282,11 +343,12 @@ describe('020 polish locks — toolbar structure & accent ownership', () => {
     expect(saved.compareDocumentPosition(clear) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it('Suggest-a-feature is the ONLY accent button; Add-choice is plain', () => {
+  it('022: Add-choice has btn--primary; Suggest has btn--warm (not btn--primary)', () => {
     const add = container.querySelector('[data-action="add-choice"]')!;
     const suggest = container.querySelector('[data-action="open-suggest"]')!;
-    expect(add.classList.contains('btn--primary')).toBe(false);
-    expect(suggest.classList.contains('btn--primary')).toBe(true);
-    expect(container.querySelectorAll('.btn--primary')).toHaveLength(1);
+    // 022 role split: Add CTAs = btn--primary, Suggest = btn--warm
+    expect(add.classList.contains('btn--primary')).toBe(true);
+    expect(suggest.classList.contains('btn--warm')).toBe(true);
+    expect(suggest.classList.contains('btn--primary')).toBe(false);
   });
 });

@@ -190,7 +190,7 @@
                    016 confirm semantics behind expansion (FR-014). -->
               <div class="choice__actions">
                 <button
-                  class="actbtn"
+                  class="actbtn actbtn--rename"
                   data-action="rename-choice"
                   bind:this={renameBtn}
                   onclick={startRename}
@@ -217,13 +217,20 @@
 
   <!-- 020 US2: always-visible footer — the Choice's signed total, sign-coloured with
        the same tokens as the summary band (FR-004/FR-005). Text first, colour second.
-       The zone mirrors the band's .sum--* treatment (tint + sign top border). -->
-  <div class="choice__foot choice__foot--{scoreSign(choiceScore(choice))}">
-    <span class="choice__scorelabel">{t(lang, 'choice.scoreLabel')}</span>
-    <span class="choice__score choice__score--{scoreSign(choiceScore(choice))}"
-      >{signed(choiceScore(choice))}</span
-    >
-  </div>
+       The zone mirrors the band's .sum--* treatment (tint + sign top border).
+       022 US3: 0-note cards render a faint empty-state label with no sign tint. -->
+  {#if choice.notes.length === 0}
+    <div class="choice__foot choice__foot--empty">
+      <span class="choice__scorelabel">{t(lang, 'choice.empty')}</span>
+    </div>
+  {:else}
+    <div class="choice__foot choice__foot--{scoreSign(choiceScore(choice))}">
+      <span class="choice__scorelabel">{t(lang, 'choice.scoreLabel')}</span>
+      <span class="choice__score choice__score--{scoreSign(choiceScore(choice))}"
+        >{signed(choiceScore(choice))}</span
+      >
+    </div>
+  {/if}
 
   <ConfirmDialog
     open={confirming}
