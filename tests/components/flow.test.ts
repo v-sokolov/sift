@@ -12,10 +12,14 @@ import {
   submitForm,
 } from '../../src/store.svelte';
 import App from '../../src/App.svelte';
+// 020 (FR-011 superseded): the summary band is hidden in App; band assertions mount
+// the retained <Summary /> directly so the 001 score contracts keep guarding it.
+import Summary from '../../src/components/Summary.svelte';
 import { render } from '../svelte';
 import type { NoteType, Weight } from '../../src/types';
 
 let container: HTMLElement;
+let sumC: HTMLElement;
 
 function addNoteVia(choiceId: string, type: NoteType, weight: Weight | null, text: string): void {
   openAddForm(choiceId);
@@ -28,6 +32,7 @@ function addNoteVia(choiceId: string, type: NoteType, weight: Weight | null, tex
 beforeEach(() => {
   setState(emptyDilemma());
   ({ container } = render(App));
+  ({ container: sumC } = render(Summary));
   flushSync();
 });
 
@@ -45,7 +50,7 @@ describe('US1 — weigh a decision and see a quiet score', () => {
     addNoteVia(id, 'advantage', 3, 'great pay');
     addNoteVia(id, 'disadvantage', 1, 'long commute');
     flushSync();
-    const cell = container.querySelectorAll('.summary .sum')[0];
+    const cell = sumC.querySelectorAll('.summary .sum')[0];
     expect(cell.querySelector('.sum__score')!.textContent).toBe('+2');
     expect(cell.querySelector('.sum__totals')!.textContent).toContain('for 3');
     expect(cell.querySelector('.sum__totals')!.textContent).toContain('against 1');
@@ -56,7 +61,7 @@ describe('US1 — weigh a decision and see a quiet score', () => {
     addNoteVia(id, 'advantage', 2, 'a');
     addNoteVia(id, 'neutral', null, 'just noting');
     flushSync();
-    const cell = container.querySelectorAll('.summary .sum')[0];
+    const cell = sumC.querySelectorAll('.summary .sum')[0];
     expect(cell.querySelector('.sum__score')!.textContent).toBe('+2');
     expect(cell.querySelector('.sum__totals')!.textContent).toContain('against 0');
   });
@@ -66,7 +71,7 @@ describe('US1 — weigh a decision and see a quiet score', () => {
     addNoteVia(a.id, 'advantage', 3, 'strong');
     addNoteVia(b.id, 'advantage', 1, 'weak');
     flushSync();
-    const cells = container.querySelectorAll('.summary .sum');
+    const cells = sumC.querySelectorAll('.summary .sum');
     expect(cells[0].classList.contains('sum--leader')).toBe(true);
     expect(cells[1].classList.contains('sum--leader')).toBe(false);
   });

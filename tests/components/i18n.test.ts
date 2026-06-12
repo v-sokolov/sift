@@ -9,6 +9,7 @@ import {
   setState,
 } from '../../src/store.svelte';
 import App from '../../src/App.svelte';
+import Summary from '../../src/components/Summary.svelte';
 import { render } from '../svelte';
 import { flushSave, load } from '../../src/persistence';
 import { messages } from '../../src/i18n';
@@ -117,15 +118,18 @@ describe('US1 — localization at the DOM level', () => {
     );
   });
 
-  it('shows the localized score-formula caption below the score band (US2)', () => {
-    // The caption lives inside .summary but is not one of the .sum score cells.
-    expect(container.querySelector('.summary .sum')).not.toBeNull();
-    const caption = container.querySelector('.summary__formula')!;
+  it('shows the localized score-formula caption in the (retained) score band (US2)', () => {
+    // 020 (FR-011 superseded): the band is hidden in App — mount it directly so the
+    // 002 caption-localization law keeps guarding the retained code.
+    const { container: sumC } = render(Summary);
+    flushSync();
+    expect(sumC.querySelector('.summary .sum')).not.toBeNull();
+    const caption = sumC.querySelector('.summary__formula')!;
     expect(caption.classList.contains('sum')).toBe(false);
     expect(caption.textContent).toBe(messages.en['summary.formula']);
     setLang('uk');
     flushSync();
-    expect(container.querySelector('.summary__formula')!.textContent).toBe(
+    expect(sumC.querySelector('.summary__formula')!.textContent).toBe(
       messages.uk['summary.formula'],
     );
   });

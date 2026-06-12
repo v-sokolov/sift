@@ -67,6 +67,21 @@ export function emptyDilemma(): AppState {
 // a component template/effect registers a dependency; mutating it re-renders.
 let current = $state<AppState>(emptyDilemma());
 
+// 020 — per-Choice accordion expand state. Deliberately OUTSIDE AppState (like the 010
+// save-status precedent, but stronger: the types prove it can never be serialized) and
+// never routed through update()/notifySave(), so toggling a card cannot stamp updatedAt,
+// flip the save indicator, or change the persisted payload (contracts E2–E3, S1).
+// Absent key = collapsed — the FR-012 collapsed-by-default falls out of the empty record.
+let expanded = $state<Record<string, boolean>>({});
+
+export function isExpanded(choiceId: string): boolean {
+  return expanded[choiceId] === true;
+}
+
+export function setExpanded(choiceId: string, open: boolean): void {
+  expanded[choiceId] = open;
+}
+
 function notifySave(): void {
   for (const cb of saveListeners) cb(current);
 }
@@ -153,6 +168,7 @@ export function removeChoice(choiceId: string): void {
   update((d) => {
     if (d.dilemma.choices.length <= MIN_CHOICES) return;
     d.dilemma.choices = d.dilemma.choices.filter((c) => c.id !== choiceId);
+    delete expanded[choiceId]; // 020 E6: no stale expand entries
     if (d.editing && d.editing.choiceId === choiceId) {
       d.editing = null;
       d.draft = null;
@@ -174,6 +190,7 @@ export function addNote(choiceId: string, draft: NoteDraft): void {
       weight: normalizeWeight(draft.type, draft.weight),
     });
     touch(d);
+    setExpanded(choiceId, true); // 020 FR-010: reveal the change on a collapsed card
   });
 }
 
@@ -185,6 +202,7 @@ export function updateNote(choiceId: string, noteId: string, draft: NoteDraft): 
     n.type = draft.type;
     n.weight = normalizeWeight(draft.type, draft.weight);
     touch(d);
+    setExpanded(choiceId, true); // 020 FR-010
   });
 }
 
@@ -192,7 +210,10 @@ export function removeNote(choiceId: string, noteId: string): void {
   update((d) => {
     const c = findChoice(d, choiceId);
     if (!c) return;
+    const had = c.notes.length;
     c.notes = c.notes.filter((n) => n.id !== noteId);
+    // 020 FR-010/E5: expand only when a note was actually removed.
+    if (c.notes.length < had) setExpanded(choiceId, true);
     // FR-011: if the edit form is open for the note being removed, close it so it
     // never stays bound to a now-nonexistent note.
     if (d.editing?.kind === 'edit' && d.editing.noteId === noteId) {
@@ -283,6 +304,7 @@ export function clearDilemma(): void {
   const fresh = emptyDilemma();
   fresh.view.lang = lang;
   fresh.view.theme = theme;
+  expanded = {}; // 020 E6: a fresh board starts all-collapsed
   setState(fresh);
 }
 

@@ -48,53 +48,48 @@
 </script>
 
 <div class="toolbar">
-  <div class="toolbar__row">
-    <div
-      class="seg langtoggle"
-      role="group"
-      aria-label={t(lang, "header.langAria")}
-    >
-      {#each LANGS as l}
-        <button
-          data-action="set-lang"
-          data-lang={l}
-          class="langbtn{l === lang ? ' is-active' : ''}"
-          aria-pressed={l === lang}
-          onclick={() => setLang(l)}>{LANG_LABEL[l]}</button
-        >
-      {/each}
+  <div class="toolbar__row toolbar__row--settings">
+    <!-- Two wrap-as-a-unit groups: [language + theme] and [status + clear] — on small
+         screens each pair stays together and the pairs wrap as wholes; on wide screens
+         the pairs sit at opposite ends (space-between). -->
+    <div class="toolbar__set">
+      <div
+        class="seg langtoggle"
+        role="group"
+        aria-label={t(lang, "header.langAria")}
+      >
+        {#each LANGS as l}
+          <button
+            data-action="set-lang"
+            data-lang={l}
+            class="langbtn{l === lang ? ' is-active' : ''}"
+            aria-pressed={l === lang}
+            onclick={() => setLang(l)}>{LANG_LABEL[l]}</button
+          >
+        {/each}
+      </div>
+      <button
+        class="btn"
+        data-action="cycle-theme"
+        title={t(lang, "toolbar.themeTitle")}
+        onclick={cycleTheme}>{t(lang, THEME_KEY[s.view.theme])}</button
+      >
     </div>
-    <button
-      class="btn"
-      data-action="cycle-theme"
-      title={t(lang, "toolbar.themeTitle")}
-      onclick={cycleTheme}>{t(lang, THEME_KEY[s.view.theme])}</button
-    >
-    <button class="btn" data-action="clear" onclick={clear}
-      >{t(lang, "toolbar.clear")}</button
-    >
-    <span class="saved" aria-live="polite"
-      >{#if s.status !== "hidden"}<span
-          class="status-dot status-dot--{s.status}"
-          aria-hidden="true"
-        ></span>{statusLabel}{/if}</span
-    >
-    <span class="toolbar__spacer"></span>
-    <!-- 018: Add-choice sits on the settings row, pinned to the right by the spacer. -->
-    <button
-      class="btn btn--primary"
-      data-action="add-choice"
-      disabled={atMax}
-      title={atMax
-        ? t(lang, "toolbar.maxChoices", { n: String(MAX_CHOICES) })
-        : undefined}
-      onclick={addChoice}
-      >{t(lang, "toolbar.addChoice")} {n} / {MAX_CHOICES}</button
-    >
+    <div class="toolbar__set">
+      <span class="saved" aria-live="polite"
+        >{#if s.status !== "hidden"}<span
+            class="status-dot status-dot--{s.status}"
+            aria-hidden="true"
+          ></span>{statusLabel}{/if}</span
+      >
+      <button class="btn" data-action="clear" onclick={clear}
+        >{t(lang, "toolbar.clear")}</button
+      >
+    </div>
   </div>
 
-  <!-- 018: the view controls on their own row, pinned right — card-level "Rank" (choices)
-       left of a divider; point-level Group/Sort right under a "Points" label. -->
+  <!-- View controls row: card-level "Rank" │ point-level Group/Sort on the left,
+       Add-choice pinned right by space-between. -->
   <div class="toolbar__row toolbar__row--views">
     <div class="toolbar__views">
       <span class="scope">{t(lang, "toolbar.scopeChoices")}</span>
@@ -119,6 +114,16 @@
         onclick={toggleSort}>{t(lang, "toolbar.sort")}</button
       >
     </div>
+    <button
+      class="btn"
+      data-action="add-choice"
+      disabled={atMax}
+      title={atMax
+        ? t(lang, "toolbar.maxChoices", { n: String(MAX_CHOICES) })
+        : undefined}
+      onclick={addChoice}
+      >{t(lang, "toolbar.addChoice")} {n} / {MAX_CHOICES}</button
+    >
   </div>
 
   <!-- 015 (FR-012) / 018: the complexity hint as a full-width quote callout under the

@@ -1,13 +1,19 @@
 // US2 (008) — the Add-point control sits above the score summary. Renders the whole App
 // and asserts DOM order; adding a point still updates the score.
+// 020 (FR-011 superseded): the summary band is hidden in App (SHOW_SUMMARY=false), so
+// the 008 DOM-order laws are gated on the flag — they resume automatically if the band
+// is reinstated. The score-update law migrates to a direct <Summary /> mount.
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { flushSync } from 'svelte';
 import { addNote, emptyDilemma, getState, openAddForm, setState } from '../../src/store.svelte';
+import { SHOW_SUMMARY } from '../../src/config';
 import App from '../../src/App.svelte';
+import Summary from '../../src/components/Summary.svelte';
 import { render, cleanup } from '../svelte';
 
 let container: HTMLElement;
+let sumC: HTMLElement;
 
 const addTrigger = () => container.querySelector('[data-action="open-add-form"]') as HTMLElement;
 const formEl = () => container.querySelector('[data-action="form"]') as HTMLElement;
@@ -21,18 +27,19 @@ function precedes(a: Node, b: Node): boolean {
 beforeEach(() => {
   setState(emptyDilemma());
   ({ container } = render(App));
+  ({ container: sumC } = render(Summary));
   flushSync();
 });
 afterEach(cleanup);
 
 describe('US2 — Add point above the score (FR-013)', () => {
-  it('the Add-point trigger precedes the score summary in DOM order', () => {
+  it.skipIf(!SHOW_SUMMARY)('the Add-point trigger precedes the score summary in DOM order', () => {
     expect(addTrigger()).not.toBeNull();
     expect(summaryEl()).not.toBeNull();
     expect(precedes(addTrigger(), summaryEl())).toBe(true);
   });
 
-  it('the open add/edit form also precedes the summary', () => {
+  it.skipIf(!SHOW_SUMMARY)('the open add/edit form also precedes the summary', () => {
     const cid = getState().dilemma.choices[0].id;
     openAddForm(cid);
     flushSync();
@@ -40,12 +47,12 @@ describe('US2 — Add point above the score (FR-013)', () => {
     expect(precedes(formEl(), summaryEl())).toBe(true);
   });
 
-  it('adding a point still updates the score below (FR-014)', () => {
+  it('adding a point still updates the score (FR-014; band mounted directly since 020)', () => {
     const cid = getState().dilemma.choices[0].id;
-    const before = (summaryEl().querySelector('.sum__score') as HTMLElement).textContent;
+    const before = (sumC.querySelector('.sum__score') as HTMLElement).textContent;
     addNote(cid, { text: 'pay', type: 'advantage', weight: 3 });
     flushSync();
-    const after = (summaryEl().querySelector('.sum__score') as HTMLElement).textContent;
+    const after = (sumC.querySelector('.sum__score') as HTMLElement).textContent;
     expect(before).toBe('0');
     expect(after).toBe('+3');
   });

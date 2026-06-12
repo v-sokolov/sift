@@ -1,5 +1,8 @@
 // 018 — Rank ordering reflected in the rendered board (US1) and sign-based score colour
 // (US2). Drives the whole App and reads the DOM (jsdom): real contrast/animation are manual.
+// 020 (FR-011 superseded): the summary band no longer renders inside App, so the .sum
+// assertions mount the retained <Summary /> component directly — the 018 contracts keep
+// guarding the hidden-but-kept code.
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { flushSync } from 'svelte';
@@ -12,15 +15,17 @@ import {
   toggleRank,
 } from '../../src/store.svelte';
 import App from '../../src/App.svelte';
+import Summary from '../../src/components/Summary.svelte';
 import { render, cleanup } from '../svelte';
 
 let container: HTMLElement;
+let sumC: HTMLElement;
 
 const cardOrder = () =>
   Array.from(container.querySelectorAll('.choices .choice')).map(
     (el) => el.getAttribute('data-choice-id') ?? '',
   );
-const scoreEl = () => container.querySelectorAll('.summary .sum__score');
+const scoreEl = () => sumC.querySelectorAll('.summary .sum__score');
 
 /** Seed three choices with distinct totals; returns their ids [a, b, c]. */
 function seedThree(): [string, string, string] {
@@ -37,6 +42,7 @@ function seedThree(): [string, string, string] {
 beforeEach(() => {
   setState(emptyDilemma());
   ({ container } = render(App));
+  ({ container: sumC } = render(Summary));
   flushSync();
 });
 afterEach(cleanup);
@@ -87,9 +93,9 @@ describe('US2 — score colour by sign', () => {
   it('C1–C3: each score carries the class matching its sign', () => {
     seedSigns();
     flushSync();
-    expect(container.querySelector('.sum__score--positive')).not.toBeNull();
-    expect(container.querySelector('.sum__score--negative')).not.toBeNull();
-    expect(container.querySelector('.sum__score--neutral')).not.toBeNull();
+    expect(sumC.querySelector('.sum__score--positive')).not.toBeNull();
+    expect(sumC.querySelector('.sum__score--negative')).not.toBeNull();
+    expect(sumC.querySelector('.sum__score--neutral')).not.toBeNull();
   });
 
   it('C4: the +/−/0 text is still rendered regardless of colour', () => {
@@ -105,7 +111,7 @@ describe('US2 — score colour by sign', () => {
     seedSigns();
     flushSync();
     expect(getState().view.rankByTotal).toBe(false);
-    expect(container.querySelector('.sum__score--positive')).not.toBeNull();
-    expect(container.querySelector('.sum__score--negative')).not.toBeNull();
+    expect(sumC.querySelector('.sum__score--positive')).not.toBeNull();
+    expect(sumC.querySelector('.sum__score--negative')).not.toBeNull();
   });
 });

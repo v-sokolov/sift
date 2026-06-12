@@ -13,3 +13,8 @@ export const CONTACT_EMAIL = 'vetalsokolov4@gmail.com';
 // The book that inspired Sift's "less, but better" ethos. Rendered as the
 // header inspiration link (and in the README).
 export const ESSENTIALISM_URL = 'https://www.goodreads.com/book/show/54644719-essentialism';
+
+// 020 (FR-011 superseded): the score summary band is HIDDEN, not removed — the card
+// footers carry the scores. Flip to true to reinstate the band; its component, styles,
+// i18n and tests are retained and still exercised at the component level.
+export const SHOW_SUMMARY = false;

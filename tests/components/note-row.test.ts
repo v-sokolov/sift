@@ -6,6 +6,9 @@ import { flushSync } from 'svelte';
 import { addNote, emptyDilemma, getState, openEditForm, setState } from '../../src/store.svelte';
 import { t } from '../../src/i18n';
 import App from '../../src/App.svelte';
+// 020 (FR-011 superseded): the summary band is hidden in App; the score assertion
+// mounts the retained <Summary /> directly.
+import Summary from '../../src/components/Summary.svelte';
 import { render, cleanup } from '../svelte';
 
 let container: HTMLElement;
@@ -68,16 +71,17 @@ describe('US1 — remove a point via the always-visible ✕', () => {
   });
 
   it('updates the derived score after removing a weighted advantage (FR-005/SC-004)', () => {
+    const { container: sumC } = render(Summary);
     const cid = getState().dilemma.choices[0].id;
     addNote(cid, { text: 'pro', type: 'advantage', weight: 3 });
     addNote(cid, { text: 'con', type: 'disadvantage', weight: 1 });
     flushSync();
-    const cell = container.querySelectorAll('.summary .sum')[0];
+    const cell = sumC.querySelectorAll('.summary .sum')[0];
     expect(cell.querySelector('.sum__score')!.textContent).toBe('+2');
     const proId = getState().dilemma.choices[0].notes.find((n) => n.type === 'advantage')!.id;
     removeBtn(proId).click();
     flushSync();
-    // Negative scores render with a Unicode minus (U+2212), per Summary.signed().
+    // Negative scores render with a Unicode minus (U+2212), per signed().
     expect(cell.querySelector('.sum__score')!.textContent).toBe('−1');
   });
 

@@ -7,7 +7,7 @@ export const en: Record<string, string> = {
   'header.titleAria': "The decision you're weighing",
   'header.langAria': 'Language',
   'header.tagline':
-    'A quiet way to weigh a decision. Compare a few options by their pros and cons, and let a gentle score help you think - it never decides for you.',
+    'A quiet way to weigh a decision. Compare a few options by their pros and cons, and let a gentle score help you think - it never decides for you. Private by design: your data is stored only in this browser, with no server backup.',
 
   // Toolbar
   'toolbar.addChoice': '＋ Add choice',
@@ -44,6 +44,10 @@ export const en: Record<string, string> = {
   'choice.remove': 'Remove choice',
   'choice.removeDisabled': 'At least 2 choices',
   'choice.removeAria': 'Remove choice',
+  'choice.toggleAria': 'Show or hide points',
+  'choice.scoreLabel': 'Score',
+  'choice.rename': 'Rename',
+  'choice.removeLabel': 'Remove',
   'group.advantage': 'Advantages',
   'group.disadvantage': 'Disadvantages',
   'group.neutral': 'Neutral',

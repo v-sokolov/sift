@@ -37,7 +37,8 @@ describe('US2 — persistence & lifecycle', () => {
     expect((container.querySelector('.header__title') as HTMLInputElement).value).toBe(
       'Where to live?',
     );
-    expect((container.querySelector('.choice__title') as HTMLInputElement).value).toBe('City');
+    // 020 rev. 2: the header title is read-only text (.choice__name), not an input.
+    expect((container.querySelector('.choice__name') as HTMLElement).textContent).toBe('City');
   });
 
   it('Clear erases all data back to the empty default state (FR-027)', () => {
