@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Choice, Note, NoteType, ViewPrefs, Weight } from '../../src/types';
-import { arrange, orderedChoices } from '../../src/view';
+import { arrange, orderedChoices, scoreSign, signed } from '../../src/view';
 
 function note(id: string, type: NoteType, weight: Weight | null): Note {
   return { id, text: id, type, weight };
@@ -250,5 +250,22 @@ describe('orderedChoices — rank Choices by total (018)', () => {
     const e1 = mk('e1', []);
     const e2 = mk('e2', []);
     expect(idsOf(orderedChoices([e1, e2], true))).toEqual(['e1', 'e2']);
+  });
+});
+
+// 020 (F3) — signed/scoreSign extracted from Summary.svelte so the card footer and the
+// summary band share one formatting/classification source (SC-003).
+describe('signed / scoreSign — shared score formatting (020)', () => {
+  it('signed: + prefix, U+2212 minus, bare zero', () => {
+    expect(signed(5)).toBe('+5');
+    expect(signed(1)).toBe('+1');
+    expect(signed(-3)).toBe('−3'); // U+2212, not the ASCII hyphen
+    expect(signed(0)).toBe('0');
+  });
+
+  it('scoreSign: positive / negative / neutral classification', () => {
+    expect(scoreSign(7)).toBe('positive');
+    expect(scoreSign(-1)).toBe('negative');
+    expect(scoreSign(0)).toBe('neutral');
   });
 });

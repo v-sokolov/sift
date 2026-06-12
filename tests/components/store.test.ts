@@ -12,6 +12,7 @@ import {
   emptyDilemma,
   getState,
   initLang,
+  isExpanded,
   openAddForm,
   openEditForm,
   removeChoice,
@@ -19,6 +20,7 @@ import {
   renameChoice,
   setDilemmaTitle,
   setDirection,
+  setExpanded,
   setFormText,
   setFormType,
   setGroupKey,
@@ -345,5 +347,74 @@ describe('toggleRank (018)', () => {
     toggleRank();
     expect(getState().status).toBe('hidden');
     expect(getState().dilemma.updatedAt).toBe(before);
+  });
+});
+
+// 020 — ephemeral per-Choice expand state (contracts E1–E6). Runtime-only, OUTSIDE
+// AppState: it must never persist, never touch() and reset with the board.
+describe('020 — expand state (E1–E6)', () => {
+  test('E1: every choice starts collapsed (absent key ⇒ false)', () => {
+    const [a, b] = getState().dilemma.choices;
+    expect(isExpanded(a.id)).toBe(false);
+    expect(isExpanded(b.id)).toBe(false);
+  });
+
+  test('E2: setExpanded never notifies the persistence channel', () => {
+    let saves = 0;
+    const off = subscribePersist(() => (saves += 1));
+    const cid = getState().dilemma.choices[0].id;
+    setExpanded(cid, true);
+    setExpanded(cid, false);
+    expect(saves).toBe(0);
+    off();
+  });
+
+  test('E3: setExpanded leaves AppState deep-equal (no updatedAt bump, no status flip)', () => {
+    const cid = getState().dilemma.choices[0].id;
+    const before = JSON.parse(JSON.stringify(getState()));
+    setExpanded(cid, true);
+    expect(isExpanded(cid)).toBe(true);
+    expect(JSON.parse(JSON.stringify(getState()))).toEqual(before);
+  });
+
+  test('E4: addNote/updateNote/removeNote auto-expand exactly the mutated choice', () => {
+    const [a, b] = getState().dilemma.choices;
+    addNote(a.id, { text: 'p', type: 'advantage', weight: 2 });
+    expect(isExpanded(a.id)).toBe(true);
+    expect(isExpanded(b.id)).toBe(false);
+
+    setExpanded(a.id, false);
+    const nid = getState().dilemma.choices[0].notes[0].id;
+    updateNote(a.id, nid, { text: 'p2', type: 'advantage', weight: 1 });
+    expect(isExpanded(a.id)).toBe(true);
+
+    setExpanded(a.id, false);
+    removeNote(a.id, nid);
+    expect(isExpanded(a.id)).toBe(true);
+    expect(isExpanded(b.id)).toBe(false);
+  });
+
+  test('E5: failure paths expand nothing', () => {
+    const cid = getState().dilemma.choices[0].id;
+    addNote('no-such-choice', { text: 'x', type: 'advantage', weight: 1 });
+    expect(isExpanded('no-such-choice')).toBe(false);
+    addNote(cid, { text: '   ', type: 'advantage', weight: 1 });
+    expect(isExpanded(cid)).toBe(false);
+    updateNote(cid, 'no-such-note', { text: 'x', type: 'advantage', weight: 1 });
+    expect(isExpanded(cid)).toBe(false);
+    removeNote(cid, 'no-such-note');
+    expect(isExpanded(cid)).toBe(false);
+  });
+
+  test('E6: removeChoice drops the entry; clearDilemma resets all', () => {
+    addChoice();
+    const third = getState().dilemma.choices[2].id;
+    setExpanded(third, true);
+    removeChoice(third);
+    expect(isExpanded(third)).toBe(false);
+    const cid = getState().dilemma.choices[0].id;
+    setExpanded(cid, true);
+    clearDilemma();
+    expect(isExpanded(cid)).toBe(false);
   });
 });

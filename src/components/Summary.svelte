@@ -2,7 +2,7 @@
   import { flip } from 'svelte/animate';
   import { getState } from '../store.svelte';
   import { againstTotal, choiceScore, forTotal, leaders } from '../scoring';
-  import { orderedChoices } from '../view';
+  import { orderedChoices, scoreSign as sign, signed } from '../view';
   import { t } from '../i18n';
 
   let s = $derived(getState());
@@ -19,19 +19,9 @@
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const flipMs = prefersReduced ? 0 : 200;
 
-  function signed(n: number): string {
-    if (n > 0) return `+${n}`;
-    if (n < 0) return `−${Math.abs(n)}`;
-    return '0';
-  }
-
   // 018: sign of the score drives both the cell tint (.sum--*) and the score-text colour
-  // (.sum__score--*). Supplementary to the +/−/0 text (Principle V).
-  function sign(n: number): 'positive' | 'negative' | 'neutral' {
-    if (n > 0) return 'positive';
-    if (n < 0) return 'negative';
-    return 'neutral';
-  }
+  // (.sum__score--*), supplementary to the +/−/0 text (Principle V). Since 020 the
+  // signed/sign helpers live in view.ts, shared with the card footer (SC-003).
 </script>
 
 <section

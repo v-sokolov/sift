@@ -13,6 +13,7 @@ import {
   openAddForm,
   removeNote,
   renameChoice,
+  setExpanded,
   setLang,
   setState,
   setTheme,
@@ -24,8 +25,19 @@ import { t } from '../../src/i18n';
 
 let container: HTMLElement;
 
-const removeBtns = () =>
-  Array.from(container.querySelectorAll('[data-action="remove-choice"]')) as HTMLButtonElement[];
+// 020 rev. 2 (H3): the ✕ moved into each card's collapsible body — expanding is now
+// the only path to it (FR-014). Every assertion below keeps its original strength;
+// only the access route changed.
+const removeBtns = () => {
+  expandAll();
+  return Array.from(
+    container.querySelectorAll('[data-action="remove-choice"]'),
+  ) as HTMLButtonElement[];
+};
+function expandAll(): void {
+  for (const c of getState().dilemma.choices) setExpanded(c.id, true);
+  flushSync();
+}
 const dialogMsg = () =>
   container.querySelector('[data-region="confirm-dialog"] .modal__title') as HTMLElement | null;
 const confirmBtn = () =>

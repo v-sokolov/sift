@@ -1,5 +1,49 @@
 <!-- SPECKIT START -->
-## Active feature: Review & Compact Existing Specs (`019-compact-specs`)
+## Active feature: Accordion Choice Cards (`020-accordion-choice-cards`)
+
+Each Choice card becomes a three-zone **accordion** (header redesigned in rev. 2,
+clarified 2026-06-12): header = **read-only title** + chevron `Trigger` far-right
+(ghost placeholder; whole header row toggles via pointer, chevron stays the sole ARIA
+toggle button — R10); disclosure is **one Bits UI `Accordion` per card** (`Root
+type="single"` + one `Item`, R1); collapsible body = the arranged Points list in
+`Accordion.Content` (reduced-motion-gated `slide` via `forceMount` + `child` snippet)
+plus an **actions row** "✎ Rename · ✕ Remove" (`choice.rename`/`choice.removeLabel`
+EN/UA) — Rename is the ONLY title-edit entry point (in-place header input swap,
+live `renameChoice`, Enter/blur commits, Esc restores via component-local
+`editingTitle`/`prevTitle`, R9; H1–H5 contracts); ✕ keeps 016 confirm semantics but
+needs an expanded card (FR-014); and a
+new **footer** showing the signed total (`signed(choiceScore(c))`) coloured by sign via
+`.choice__score--*` reusing the 018 tokens `--advantage`/`--disadvantage`/`--neutral`,
+the zone tinted like a `.sum--*` cell (`.choice__foot--*`: color-mix bg + sign top
+border; leader stays band-only). Cards start **collapsed on every visit**;
+state is **ephemeral** — a module-level `$state` record in `store.svelte.ts` OUTSIDE
+`AppState` (010 `status` precedent), so the persisted `sift.v1` payload is untouched by
+construction (**no schemaVersion change, no ViewPrefs field**). `setExpanded` (driven by
+each card's controlled `Accordion.Root` `value`/`onValueChange`) never fires the persist
+channel nor `touch()`. `addNote`/`updateNote`/`removeNote` auto-expand
+exactly the mutated Choice (FR-010); `removeChoice`/`clearDilemma` drop stale entries.
+`signed()`/`sign()` move from `Summary.svelte` to `view.ts` as exported pure
+`signed`/`scoreSign` consumed by both card footer and summary band (SC-003 single
+source). Summary band is **HIDDEN, not removed** (FR-011 superseded, clarified choice
+A): `SHOW_SUMMARY=false` in `config.ts` gates `<Summary />` in App; band contracts
+keep running against a direct component mount (008 order laws `it.skipIf`-gated; flip
+the flag to reinstate). New i18n:
+`choice.toggleAria`/`choice.scoreLabel` (EN/UA). No new runtime dependency. 015 grid /
+016 confirm / 018 rank-colour contracts must stay green (B1–B4). **Increment 3**
+(post-implementation polish, user-directed): CaretDown SVG toggle; grid re-tiered
+1-col/<720 · 2-up/≥720 · 3-up/≥1280 (supersedes 015 wrap, summary mirrored); actions
+row space-between; accent moved Add-choice→Suggest; tagline privacy sentence EN/UA;
+toolbar regrouped ([lang+theme]⟷[status+Clear] pairs, <475px two-row stack, Add-choice
+right of the views row) — locked by 4 regression tests (suite at 215).
+
+- Plan: `specs/020-accordion-choice-cards/plan.md`
+- Spec: `specs/020-accordion-choice-cards/spec.md` (incl. Clarifications, Session 2026-06-12)
+- Research / decisions: `specs/020-accordion-choice-cards/research.md` (R1–R8: per-card Bits UI Accordion, ephemeral store rune, helper extraction, footer CSS, jsdom/motion, layout, i18n, tests; R9–R10 rev. 2: component-local title-edit state w/ Esc-before-blur, whole-header pointer toggle)
+- Contracts: `specs/020-accordion-choice-cards/contracts/accordion.md` (A1–A6 accordion — A1/A4 rev. 2, F1–F4 footer, E1–E6 expand-state, H1–H5 rename/relocated-controls, S1–S2 serialization honesty, B1–B4 boundary, M1–M5 manual)
+- Data model: `specs/020-accordion-choice-cards/data-model.md` (runtime-only `expanded` record outside `AppState`; `signed`/`scoreSign` to `view.ts`)
+- Quickstart: `specs/020-accordion-choice-cards/quickstart.md` (gates + 10-step manual walkthrough)
+
+## Just shipped: Review & Compact Existing Specs (`019-compact-specs`, merged PR #20)
 
 A **documentation-only** maintenance feature: compact all 17 shipped spec folders (~15k lines)
 **in place** with a two-tier treatment — **FREEZE** the cosmetic specs (005, 011) to a single
@@ -17,7 +61,7 @@ place, 017 gap untouched; diff confined to `specs/**` + this index. No source/te
 - Data model: `specs/019-compact-specs/data-model.md` (tier table for all 17 folders + per-tier file-treatment rule)
 - Quickstart: `specs/019-compact-specs/quickstart.md` (SC-001 size, SC-002 anchor check, SC-005 source-untouched)
 
-## Just shipped: Sort Choices by Total & Colour-Code Scores (`018-sort-color-scores`, merged PR #19)
+## Prior feature: Sort Choices by Total & Colour-Code Scores (`018-sort-color-scores`, merged PR #19)
 
 - Plan: `specs/018-sort-color-scores/plan.md`
 - Spec: `specs/018-sort-color-scores/spec.md` (incl. Clarifications, Session 2026-06-07)

@@ -81,4 +81,15 @@ describe('catalog parity (SC-001 / I-L2)', () => {
       }
     }
   });
+
+  // 020 Increment 3 — copy lock: the tagline carries the privacy promise (local-only,
+  // no server backup) in BOTH languages. Pins a Principle-II-adjacent product claim.
+  it('tagline includes the privacy sentence in EN and UA', () => {
+    expect(messages.en['header.tagline']).toContain(
+      'Private by design: your data is stored only in this browser, with no server backup.',
+    );
+    expect(messages.uk['header.tagline']).toContain(
+      'Приватність за задумом: ваші дані зберігаються лише в цьому браузері, без резервної копії на сервері.',
+    );
+  });
 });

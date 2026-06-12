@@ -1,6 +1,7 @@
 <script lang="ts">
   import { flip } from 'svelte/animate';
   import { closeForm, getState } from './store.svelte';
+  import { SHOW_SUMMARY } from './config';
   import { orderedChoices } from './view';
   import { applyTheme } from './theme';
   import Header from './components/Header.svelte';
@@ -50,6 +51,9 @@
   {/each}
 </section>
 <AddEditForm />
-<Summary />
+{#if SHOW_SUMMARY}
+  <!-- Hidden since 020 (FR-011 superseded): card footers carry the scores. -->
+  <Summary />
+{/if}
 <Footer />
 <SuggestDialog />

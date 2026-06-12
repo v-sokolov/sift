@@ -98,3 +98,21 @@ export function orderedChoices(choices: Choice[], rankByTotal: boolean): Choice[
     .sort((a, b) => b.score - a.score || a.i - b.i)
     .map((x) => x.c);
 }
+
+/**
+ * 020 — shared score formatting, extracted from Summary.svelte so the card footer and
+ * the summary band can never drift (SC-003). `signed` keeps the explicit +/−/0 text
+ * (U+2212 minus) so sign colour stays supplementary (Principle V, FR-011 of 018).
+ */
+export function signed(n: number): string {
+  if (n > 0) return `+${n}`;
+  if (n < 0) return `−${Math.abs(n)}`;
+  return '0';
+}
+
+/** Sign classification driving the `--positive/--negative/--neutral` CSS modifiers. */
+export function scoreSign(n: number): 'positive' | 'negative' | 'neutral' {
+  if (n > 0) return 'positive';
+  if (n < 0) return 'negative';
+  return 'neutral';
+}

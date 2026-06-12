@@ -113,9 +113,11 @@ describe('save-status indicator (010)', () => {
 
 describe('015 US1 — six-choice cap in the toolbar (FR-002/FR-009, contract B1/B4)', () => {
   const addBtn = () => container.querySelector('[data-action="add-choice"]') as HTMLButtonElement;
+  // 020 rev. 2: untitled Choices render their ghost placeholder as read-only header
+  // text (.choice__name--ghost) instead of an input placeholder; same 015 law.
   const placeholders = () =>
-    Array.from(container.querySelectorAll('.choice input[placeholder]')).map(
-      (el) => (el as HTMLInputElement).placeholder,
+    Array.from(container.querySelectorAll('.choice .choice__name--ghost')).map(
+      (el) => el.textContent ?? '',
     );
 
   it('stays enabled at 5 ("5 / 6") and disables only at 6 ("6 / 6")', () => {
@@ -251,5 +253,40 @@ describe('US1 — Rank toggle (018)', () => {
     const text = container.querySelector('.toolbar')?.textContent ?? '';
     expect(text).toContain(t('uk', 'toolbar.rank'));
     expect(text).toContain(t('uk', 'toolbar.scopeChoices'));
+  });
+});
+
+// 020 Increment 3 — regression LOCKS for user-directed polish decisions (written after
+// the changes landed, 016 US2 precedent: they pin deliberate choices, not red-first
+// gates). Geometry (grid tiers, space-between, 50% caps) stays manual — jsdom has no
+// layout engine.
+describe('020 polish locks — toolbar structure & accent ownership', () => {
+  it('Add-choice lives in the views row, after the Rank/Group/Sort group', () => {
+    const viewsRow = container.querySelector('.toolbar__row--views')!;
+    const add = viewsRow.querySelector('[data-action="add-choice"]');
+    expect(add).not.toBeNull();
+    // It follows the toggle group within the same row (space-between pins it right).
+    const views = viewsRow.querySelector('.toolbar__views')!;
+    expect(views.compareDocumentPosition(add!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('settings row pairs [lang+theme] and [status+Clear], status before Clear', () => {
+    const sets = container.querySelectorAll('.toolbar__row--settings .toolbar__set');
+    expect(sets).toHaveLength(2);
+    expect(sets[0].querySelector('.langtoggle')).not.toBeNull();
+    expect(sets[0].querySelector('[data-action="cycle-theme"]')).not.toBeNull();
+    const saved = sets[1].querySelector('.saved')!;
+    const clear = sets[1].querySelector('[data-action="clear"]')!;
+    expect(saved).not.toBeNull();
+    expect(clear).not.toBeNull();
+    expect(saved.compareDocumentPosition(clear) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('Suggest-a-feature is the ONLY accent button; Add-choice is plain', () => {
+    const add = container.querySelector('[data-action="add-choice"]')!;
+    const suggest = container.querySelector('[data-action="open-suggest"]')!;
+    expect(add.classList.contains('btn--primary')).toBe(false);
+    expect(suggest.classList.contains('btn--primary')).toBe(true);
+    expect(container.querySelectorAll('.btn--primary')).toHaveLength(1);
   });
 });
