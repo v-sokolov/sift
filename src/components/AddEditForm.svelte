@@ -11,6 +11,7 @@
     submitForm,
   } from '../store.svelte';
   import { t } from '../i18n';
+  import { autofocus } from '../actions';
 
   let s = $derived(getState());
   let lang = $derived(s.view.lang);
@@ -94,6 +95,7 @@
     </div>
     <div class="form__row">
       <textarea
+        use:autofocus
         data-field="note-text"
         data-action="form-text"
         placeholder={t(lang, 'form.textPlaceholder')}

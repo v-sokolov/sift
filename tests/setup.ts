@@ -10,6 +10,12 @@ if (typeof Element !== 'undefined' && !Element.prototype.getAnimations) {
   Element.prototype.getAnimations = () => [];
 }
 
+// jsdom lacks scrollIntoView (021 S1–S3). Stub so the auto-scroll $effect in
+// App.svelte doesn't throw during tests — real scroll verified manually (M2/M6).
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {};
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();

@@ -9,6 +9,7 @@
   import { t } from '../i18n';
   import NoteRow from './NoteRow.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
+  import { autofocus } from '../actions';
 
   let { choice, index }: { choice: Choice; index: number } = $props();
 
@@ -55,11 +56,6 @@
       renameBtn?.focus();
     }
   }
-  function autofocus(node: HTMLInputElement) {
-    node.focus();
-    node.select();
-  }
-
   // 020 rev. 2 (R10): the whole header row toggles as a pointer convenience (FR-013).
   // The chevron Trigger stays the single accessible toggle button; clicks on it (or any
   // other interactive child) are left to the control itself, and nothing toggles while

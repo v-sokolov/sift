@@ -4,6 +4,9 @@
 
   let s = $derived(getState());
   let lang = $derived(s.view.lang);
+
+  // H1: ephemeral, component-local — resets to false on every page load (FR-008).
+  let descOpen = $state(false);
 </script>
 
 <header>
@@ -24,7 +27,25 @@
         >
       </div>
     </div>
-    <p class="header__tagline">{t(lang, 'header.tagline')}</p>
+    <!-- H2/H3: --open class drives mobile visibility; desktop always-visible via CSS.
+         Placed before the toggle so it expands upward (toggle stays at bottom). -->
+    <p
+      id="header-tagline"
+      class="header__tagline"
+      class:header__tagline--open={descOpen}
+    >{t(lang, 'header.tagline')}</p>
+    <!-- H5/H6: visible label + CaretDown chevron (rotates when open). Right-aligned. -->
+    <button
+      class="header__tagline-toggle"
+      aria-expanded={descOpen}
+      aria-controls="header-tagline"
+      onclick={() => (descOpen = !descOpen)}
+    >
+      {t(lang, 'header.taglineToggleShow')}
+      <svg class="header__tagline-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M5 9l7 7 7-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
   </div>
   <div class="header__bar">
     <div class="header__titlebox">

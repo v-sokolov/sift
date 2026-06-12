@@ -6,6 +6,8 @@ export const en: Record<string, string> = {
   'header.titlePlaceholder': 'What are you deciding?',
   'header.titleAria': "The decision you're weighing",
   'header.langAria': 'Language',
+  'header.taglineToggleShow': 'Read more about Sift',
+  'header.taglineToggleHide': 'Read more about Sift',
   'header.tagline':
     'A quiet way to weigh a decision. Compare a few options by their pros and cons, and let a gentle score help you think - it never decides for you. Private by design: your data is stored only in this browser, with no server backup.',
 

@@ -1,47 +1,39 @@
 <!-- SPECKIT START -->
-## Active feature: Accordion Choice Cards (`020-accordion-choice-cards`)
+## Active feature: Scroll, Focus, Collapsible Header & Scrollbar Gutter (`021-scroll-focus-collapse`)
 
-Each Choice card becomes a three-zone **accordion** (header redesigned in rev. 2,
-clarified 2026-06-12): header = **read-only title** + chevron `Trigger` far-right
-(ghost placeholder; whole header row toggles via pointer, chevron stays the sole ARIA
-toggle button — R10); disclosure is **one Bits UI `Accordion` per card** (`Root
-type="single"` + one `Item`, R1); collapsible body = the arranged Points list in
-`Accordion.Content` (reduced-motion-gated `slide` via `forceMount` + `child` snippet)
-plus an **actions row** "✎ Rename · ✕ Remove" (`choice.rename`/`choice.removeLabel`
-EN/UA) — Rename is the ONLY title-edit entry point (in-place header input swap,
-live `renameChoice`, Enter/blur commits, Esc restores via component-local
-`editingTitle`/`prevTitle`, R9; H1–H5 contracts); ✕ keeps 016 confirm semantics but
-needs an expanded card (FR-014); and a
-new **footer** showing the signed total (`signed(choiceScore(c))`) coloured by sign via
-`.choice__score--*` reusing the 018 tokens `--advantage`/`--disadvantage`/`--neutral`,
-the zone tinted like a `.sum--*` cell (`.choice__foot--*`: color-mix bg + sign top
-border; leader stays band-only). Cards start **collapsed on every visit**;
-state is **ephemeral** — a module-level `$state` record in `store.svelte.ts` OUTSIDE
-`AppState` (010 `status` precedent), so the persisted `sift.v1` payload is untouched by
-construction (**no schemaVersion change, no ViewPrefs field**). `setExpanded` (driven by
-each card's controlled `Accordion.Root` `value`/`onValueChange`) never fires the persist
-channel nor `touch()`. `addNote`/`updateNote`/`removeNote` auto-expand
-exactly the mutated Choice (FR-010); `removeChoice`/`clearDilemma` drop stale entries.
-`signed()`/`sign()` move from `Summary.svelte` to `view.ts` as exported pure
-`signed`/`scoreSign` consumed by both card footer and summary band (SC-003 single
-source). Summary band is **HIDDEN, not removed** (FR-011 superseded, clarified choice
-A): `SHOW_SUMMARY=false` in `config.ts` gates `<Summary />` in App; band contracts
-keep running against a direct component mount (008 order laws `it.skipIf`-gated; flip
-the flag to reinstate). New i18n:
-`choice.toggleAria`/`choice.scoreLabel` (EN/UA). No new runtime dependency. 015 grid /
-016 confirm / 018 rank-colour contracts must stay green (B1–B4). **Increment 3**
-(post-implementation polish, user-directed): CaretDown SVG toggle; grid re-tiered
-1-col/<720 · 2-up/≥720 · 3-up/≥1280 (supersedes 015 wrap, summary mirrored); actions
-row space-between; accent moved Add-choice→Suggest; tagline privacy sentence EN/UA;
-toolbar regrouped ([lang+theme]⟷[status+Clear] pairs, <475px two-row stack, Add-choice
-right of the views row) — locked by 4 regression tests (suite at 215).
+Four UX polish enhancements — no new runtime dependency, no `AppState`/`sift.v1` change:
+**(1) scrollbar-gutter** — `scrollbar-gutter: stable` on `html` in `app.css`; eliminates
+layout shift when the scrollbar appears/disappears (G1).
+**(2) Auto-focus Add Point form** — shared `autofocus` Svelte action in new `src/actions.ts`;
+`use:autofocus` on textarea in `AddEditForm.svelte`; `ChoiceCard.svelte` imports from same module
+(F1–F3).
+**(3) Auto-scroll to new Choice** — `$effect` in `App.svelte` watching `choices.length`, uses
+`tick()` then `scrollIntoView` on the last `.choice-cell`; `smooth`/`instant` per
+`prefers-reduced-motion` (S1–S3; jsdom scroll manually tested M2/M6).
+**(4) Collapsible header description** — component-local `descOpen = $state(false)` in
+`Header.svelte`; toggle button visible only at ≤719 px (CSS `display:none` at ≥720 px);
+description hidden by default mobile / always-visible desktop; `slide` transition (reduced-motion-
+gated); `aria-expanded` + `aria-controls`; two new i18n keys `header.taglineToggleShow`/
+`header.taglineToggleHide` EN/UA (H1–H6). 020/019/018/016/015 boundary contracts B1–B3 must stay green.
+
+- Plan: `specs/021-scroll-focus-collapse/plan.md`
+- Spec: `specs/021-scroll-focus-collapse/spec.md`
+- Research: `specs/021-scroll-focus-collapse/research.md` (R1–R6: scroll tick, autofocus action, collapsible state, responsive strategy, scrollbar-gutter, test coverage)
+- Contracts: `specs/021-scroll-focus-collapse/contracts/ux-enhancements.md` (S1–S3 scroll, F1–F3 focus, H1–H6 header, G1 gutter, B1–B3 boundary, M1–M6 manual)
+- Data model: `specs/021-scroll-focus-collapse/data-model.md` (component-local `descOpen`; new `src/actions.ts`; 2 i18n keys; no store/persistence change)
+- Quickstart: `specs/021-scroll-focus-collapse/quickstart.md` (gates + 10-step walkthrough)
+
+## Just shipped: Accordion Choice Cards (`020-accordion-choice-cards`, merged PR #21)
+
+Per-card Bits UI Accordion (header = read-only title + CaretDown chevron Trigger; body =
+Points list + Rename/Remove actions row; footer = signed total coloured by sign). Ephemeral
+`expanded` record in `store.svelte.ts` outside `AppState`. `signed`/`scoreSign` extracted to
+`view.ts`. Summary band hidden (`SHOW_SUMMARY=false`). Grid 1-col/<720·2-up/≥720·3-up/≥1280.
+Toolbar regrouped; tagline privacy sentence EN/UA. 214 tests + 4 regression locks.
 
 - Plan: `specs/020-accordion-choice-cards/plan.md`
-- Spec: `specs/020-accordion-choice-cards/spec.md` (incl. Clarifications, Session 2026-06-12)
-- Research / decisions: `specs/020-accordion-choice-cards/research.md` (R1–R8: per-card Bits UI Accordion, ephemeral store rune, helper extraction, footer CSS, jsdom/motion, layout, i18n, tests; R9–R10 rev. 2: component-local title-edit state w/ Esc-before-blur, whole-header pointer toggle)
-- Contracts: `specs/020-accordion-choice-cards/contracts/accordion.md` (A1–A6 accordion — A1/A4 rev. 2, F1–F4 footer, E1–E6 expand-state, H1–H5 rename/relocated-controls, S1–S2 serialization honesty, B1–B4 boundary, M1–M5 manual)
-- Data model: `specs/020-accordion-choice-cards/data-model.md` (runtime-only `expanded` record outside `AppState`; `signed`/`scoreSign` to `view.ts`)
-- Quickstart: `specs/020-accordion-choice-cards/quickstart.md` (gates + 10-step manual walkthrough)
+- Spec: `specs/020-accordion-choice-cards/spec.md`
+- Contracts: `specs/020-accordion-choice-cards/contracts/accordion.md` (A1–A6, F1–F4, E1–E6, H1–H5, S1–S2, B1–B4)
 
 ## Just shipped: Review & Compact Existing Specs (`019-compact-specs`, merged PR #20)
 

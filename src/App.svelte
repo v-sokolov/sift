@@ -1,5 +1,6 @@
 <script lang="ts">
   import { flip } from 'svelte/animate';
+  import { tick } from 'svelte';
   import { closeForm, getState } from './store.svelte';
   import { SHOW_SUMMARY } from './config';
   import { orderedChoices } from './view';
@@ -27,6 +28,32 @@
   // Keep <html data-theme> in sync with the chosen theme.
   $effect(() => {
     applyTheme(getState().view.theme);
+  });
+
+  // S1–S3: scroll the newly added Choice card into view after addChoice().
+  // prevChoiceCount initialised on first effect run (not at declaration) to avoid the
+  // "captures initial value of s" Svelte warning and to skip the mount-time non-scroll.
+  let prevChoiceCount = 0;
+  let scrollInitialised = false;
+  $effect(() => {
+    const count = s.dilemma.choices.length;
+    if (scrollInitialised && count > prevChoiceCount) {
+      tick().then(() => {
+        const cells = document.querySelectorAll('.choice-cell');
+        const last = cells[cells.length - 1];
+        if (last instanceof HTMLElement) {
+          const behavior: ScrollBehavior =
+            typeof window !== 'undefined' &&
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              ? 'instant'
+              : 'smooth';
+          last.scrollIntoView({ behavior });
+        }
+      });
+    }
+    scrollInitialised = true;
+    prevChoiceCount = count;
   });
 
   // The suggest dialog's Esc / focus-trap / focus-return / scroll-lock are owned by Bits UI

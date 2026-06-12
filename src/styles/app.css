@@ -6,6 +6,10 @@
 
 @import "tailwindcss";
 
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   --space-1: 4px;
   --space-2: 8px;
@@ -161,7 +165,7 @@ header {
    [container3: Suggest button], with a regular gap. */
 .header__brandmain {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
 }
@@ -195,6 +199,45 @@ header {
   color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.5;
+}
+/* H4: toggle hidden on desktop; tagline always visible. */
+.header__tagline-toggle {
+  display: none;
+}
+/* H2/H4 (mobile ≤719px): tagline collapsed by default; animates open with max-height. */
+@media (max-width: 719px) {
+  .header__tagline {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    transition: max-height 220ms ease, opacity 180ms ease, padding-top 180ms ease;
+  }
+  .header__tagline--open {
+    max-height: 300px;
+    opacity: 1;
+    padding-top: var(--space-3);
+  }
+  .header__tagline-toggle {
+    display: flex;
+    width: fit-content;
+    margin-left: auto;
+    align-items: center;
+    margin-top: var(--space-2);
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    gap: var(--space-1);
+  }
+  .header__tagline-caret {
+    transition: transform 200ms ease;
+  }
+  .header__tagline-toggle[aria-expanded='true'] .header__tagline-caret {
+    transform: rotate(180deg);
+  }
 }
 .header__bar {
   display: flex;
