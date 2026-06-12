@@ -1,27 +1,38 @@
 <!-- SPECKIT START -->
-## Active feature: Scroll, Focus, Collapsible Header & Scrollbar Gutter (`021-scroll-focus-collapse`)
+## Active feature: UI Polish — Toolbar Density, Collapsed-Card Summary & Contrast (`022-ui-polish-density-contrast`)
+
+Six UX polish enhancements — no new runtime dependency, no `AppState`/`sift.v1` change:
+**(US1) Toolbar 2-up band** — at 541–800 px toggles lay out 2-per-row (not one-per-row);
+Group+Sort wrapped in `.seg.seg--multi` joined multi-select control (T2–T3, M1–M2).
+**(US2) Collapsed-card point summary** — new `pointSummary(notes)` pure function in `view.ts`;
+`choice__summary` span in `ChoiceCard.svelte` header, shown only when collapsed + non-empty;
+count-free "+N −M · ~K" format, null for empty (P1–P8).
+**(US3) Empty-card footer** — 0-notes cards render `choice__foot--empty` (no sign tint) with
+faint "no points yet" copy; net-zero non-empty cards keep neutral tint (Z1–Z4).
+**(US4) AA contrast for real labels** — `choice__scorelabel`, `group-label`, `actbtn`, `saved`
+move from `--text-faint` to `--text-muted`; ghost placeholders keep `--text-faint` (K1–K4, M5/M7).
+**(US5/US7) CTA colour hierarchy** — three voices: `btn--primary` (blue) for Add-choice + Add-point;
+`btn--warm` (amber, new `--warm` token promoted from `--status-editing`) for Suggest trigger + Send;
+`btn--danger` (`--disadvantage`) for confirm Remove/Clear; toggle `aria-pressed="true"` softens
+to tint recipe; 020 sole-accent regression locks updated (R1–R8, M3–M5, M8).
+**(US6) Header hover affordance** — `.choice__head:hover` subtle bg inside pointer-capable media
+query; CSS only, manual verification (M6).
+
+- Plan: `specs/022-ui-polish-density-contrast/plan.md`
+- Spec: `specs/022-ui-polish-density-contrast/spec.md`
+- Research: `specs/022-ui-polish-density-contrast/research.md` (R1–R10: breakpoint, seg-multi, summary derivation, empty footer, contrast audit, warm token, danger variant, tint toggle, bulb filter, boundary)
+- Contracts: `specs/022-ui-polish-density-contrast/contracts/ui-polish.md` (T1–T4 toolbar, P1–P8 summary, Z1–Z4 empty state, K1–K5 contrast, R1–R8 colour roles, B1–B6 boundary, M1–M8 manual)
+- Data model: `specs/022-ui-polish-density-contrast/data-model.md` (`pointSummary()`, `--warm` token, `.btn--warm/.btn--danger`, modified selectors, 2 i18n keys)
+- Quickstart: `specs/022-ui-polish-density-contrast/quickstart.md` (gates + 6-phase walkthrough + M1–M8 manual sweep)
+
+## Just shipped: Scroll, Focus, Collapsible Header & Scrollbar Gutter (`021-scroll-focus-collapse`, merged PR #22)
 
 Four UX polish enhancements — no new runtime dependency, no `AppState`/`sift.v1` change:
-**(1) scrollbar-gutter** — `scrollbar-gutter: stable` on `html` in `app.css`; eliminates
-layout shift when the scrollbar appears/disappears (G1).
-**(2) Auto-focus Add Point form** — shared `autofocus` Svelte action in new `src/actions.ts`;
-`use:autofocus` on textarea in `AddEditForm.svelte`; `ChoiceCard.svelte` imports from same module
-(F1–F3).
-**(3) Auto-scroll to new Choice** — `$effect` in `App.svelte` watching `choices.length`, uses
-`tick()` then `scrollIntoView` on the last `.choice-cell`; `smooth`/`instant` per
-`prefers-reduced-motion` (S1–S3; jsdom scroll manually tested M2/M6).
-**(4) Collapsible header description** — component-local `descOpen = $state(false)` in
-`Header.svelte`; toggle button visible only at ≤719 px (CSS `display:none` at ≥720 px);
-description hidden by default mobile / always-visible desktop; `slide` transition (reduced-motion-
-gated); `aria-expanded` + `aria-controls`; two new i18n keys `header.taglineToggleShow`/
-`header.taglineToggleHide` EN/UA (H1–H6). 020/019/018/016/015 boundary contracts B1–B3 must stay green.
+scrollbar-gutter stable (G1); autofocus action in `src/actions.ts` (F1–F3); auto-scroll to new
+Choice via `$effect`+`tick()` (S1–S3); collapsible tagline in `Header.svelte` at ≤719 px with
+`slide` transition, `aria-expanded`, and 2 i18n keys (H1–H6). 226 tests passing.
 
 - Plan: `specs/021-scroll-focus-collapse/plan.md`
-- Spec: `specs/021-scroll-focus-collapse/spec.md`
-- Research: `specs/021-scroll-focus-collapse/research.md` (R1–R6: scroll tick, autofocus action, collapsible state, responsive strategy, scrollbar-gutter, test coverage)
-- Contracts: `specs/021-scroll-focus-collapse/contracts/ux-enhancements.md` (S1–S3 scroll, F1–F3 focus, H1–H6 header, G1 gutter, B1–B3 boundary, M1–M6 manual)
-- Data model: `specs/021-scroll-focus-collapse/data-model.md` (component-local `descOpen`; new `src/actions.ts`; 2 i18n keys; no store/persistence change)
-- Quickstart: `specs/021-scroll-focus-collapse/quickstart.md` (gates + 10-step walkthrough)
 
 ## Just shipped: Accordion Choice Cards (`020-accordion-choice-cards`, merged PR #21)
 

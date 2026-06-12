@@ -86,8 +86,14 @@ describe('020 A — accordion behaviour', () => {
       expect(bodyIn(card)).toBeNull();
       expect(card.querySelector('.notes')).toBeNull();
       expect(card.querySelector('.empty')).toBeNull();
-      expect(card.querySelector('.choice__foot .choice__score')).not.toBeNull();
+      // 022 US3: non-empty cards have .choice__score; empty card (index 2) has --empty footer instead
     }
+    // Non-empty cards have a score element
+    expect(cards()[0].querySelector('.choice__foot .choice__score')).not.toBeNull(); // Acme +1
+    expect(cards()[1].querySelector('.choice__foot .choice__score')).not.toBeNull(); // neutral ~0
+    // Empty card has no score, but has an empty footer
+    expect(cards()[2].querySelector('.choice__foot .choice__score')).toBeNull();
+    expect(cards()[2].querySelector('.choice__foot--empty')).not.toBeNull();
   });
 
   it('A2: the chevron toggles ONLY its own card, open then closed', async () => {
@@ -264,12 +270,14 @@ describe('020 F — footer score (F1–F2, A5)', () => {
     return Array.from(sumC.querySelectorAll('.sum__score')) as HTMLElement[];
   };
 
-  it('F1: footer shows the signed total on every card — +N / −N / 0', () => {
+  it('F1: footer shows the signed total on non-empty cards; empty card shows placeholder (022 US3)', () => {
     const [a, b, c] = cards();
-    // Acme: +3 −2 = +1; neutral-only: 0; empty: 0.
+    // Acme: +3 −2 = +1; neutral-only: 0; empty: no score, shows empty placeholder.
     expect(footScore(a)!.textContent).toBe('+1');
     expect(footScore(b)!.textContent).toBe('0');
-    expect(footScore(c)!.textContent).toBe('0');
+    // 022 US3: empty card has no .choice__score — it shows choice.empty label instead
+    expect(footScore(c)).toBeNull();
+    expect(c.querySelector('.choice__foot--empty')).not.toBeNull();
   });
 
   it('F1: negative totals use the U+2212 minus', async () => {
@@ -344,7 +352,37 @@ describe('020 US3 — collapsed cards under Rank-by-score', () => {
 describe('020 — summary band hidden (FR-011 superseded)', () => {
   it('App renders no .summary; card footers are the only score display', () => {
     expect(container.querySelector('.summary')).toBeNull();
-    expect(container.querySelectorAll('.choice__foot .choice__score')).toHaveLength(3);
+    // 022 US3: empty card shows --empty footer (no .choice__score) — non-empty cards have score
+    expect(container.querySelectorAll('.choice__foot .choice__score')).toHaveLength(2); // Acme + neutral
+    expect(container.querySelectorAll('.choice__foot--empty')).toHaveLength(1); // 1 empty card
+  });
+});
+
+describe('022 US3 — empty-card footer (Z1–Z4)', () => {
+  const foot = (i: number) => cards()[i].querySelector('.choice__foot') as HTMLElement;
+
+  it('Z1: card with 0 notes has choice__foot--empty and no sign-tint class', () => {
+    // cards()[2] is empty in seededState
+    const f = foot(2);
+    expect(f.classList.contains('choice__foot--empty')).toBe(true);
+    expect(f.classList.contains('choice__foot--positive')).toBe(false);
+    expect(f.classList.contains('choice__foot--negative')).toBe(false);
+    expect(f.classList.contains('choice__foot--neutral')).toBe(false);
+  });
+
+  it('Z2: empty card footer shows the "no points yet" label text', () => {
+    const f = foot(2);
+    expect(f.textContent?.trim()).not.toBe('');
+  });
+
+  it('Z3: non-empty card does NOT have choice__foot--empty', () => {
+    expect(foot(0).classList.contains('choice__foot--empty')).toBe(false);
+  });
+
+  it('Z4: net-zero non-empty card has choice__foot--neutral, not empty', () => {
+    // cards()[1] has 1 neutral note (net 0) — should NOT be empty
+    expect(foot(1).classList.contains('choice__foot--neutral')).toBe(true);
+    expect(foot(1).classList.contains('choice__foot--empty')).toBe(false);
   });
 });
 

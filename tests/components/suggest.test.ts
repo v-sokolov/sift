@@ -8,7 +8,7 @@ import {
   setSuggestField,
 } from '../../src/store.svelte';
 import App from '../../src/App.svelte';
-import { render } from '../svelte';
+import { render, cleanup } from '../svelte';
 import { messages } from '../../src/i18n';
 import { CONTACT_EMAIL, LINKEDIN_URL } from '../../src/config';
 
@@ -203,4 +203,31 @@ describe('US2 — suggest modal (wired interactions)', () => {
   //   - focus returns to the trigger on close (FocusScope),
   //   - background scroll is locked while open (ScrollLock).
   // The close-wiring itself is covered above by the Esc-close and submit-close tests.
+});
+
+describe('022 US5 — CTA colour roles: Suggest warm (R3, R4)', () => {
+  let container: HTMLElement;
+  beforeEach(() => {
+    localStorage.clear();
+    setState(emptyDilemma());
+    ({ container } = render(App));
+    flushSync();
+  });
+  afterEach(cleanup);
+
+  it('R3: Suggest trigger has btn--warm and NOT btn--primary', () => {
+    const btn = container.querySelector('[data-action="open-suggest"]') as HTMLButtonElement;
+    expect(btn).not.toBeNull();
+    expect(btn.classList.contains('btn--warm')).toBe(true);
+    expect(btn.classList.contains('btn--primary')).toBe(false);
+  });
+
+  it('R4: Suggest modal Send button has btn--warm and NOT btn--primary', () => {
+    openSuggest();
+    flushSync();
+    const btn = container.querySelector('[data-action="suggest-send"]') as HTMLButtonElement;
+    expect(btn).not.toBeNull();
+    expect(btn.classList.contains('btn--warm')).toBe(true);
+    expect(btn.classList.contains('btn--primary')).toBe(false);
+  });
 });

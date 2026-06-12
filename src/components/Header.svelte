@@ -22,19 +22,12 @@
         <h1 class="header__wordmark">Sift</h1>
       </span>
       <div class="header__brandaction">
-        <button class="btn btn--primary" data-action="open-suggest" onclick={openSuggest}
-          >{t(lang, 'suggest.open')} <span aria-hidden="true">💡</span></button
+        <button class="btn btn--warm" data-action="open-suggest" onclick={openSuggest}
+          >{t(lang, 'suggest.open')} <span class="btn__bulb" aria-hidden="true">💡</span></button
         >
       </div>
     </div>
-    <!-- H2/H3: --open class drives mobile visibility; desktop always-visible via CSS.
-         Placed before the toggle so it expands upward (toggle stays at bottom). -->
-    <p
-      id="header-tagline"
-      class="header__tagline"
-      class:header__tagline--open={descOpen}
-    >{t(lang, 'header.tagline')}</p>
-    <!-- H5/H6: visible label + CaretDown chevron (rotates when open). Right-aligned. -->
+    <!-- H5/H6: toggle sits above the tagline so expanding reads top-to-bottom. -->
     <button
       class="header__tagline-toggle"
       aria-expanded={descOpen}
@@ -46,6 +39,12 @@
         <path d="M5 9l7 7 7-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </button>
+    <!-- H2/H3: tagline below the toggle; max-height animation expands downward. -->
+    <p
+      id="header-tagline"
+      class="header__tagline"
+      class:header__tagline--open={descOpen}
+    >{t(lang, 'header.tagline')}</p>
   </div>
   <div class="header__bar">
     <div class="header__titlebox">

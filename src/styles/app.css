@@ -47,7 +47,10 @@ html {
 
   /* Save-status dot: green = saved, amber = editing. */
   --status-saved: var(--advantage);
-  --status-editing: #c08a00;
+  --warm: #8c6400;
+  --status-editing: var(--warm);
+  /* Rename action: orange-brown, AA on white (≈5.7:1). */
+  --edit: #c0601a;
 }
 
 /* Dark palette — single source of truth. The theme is always resolved to an explicit
@@ -72,7 +75,10 @@ html {
   --focus: #79a9d6;
 
   --status-saved: var(--advantage);
-  --status-editing: #e0b34d;
+  --warm: #e0b34d;
+  --status-editing: var(--warm);
+  /* Rename action: orange, AA on dark surface (≈4.8:1). */
+  --edit: #e07a30;
 }
 
 html,
@@ -128,7 +134,7 @@ body {
 }
 
 #app {
-  max-width: 1100px;
+  max-width: 1280px;
   margin: 0 auto;
   /* Honor device safe-area insets so content clears the notch / rounded corners in
      both orientations. max() keeps the comfortable padding on
@@ -349,30 +355,30 @@ header {
     max-width: calc(50% - var(--space-3));
   }
 }
-/* The views row (Rank │ Group/Sort + Add-choice) stacks earlier than the rest of the
-   toolbar — its content is wider, so it wraps at ≤800px. */
-@media (max-width: 800px) {
-  .toolbar [data-action="add-choice"],
-  .toolbar .toggle,
+/* ≤850px: each labelled container takes half the row minus the column gap, so the
+   view controls wrap equally two-per-row (2×2 when sorting, 2+1 when grouping);
+   controls stretch to fill their container with seg buttons splitting evenly. */
+@media (max-width: 850px) {
+  /* The cluster spans the full row so the 50% field basis means half the toolbar,
+     not half of a shrink-to-fit box. */
   .toolbar__views {
     flex-basis: 100%;
   }
-  /* The vertical divider reads as clutter once the row stacks; hide it. */
-  .toolbar__divider {
-    display: none;
+  .toolbar__field {
+    flex: 1 1 calc(50% - var(--space-5));
+  }
+  .toolbar__field > .btn,
+  .toolbar__field > .seg {
+    align-self: stretch;
+  }
+  .toolbar__field .seg button {
+    flex: 1;
   }
 }
-@media (max-width: 719px) {
-  /* On small screens each config segmented control gets its own full-width row
-     (Sort-by Weight|Type, Direction Asc|Desc). The language toggle keeps its natural
-     width; Language/Theme/Clear keep content widths (equal columns stretched short
-     labels and looked broken). */
-  .toolbar__row .seg:not(.langtoggle) {
+/* ≤540px: the containers go full-width, one per row. */
+@media (max-width: 540px) {
+  .toolbar__field {
     flex-basis: 100%;
-  }
-  /* Full-width segs split their buttons evenly so they read as a real segmented row. */
-  .toolbar__row .seg:not(.langtoggle) button {
-    flex: 1;
   }
 }
 .btn {
@@ -390,13 +396,42 @@ header {
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* 022: Button variant colours — blended with the neutral palette so they read as calm
+   accents rather than vivid UI chrome. Borders are 60% semantic for a softer outline;
+   text is 80% semantic for legibility. Both adapt automatically to light/dark themes. */
 .btn--primary {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: color-mix(in srgb, var(--advantage) 60%, var(--border));
+  color: color-mix(in srgb, var(--advantage) 80%, var(--text-muted));
+}
+.btn--warm {
+  border-color: color-mix(in srgb, var(--warm) 60%, var(--border));
+  color: color-mix(in srgb, var(--warm) 80%, var(--text-muted));
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn--warm:hover {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--warm) 25%, transparent);
+  }
+}
+.btn--warm:focus-visible,
+.btn--warm:active {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--warm) 25%, transparent);
+}
+/* Bulb emoji: greyscale/dimmed at rest, full-colour on interaction. */
+.btn--warm .btn__bulb {
+  filter: grayscale(1) opacity(0.6);
+}
+.btn--warm:hover .btn__bulb,
+.btn--warm:focus-visible .btn__bulb,
+.btn--warm:active .btn__bulb {
+  filter: none;
+}
+.btn--danger {
+  border-color: color-mix(in srgb, var(--disadvantage) 60%, var(--border));
+  color: color-mix(in srgb, var(--disadvantage) 80%, var(--text-muted));
 }
 .toggle[aria-pressed="true"] {
-  background: var(--accent);
-  color: #fff;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
   border-color: var(--accent);
 }
 /* 018: card-level Rank (a native checkbox) + "Choices"/"Points" scope labels, set off
@@ -406,24 +441,123 @@ header {
   color: var(--text-muted);
   font-size: 0.85rem;
 }
-.toolbar__divider {
-  width: 1px;
-  align-self: stretch;
-  min-height: 1.5rem;
-  background: var(--border);
-}
-/* 018: the view-controls cluster (Rank | Group | Sort + scope labels). Inline on wide
-   screens (pushed right by the spacer); at ≤1024px it wraps to its own full-width row so
-   the controls aren't crammed against the left cluster. */
+/* 018/022: the view-controls cluster — self-contained labelled containers
+   (Choices │ Points │ mode config), each with a small-caps scope label ABOVE its
+   controls (same treatment as the card score labels). Containers keep content
+   width and wrap vertically as whole units; ≤540px they stack full-width. */
 .toolbar__views {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
+  align-items: flex-end;
+  gap: var(--space-3) var(--space-5);
   flex-wrap: wrap;
 }
-/* View controls left, Add-choice pinned to the right edge of the same row. */
+.toolbar__field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+.toolbar__field > .scope,
+.toolbar__add > .scope {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+/* View controls hug the left edge on their own row. */
 .toolbar__row--views {
-  justify-content: space-between;
+  justify-content: flex-start;
+}
+/* 022: both Add CTAs (Add-choice + Add-point) share one labelled "Create" container —
+   same anatomy as the view fields (scope label above the controls) — the last
+   controls before the cards. The rule across all widths: when the container FITS
+   beside the view controls it sits inline right (margin-left:auto); whenever it
+   WRAPS it becomes a full-width band with the buttons splitting 50/50. */
+.toolbar__add {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+.toolbar__addbtns {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+@media (max-width: 850px) {
+  /* Create always wraps here: full-width band under the 2-per-row field grid,
+     with extra breathing room above. */
+  .toolbar__row--views {
+    row-gap: 20px;
+  }
+  .toolbar__add {
+    flex-basis: 100%;
+    align-items: stretch;
+  }
+  .toolbar__addbtns .btn {
+    flex: 1 1 calc(50% - var(--space-3));
+  }
+}
+/* ≤540px: the buttons stack, one full-width per row — same tier as the fields. */
+@media (max-width: 540px) {
+  .toolbar__addbtns {
+    flex-wrap: wrap;
+  }
+  .toolbar__addbtns .btn {
+    flex-basis: 100%;
+  }
+}
+/* 851–1199px exception bands: with a view mode active the fields + Create can't
+   share one line (3+ fields overflow below 1000px; Sort's 4 fields below 1200px).
+   Gate on field count via :has() (015 precedent) and apply the wrapped-band
+   treatment: the cluster and its fields grow to fill line one (the cluster itself
+   must grow, or the fields stretch inside a shrink-to-fit box) and Create becomes
+   the same full-width 50/50 band as ≤850px. Default mode (2 fields) fits inline
+   throughout, and everything fits on one line from 1200px up. */
+@media (min-width: 851px) and (max-width: 999px) {
+  .toolbar__row--views:has(.toolbar__field:nth-of-type(3)) {
+    .toolbar__views,
+    .toolbar__field {
+      flex: 1 1 auto;
+    }
+    .toolbar__field > .btn,
+    .toolbar__field > .seg {
+      align-self: stretch;
+    }
+    .toolbar__field .seg button {
+      flex: 1;
+    }
+    .toolbar__add {
+      flex-basis: 100%;
+      align-items: stretch;
+    }
+    .toolbar__addbtns .btn {
+      flex: 1 1 calc(50% - var(--space-3));
+    }
+  }
+}
+@media (min-width: 1000px) and (max-width: 1199px) {
+  .toolbar__row--views:has(.toolbar__field:nth-of-type(4)) {
+    .toolbar__views,
+    .toolbar__field {
+      flex: 1 1 auto;
+    }
+    .toolbar__field > .btn,
+    .toolbar__field > .seg {
+      align-self: stretch;
+    }
+    .toolbar__field .seg button {
+      flex: 1;
+    }
+    .toolbar__add {
+      flex-basis: 100%;
+      align-items: stretch;
+    }
+    .toolbar__addbtns .btn {
+      flex: 1 1 calc(50% - var(--space-3));
+    }
+  }
 }
 .count {
   color: var(--text-muted);
@@ -438,7 +572,7 @@ header {
   font-size: 0.85rem;
 }
 .saved {
-  color: var(--text-faint);
+  color: var(--text-muted);
   font-size: 0.85rem;
   display: inline-flex;
   align-items: center;
@@ -457,6 +591,10 @@ header {
 }
 .status-dot--editing {
   background: var(--status-editing);
+}
+/* 022: neutral "Idle" variant — shown when nothing is pending and nothing was just saved. */
+.status-dot--idle {
+  background: var(--neutral);
 }
 .seg {
   display: inline-flex;
@@ -599,11 +737,16 @@ header {
   background: color-mix(in srgb, var(--neutral) 12%, transparent);
   border-top-color: var(--neutral);
 }
+/* 022 US3: no-points empty state — no sign tint, just a faint placeholder label. */
+.choice__foot--empty {
+  /* No background tint, no coloured top border — the footer still exists for
+     grid alignment (margin-top:auto keeps it at the card bottom). */
+}
 .choice__scorelabel {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--text-faint);
+  color: var(--text-muted);
 }
 .choice__score {
   font-weight: 600;
@@ -647,7 +790,7 @@ header {
   background: transparent;
   border: none;
   border-radius: 6px;
-  color: var(--text-faint);
+  color: var(--text-muted);
   font-size: 0.85rem;
   padding: var(--space-1) var(--space-2);
   min-block-size: 44px;
@@ -664,8 +807,19 @@ header {
 .actbtn:hover:not([disabled]) {
   color: var(--text);
 }
+/* 022: Rename = muted orange; Remove = muted red. Blended at 65% so they're calm
+   but still distinct from the default --text-muted grey. */
+.actbtn--rename {
+  color: color-mix(in srgb, var(--edit) 65%, var(--text-muted));
+}
+.actbtn--rename:hover:not([disabled]) {
+  color: color-mix(in srgb, var(--edit) 80%, var(--text-muted));
+}
+.actbtn--danger {
+  color: color-mix(in srgb, var(--disadvantage) 65%, var(--text-muted));
+}
 .actbtn--danger:hover:not([disabled]) {
-  color: var(--disadvantage);
+  color: color-mix(in srgb, var(--disadvantage) 80%, var(--text-muted));
 }
 .actbtn[disabled] {
   opacity: 0.3;
@@ -718,7 +872,7 @@ header {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--text-faint);
+  color: var(--text-muted);
   margin-top: var(--space-2);
 }
 .note {
@@ -899,12 +1053,6 @@ header {
 }
 
 /* ---- Add/edit form ---- */
-.addtrigger {
-  margin: var(--space-3) 0;
-  /* Center the "＋ add point" trigger horizontally. */
-  display: flex;
-  justify-content: center;
-}
 .form {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -961,10 +1109,6 @@ header {
   .form select {
     width: 100%;
   }
-  /* Full-width "＋ add point" trigger on small screens, matching Add choice/Group/Sort. */
-  .addtrigger .btn {
-    width: 100%;
-  }
 }
 
 /* ---- Footer (pinned to the bottom of the column) ---- */
@@ -982,6 +1126,19 @@ header {
 .footer__links {
   margin-left: var(--space-2);
   white-space: nowrap;
+}
+/* ≤540px: the three footer segments (inspired / made-by / links) stack as their own
+   centered column rows instead of wrapping mid-sentence. */
+@media (max-width: 540px) {
+  .footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  .footer__links {
+    margin-left: 0;
+  }
 }
 /* Links use --accent (AA in both themes) rather than the faint footer text. */
 .footer__link {
@@ -1132,5 +1289,10 @@ header {
   .modal__close:hover {
     color: var(--text);
     background: var(--surface-2);
+  }
+  /* 022 US6: collapsed header hover affordance. */
+  .choice__head:hover {
+    background: color-mix(in srgb, var(--surface-2) 80%, transparent);
+    border-radius: calc(var(--radius) - 2px);
   }
 }

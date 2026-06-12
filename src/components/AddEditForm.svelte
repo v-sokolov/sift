@@ -3,7 +3,6 @@
   import {
     closeForm,
     getState,
-    openAddForm,
     setFormChoice,
     setFormText,
     setFormType,
@@ -34,23 +33,11 @@
     e.preventDefault();
     submitForm();
   }
-  function firstChoiceId(): string | undefined {
-    return getState().dilemma.choices[0]?.id;
-  }
 </script>
 
-{#if !editing || !draft}
-  <div class="addtrigger">
-    <button
-      class="btn"
-      data-action="open-add-form"
-      onclick={() => {
-        const id = firstChoiceId();
-        if (id) openAddForm(id);
-      }}>{t(lang, 'form.addNote')}</button
-    >
-  </div>
-{:else}
+<!-- 022: the Add-point trigger lives in the Toolbar's add row now; this component
+     renders only the open add/edit form (still placed below the cards grid). -->
+{#if editing && draft}
   <form class="form" data-action="form" novalidate {onsubmit}>
     <div class="form__row">
       <label

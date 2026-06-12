@@ -16,6 +16,14 @@ if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {};
 }
 
+// jsdom lacks Element.animate (Web Animations API); Svelte's `transition:slide` (022)
+// calls it. Return a minimal Animation-like object so the transition doesn't throw —
+// real animation is verified manually (quickstart M1/M7).
+if (typeof Element !== 'undefined' && !Element.prototype.animate) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (Element.prototype as any).animate = () => ({ cancel: () => {}, finished: Promise.resolve() });
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
