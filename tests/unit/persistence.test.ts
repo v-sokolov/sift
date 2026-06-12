@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { AppState } from '../../src/types';
-import { emptyDilemma } from '../../src/state';
-import { STORAGE_KEY, flushSave, load, scheduleSave } from '../../src/persistence';
+import { emptyDilemma } from '../../src/store.svelte';
+import { DEBOUNCE_MS, STORAGE_KEY, flushSave, load, scheduleSave } from '../../src/persistence';
 
 function seedState(): AppState {
   const s = emptyDilemma();
@@ -25,6 +25,97 @@ describe('round-trip', () => {
     expect(out).not.toBeNull();
     expect(out!.dilemma).toEqual(s.dilemma);
     expect(out!.view).toEqual(s.view);
+  });
+});
+
+describe('language migration (002)', () => {
+  it('round-trips a stored language', () => {
+    const s = seedState();
+    s.view.lang = 'uk';
+    flushSave(s);
+    expect(load()!.view.lang).toBe('uk');
+  });
+
+  it('still loads an old payload that has no lang (board not lost); lang left unset', () => {
+    const s = seedState();
+    const view = { ...s.view } as unknown as Record<string, unknown>;
+    delete view.lang;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view }));
+    const out = load();
+    expect(out).not.toBeNull();
+    expect(out!.dilemma.title).toBe('Which job?');
+    expect((out!.view as unknown as Record<string, unknown>).lang).toBeUndefined();
+  });
+
+  it('accepts a payload with an invalid lang and drops it (no rejection)', () => {
+    const s = seedState();
+    const view = { ...s.view, lang: 'fr' };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view }));
+    const out = load();
+    expect(out).not.toBeNull();
+    expect((out!.view as unknown as Record<string, unknown>).lang).toBeUndefined();
+  });
+});
+
+describe('groupKey persistence (008)', () => {
+  it('round-trips a stored grouping dimension', () => {
+    const s = seedState();
+    s.view.groupKey = 'weight';
+    flushSave(s);
+    expect(load()!.view.groupKey).toBe('weight');
+  });
+
+  it('defaults a missing groupKey to type (legacy save loads, board not lost)', () => {
+    const s = seedState();
+    const view = { ...s.view } as unknown as Record<string, unknown>;
+    delete view.groupKey;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view }));
+    const out = load();
+    expect(out).not.toBeNull();
+    expect(out!.dilemma.title).toBe('Which job?');
+    expect(out!.view.groupKey).toBe('type');
+  });
+
+  it('defaults an invalid groupKey to type', () => {
+    const s = seedState();
+    const view = { ...s.view, groupKey: 'bogus' };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view }));
+    expect(load()!.view.groupKey).toBe('type');
+  });
+});
+
+describe('choice-count range 2..6 (015, FR-004/FR-005, contract B3)', () => {
+  function withChoices(n: number): AppState {
+    const s = seedState();
+    while (s.dilemma.choices.length < n) {
+      s.dilemma.choices.push({ id: `c${s.dilemma.choices.length + 1}`, title: `C${s.dilemma.choices.length + 1}`, notes: [] });
+    }
+    return s;
+  }
+
+  it('round-trips a 5-choice board verbatim under the unchanged sift.v1 key', () => {
+    const s = withChoices(5);
+    flushSave(s);
+    expect(STORAGE_KEY).toBe('sift.v1');
+    const out = load();
+    expect(out).not.toBeNull();
+    expect(out!.dilemma.choices).toHaveLength(5);
+    expect(out!.dilemma).toEqual(s.dilemma);
+  });
+
+  it('round-trips a 6-choice board verbatim', () => {
+    const s = withChoices(6);
+    flushSave(s);
+    const out = load();
+    expect(out).not.toBeNull();
+    expect(out!.dilemma.choices).toHaveLength(6);
+    expect(out!.dilemma).toEqual(s.dilemma);
+  });
+
+  it('rejects a 7-choice board (hand-edited storage) → null, never throws', () => {
+    const s = withChoices(7);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view: s.view }));
+    expect(load()).toBeNull();
   });
 });
 
@@ -55,16 +146,25 @@ describe('defensive load (P4)', () => {
 });
 
 describe('debounce (P2/P3)', () => {
-  it('coalesces rapid scheduleSave calls into a single write', () => {
+  it('uses a 2s settle window (010, FR-004)', () => {
+    expect(DEBOUNCE_MS).toBe(2000);
+  });
+
+  it('coalesces rapid scheduleSave calls into a single write after the 2s window (SC-006)', () => {
     vi.useFakeTimers();
     const setItem = vi.spyOn(Storage.prototype, 'setItem');
+    const onSaved = vi.fn();
     const s = seedState();
-    scheduleSave(s);
-    scheduleSave(s);
-    scheduleSave(s);
+    scheduleSave(s, onSaved);
+    scheduleSave(s, onSaved);
+    scheduleSave(s, onSaved);
     expect(setItem).not.toHaveBeenCalled();
-    vi.advanceTimersByTime(400);
+    // Nothing fires before the full window elapses.
+    vi.advanceTimersByTime(1999);
+    expect(setItem).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
     expect(setItem).toHaveBeenCalledTimes(1);
+    expect(onSaved).toHaveBeenCalledTimes(1);
     setItem.mockRestore();
   });
 
@@ -78,8 +178,37 @@ describe('debounce (P2/P3)', () => {
     expect(load()).not.toBeNull();
     // The earlier pending debounce must not fire a second write.
     const setItem = vi.spyOn(Storage.prototype, 'setItem');
-    vi.advanceTimersByTime(400);
+    vi.advanceTimersByTime(2000);
     expect(setItem).not.toHaveBeenCalled();
     setItem.mockRestore();
+  });
+});
+
+// 018 (US1, FR-007/R4) — rankByTotal is additive view state: round-trips, and a payload
+// missing it (or with a non-boolean) defaults to false without rejecting the save.
+describe('rankByTotal persistence (018)', () => {
+  it('P1: round-trips a stored rankByTotal=true', () => {
+    const s = seedState();
+    s.view.rankByTotal = true;
+    flushSave(s);
+    expect(load()!.view.rankByTotal).toBe(true);
+  });
+
+  it('P2: defaults a missing rankByTotal to false (legacy save loads, board not lost)', () => {
+    const s = seedState();
+    const view = { ...s.view } as unknown as Record<string, unknown>;
+    delete view.rankByTotal;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view }));
+    const out = load();
+    expect(out).not.toBeNull();
+    expect(out!.dilemma.title).toBe('Which job?');
+    expect(out!.view.rankByTotal).toBe(false);
+  });
+
+  it('P2: defaults a non-boolean rankByTotal to false', () => {
+    const s = seedState();
+    const view = { ...s.view, rankByTotal: 'yes' };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, dilemma: s.dilemma, view }));
+    expect(load()!.view.rankByTotal).toBe(false);
   });
 });

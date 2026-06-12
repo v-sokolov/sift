@@ -1,10 +1,13 @@
 // Pure note arrangement. Given a Choice + ViewPrefs, return the note structure to
 // render. Never mutates the choice. See contracts/view.md.
 
-import type { Choice, Direction, Note, NoteType, ViewPrefs } from './types';
+import type { Choice, Direction, Note, NoteType, ViewPrefs, Weight } from './types';
+import { choiceScore } from './scoring';
 
 export interface Section {
-  label: NoteType | null; // null = flat list
+  // null = flat list; NoteType = grouped-by-type; Weight = a by-weight section;
+  // 'weightless' = the trailing by-weight section holding neutral (weightless) notes (008).
+  label: NoteType | Weight | 'weightless' | null;
   notes: Note[];
 }
 
@@ -39,17 +42,32 @@ export function arrange(choice: Choice, prefs: ViewPrefs): Section[] {
   }
 
   if (prefs.mode === 'grouped') {
-    const cmp = byWeight(prefs.direction);
+    // By weight (008): one section per present weight value, heaviest first, types mixed;
+    // then a trailing 'weightless' section for neutral (null-weight) notes. Empty sections
+    // are omitted. Members keep creation order.
+    if (prefs.groupKey === 'weight') {
+      const sections: Section[] = [];
+      for (const w of [3, 2, 1] as const) {
+        const inWeight = notes.filter((n) => n.weight === w);
+        if (inWeight.length) sections.push({ label: w, notes: inWeight });
+      }
+      const weightless = notes.filter((n) => n.weight === null);
+      if (weightless.length) sections.push({ label: 'weightless', notes: weightless });
+      return sections;
+    }
+
+    // By type: fixed Adv → Disadv → Neutral. Weighted sections heaviest first (the prior
+    // grouped default); neutral keeps creation order. Direction is ignored in grouped mode.
+    const heaviestFirst = byWeight('desc');
     return [
       {
         label: 'advantage',
-        notes: stableSort(notes.filter((n) => n.type === 'advantage'), cmp),
+        notes: stableSort(notes.filter((n) => n.type === 'advantage'), heaviestFirst),
       },
       {
         label: 'disadvantage',
-        notes: stableSort(notes.filter((n) => n.type === 'disadvantage'), cmp),
+        notes: stableSort(notes.filter((n) => n.type === 'disadvantage'), heaviestFirst),
       },
-      // Neutral has no weight → keep creation order.
       { label: 'neutral', notes: notes.filter((n) => n.type === 'neutral') },
     ];
   }
@@ -65,4 +83,36 @@ export function arrange(choice: Choice, prefs: ViewPrefs): Section[] {
     };
   }
   return [{ label: null, notes: stableSort(notes, cmp) }];
+}
+
+/**
+ * 018 — display order of Choice cards. When `rankByTotal` is false, returns the choices
+ * unchanged (authoring order). When true, returns a NEW array ordered by `choiceScore`
+ * descending, with ties broken by original index so the order is stable and deterministic
+ * (FR-002/003). Pure — never mutates the input array or any Choice (FR-006).
+ */
+export function orderedChoices(choices: Choice[], rankByTotal: boolean): Choice[] {
+  if (!rankByTotal) return choices;
+  return choices
+    .map((c, i) => ({ c, i, score: choiceScore(c) }))
+    .sort((a, b) => b.score - a.score || a.i - b.i)
+    .map((x) => x.c);
+}
+
+/**
+ * 020 — shared score formatting, extracted from Summary.svelte so the card footer and
+ * the summary band can never drift (SC-003). `signed` keeps the explicit +/−/0 text
+ * (U+2212 minus) so sign colour stays supplementary (Principle V, FR-011 of 018).
+ */
+export function signed(n: number): string {
+  if (n > 0) return `+${n}`;
+  if (n < 0) return `−${Math.abs(n)}`;
+  return '0';
+}
+
+/** Sign classification driving the `--positive/--negative/--neutral` CSS modifiers. */
+export function scoreSign(n: number): 'positive' | 'negative' | 'neutral' {
+  if (n > 0) return 'positive';
+  if (n < 0) return 'negative';
+  return 'neutral';
 }

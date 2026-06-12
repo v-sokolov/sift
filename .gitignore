@@ -1,15 +1,26 @@
 # Brainstorm/visual-companion scratch files
 .superpowers/
 .claude/
-.specify/
 .yarn/
 .remember/
+
+# .specify is regenerable tooling and stays ignored — EXCEPT the constitution, which the
+# committed specs cite ("Constitution Check", v2.0.0) and so must be readable in the repo (012).
+.specify/*
+!.specify/memory/
+.specify/memory/*
+!.specify/memory/constitution.md
 
 # Superseded brainstorm design docs — kept locally; source of truth is specs/
 docs/
 
 # Dependencies
 node_modules/
+
+# Lockfile intentionally NOT committed (003 decision): a lock generated against the
+# internal Wix mirror pins npm.dev.wixpress.com archive URLs that the public GitHub
+# Pages CI cannot reach. CI runs `yarn install --no-immutable` from public npm instead.
+yarn.lock
 
 # Build output
 dist/

@@ -1,0 +1,1136 @@
+/* Single CSS entry for the phase-2 (Svelte) build. Tailwind v4 utilities + the
+   semantic design tokens migrated from the MVP's tokens.css. Weight is always
+   conveyed by dot-count AND color (Principle V); colors meet WCAG AA against the
+   surfaces in both themes. Light is the default; dark applies via an explicit
+   [data-theme="dark"] resolved pre-paint (system → light/dark). */
+
+@import "tailwindcss";
+
+html {
+  scrollbar-gutter: stable;
+}
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --radius: 10px;
+  --font:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  /* Relative base so the UI honors the user's browser/OS text-size preference
+     (15/16 = default 15px). */
+  --font-size: 0.9375rem;
+  --line: 1.5;
+
+  /* Light theme (default) */
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --surface-2: #f0f0ee;
+  --border: #e2e2dd;
+  --text: #23231f;
+  --text-muted: #6c6c66;
+  --text-faint: #9a9a93;
+
+  --advantage: #2f7d57;
+  --disadvantage: #b5483d;
+  --neutral: #6c6c66;
+  --leader-bg: #e8f3ec;
+  --leader-border: #2f7d57;
+
+  --accent: #3a6ea5;
+  --focus: #3a6ea5;
+
+  /* Save-status dot: green = saved, amber = editing. */
+  --status-saved: var(--advantage);
+  --status-editing: #c08a00;
+}
+
+/* Dark palette — single source of truth. The theme is always resolved to an explicit
+   data-theme (system → light/dark) pre-paint, so one [data-theme="dark"] block covers both
+   the OS-preference and the explicit-toggle cases. */
+:root[data-theme="dark"] {
+  --bg: #1b1b19;
+  --surface: #242421;
+  --surface-2: #2d2d2a;
+  --border: #3a3a36;
+  --text: #ece8e1;
+  --text-muted: #a8a89f;
+  --text-faint: #7c7c74;
+
+  --advantage: #6fcf97;
+  --disadvantage: #e0897e;
+  --neutral: #a8a89f;
+  --leader-bg: #21342a;
+  --leader-border: #6fcf97;
+
+  --accent: #79a9d6;
+  --focus: #79a9d6;
+
+  --status-saved: var(--advantage);
+  --status-editing: #e0b34d;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  line-height: var(--line);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible focus for keyboard users everywhere. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respect reduced motion globally; component transitions also gate on it. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---- Component styles (migrated from the MVP's main.css) ---- */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  line-height: var(--line);
+}
+
+#app {
+  max-width: 1100px;
+  margin: 0 auto;
+  /* Honor device safe-area insets so content clears the notch / rounded corners in
+     both orientations. max() keeps the comfortable padding on
+     non-notched screens. Requires viewport-fit=cover (index.html). */
+  padding: max(var(--space-6), env(safe-area-inset-top))
+    max(var(--space-4), env(safe-area-inset-right)) var(--space-5)
+    max(var(--space-4), env(safe-area-inset-left));
+  /* Full-height column so the header stays at the top and the footer is pinned
+     to the bottom even when the board is short (sticky-footer layout). dvh tracks the
+     dynamic viewport as browser chrome collapses/expands. */
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* ---- Header ---- */
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+.header__brand {
+  margin-bottom: var(--space-1);
+}
+/* container1 — brand row: [container2: logo+wordmark over tagline] space-between
+   [container3: Suggest button], with a regular gap. */
+.header__brandmain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+/* Action column keeps its intrinsic width; the brand side absorbs any squeeze. */
+.header__brandaction {
+  flex: none;
+}
+.header__brandleft {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.header__logo {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 6px;
+  display: block;
+}
+.header__wordmark {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.header__tagline {
+  /* Sits below the brand row again — give it clear separation from the row above. */
+  margin: 0;
+  padding-top: var(--space-3);
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+/* H4: toggle hidden on desktop; tagline always visible. */
+.header__tagline-toggle {
+  display: none;
+}
+/* H2/H4 (mobile ≤719px): tagline collapsed by default; animates open with max-height. */
+@media (max-width: 719px) {
+  .header__tagline {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    transition: max-height 220ms ease, opacity 180ms ease, padding-top 180ms ease;
+  }
+  .header__tagline--open {
+    max-height: 300px;
+    opacity: 1;
+    padding-top: var(--space-3);
+  }
+  .header__tagline-toggle {
+    display: flex;
+    width: fit-content;
+    margin-left: auto;
+    align-items: center;
+    margin-top: var(--space-2);
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    gap: var(--space-1);
+  }
+  .header__tagline-caret {
+    transition: transform 200ms ease;
+  }
+  .header__tagline-toggle[aria-expanded='true'] .header__tagline-caret {
+    transform: rotate(180deg);
+  }
+}
+.header__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.header__titlebox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1 1 260px;
+  min-width: 0;
+}
+/* Pencil cue that the dilemma title is editable — decorative, always visible (not
+   hover-gated), brightens when the field is focused. */
+.header__edit {
+  flex: none;
+  color: var(--text-faint);
+  font-size: 1.2rem;
+  line-height: 1;
+  pointer-events: none;
+}
+.header__titlebox:focus-within .header__edit {
+  color: var(--accent);
+}
+.header__title {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.6rem;
+  font-weight: 600;
+  padding: var(--space-2) 0;
+  outline: none;
+}
+/* On small screens, the dilemma title takes its own full-width row (flex-wrap). */
+@media (max-width: 719px) {
+  .header__titlebox {
+    flex-basis: 100%;
+  }
+}
+/* Match the adjacent .btn (theme/Clear) height and font so the toggle lines up. */
+.langtoggle .langbtn {
+  background: var(--surface);
+  border: none;
+  border-left: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--font-size);
+}
+.langtoggle .langbtn:first-child {
+  border-left: none;
+}
+/* Active language: weight + underline, not color alone (Constitution V). */
+.langtoggle .langbtn.is-active {
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.header__title::placeholder {
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+/* ---- Toolbar ---- */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+.toolbar__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  /* Settings row (lang/theme + status/clear) aligns to the right. */
+  justify-content: flex-end;
+}
+/* A pair of settings controls that wraps as one unit on narrow screens. */
+.toolbar__set {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+/* EN / UA always split the language toggle half-and-half, however wide it stretches. */
+.langtoggle button {
+  flex: 1 1 50%;
+}
+/* Settings row: [language+theme] left, [status+clear] right at every width. */
+.toolbar__row--settings {
+  justify-content: space-between;
+}
+/* Below 475px the two pairs stack into two rows; within each row the two members
+   split it, each capped at 50% minus the gap. */
+@media (max-width: 474px) {
+  .toolbar__row--settings .toolbar__set {
+    flex-basis: 100%;
+    justify-content: space-between;
+  }
+  .toolbar__row--settings .toolbar__set > * {
+    flex: 1 1 auto;
+    max-width: calc(50% - var(--space-3));
+  }
+}
+/* The views row (Rank │ Group/Sort + Add-choice) stacks earlier than the rest of the
+   toolbar — its content is wider, so it wraps at ≤800px. */
+@media (max-width: 800px) {
+  .toolbar [data-action="add-choice"],
+  .toolbar .toggle,
+  .toolbar__views {
+    flex-basis: 100%;
+  }
+  /* The vertical divider reads as clutter once the row stacks; hide it. */
+  .toolbar__divider {
+    display: none;
+  }
+}
+@media (max-width: 719px) {
+  /* On small screens each config segmented control gets its own full-width row
+     (Sort-by Weight|Type, Direction Asc|Desc). The language toggle keeps its natural
+     width; Language/Theme/Clear keep content widths (equal columns stretched short
+     labels and looked broken). */
+  .toolbar__row .seg:not(.langtoggle) {
+    flex-basis: 100%;
+  }
+  /* Full-width segs split their buttons evenly so they read as a real segmented row. */
+  .toolbar__row .seg:not(.langtoggle) button {
+    flex: 1;
+  }
+}
+.btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  /* Touch-target floor. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+}
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn--primary {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.toggle[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+/* 018: card-level Rank (a native checkbox) + "Choices"/"Points" scope labels, set off
+   from the point-level Group/Sort by a thin vertical divider so the two axes read as
+   distinct (Choices [Rank] │ Points [Group][Sort]). */
+.scope {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.toolbar__divider {
+  width: 1px;
+  align-self: stretch;
+  min-height: 1.5rem;
+  background: var(--border);
+}
+/* 018: the view-controls cluster (Rank | Group | Sort + scope labels). Inline on wide
+   screens (pushed right by the spacer); at ≤1024px it wraps to its own full-width row so
+   the controls aren't crammed against the left cluster. */
+.toolbar__views {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+/* View controls left, Add-choice pinned to the right edge of the same row. */
+.toolbar__row--views {
+  justify-content: space-between;
+}
+.count {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+/* 015 (FR-012): quiet complexity hint shown while the board has 4–6 choices.
+   Always-visible plain text (never tooltip-only); muted like .saved, but kept at
+   --text-muted for WCAG AA in both themes. */
+.toolbar__hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.saved {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+/* Save-status dot: decorative cue; the text label carries the meaning (Constitution V). */
+.status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex: none;
+}
+.status-dot--saved {
+  background: var(--status-saved);
+}
+.status-dot--editing {
+  background: var(--status-editing);
+}
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.seg button {
+  background: var(--surface);
+  border: none;
+  padding: var(--space-1) var(--space-3);
+  border-left: 1px solid var(--border);
+  /* Touch-target floor. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+}
+.seg button:first-child {
+  border-left: none;
+}
+.seg button[aria-pressed="true"] {
+  background: var(--surface-2);
+  font-weight: 600;
+}
+.seg button[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---- Choice columns (responsive at 720px, research R4) ----
+   015: count-conditional override — boards with 5+ choices wrap at 3 per row
+   (5 → 3+2, 6 → 3+3) instead of cramming ever-narrower columns; 2–4 boards keep
+   the one-column-per-choice rule below, untouched. Pure CSS (FR-011): the
+   matching .summary:has() rule keeps the score cells column-aligned. */
+.choices {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .choices {
+    /* 020 polish: two cards per row (1-2 / 3-4 / 5-6) — supersedes the 015
+       one-column-per-choice + 3-wide wrap. Wider cards suit the accordion anatomy
+       (read-only name + actions row + footer). minmax(0,1fr) keeps tracks shrinkable. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* Equal-height cards: every row sizes to the tallest card in it. Not applied to
+       the <720px single-column stack, where each card hugs its own content. */
+    grid-auto-rows: 1fr;
+  }
+}
+@media (min-width: 1280px) {
+  /* Wide screens: three per row (1-2-3 / 4-5-6). */
+  .choices {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+/* 018: each card is wrapped in a .choice-cell so it can carry animate:flip (Svelte only
+   allows animate on the keyed each's element child, not a component). The wrapper is the
+   grid item; the card fills it so the 015 equal-height (grid-auto-rows:1fr) is preserved. */
+.choice-cell {
+  display: flex;
+}
+.choice-cell > .choice {
+  flex: 1 1 auto;
+  /* 020: flex items default to min-width:auto — the card's min-content (header
+     buttons + footer) would otherwise overflow its cell on 4–6-column boards. */
+  min-width: 0;
+}
+.choice {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.choice__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  /* 020 rev. 2 (R10): the whole row toggles by pointer; the chevron is the
+     accessible button. The title input overrides with its own text cursor. */
+  cursor: pointer;
+}
+/* 020: the per-card Accordion's Root/Item divs (and the Header heading wrapper) must
+   not introduce boxes inside the card's flex column — flatten them so .choice__head /
+   .choice__body remain direct flex children and the card layout is bit-identical to
+   pre-020 when expanded. */
+.choice__acc,
+.choice__disclosure {
+  display: contents;
+}
+/* 020: CaretDown disclosure trigger (SVG, currentColor) — points down collapsed,
+   flips 180° when open (data-state comes from the Accordion trigger), instant under
+   reduced motion. The 44px .iconbtn box keeps it height-aligned with the header. */
+.choice__chevron {
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+.choice__chevron[data-state='open'] {
+  transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .choice__chevron {
+    transition: none;
+  }
+}
+/* 020: collapsible body — owns the gap the card used to give head/notes siblings. */
+.choice__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+/* 020 US2: score footer. margin-top:auto pins it to the card bottom, so in a mixed
+   collapsed/expanded row (015 equal-height grid) every footer lines up with its
+   summary cell below. Mirrors the band's .sum--* sign treatment (soft color-mix tint
+   + sign-coloured 2px top border, same tokens) — the negative side/bottom margins
+   bleed the tint to the card edges so it reads as the card's own base, like a .sum
+   cell. Leader stays band-only (no per-card winner framing, Principle I). */
+.choice__foot {
+  margin: auto calc(-1 * var(--space-3)) calc(-1 * var(--space-3));
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-top: 2px solid transparent;
+  border-radius: 0 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.choice__foot--positive {
+  background: color-mix(in srgb, var(--advantage) 12%, transparent);
+  border-top-color: var(--advantage);
+}
+.choice__foot--negative {
+  background: color-mix(in srgb, var(--disadvantage) 12%, transparent);
+  border-top-color: var(--disadvantage);
+}
+.choice__foot--neutral {
+  background: color-mix(in srgb, var(--neutral) 12%, transparent);
+  border-top-color: var(--neutral);
+}
+.choice__scorelabel {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+}
+.choice__score {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+/* Same semantic tokens as .sum__score--* (018) — AA-tuned in both themes. */
+.choice__score--positive {
+  color: var(--advantage);
+}
+.choice__score--negative {
+  color: var(--disadvantage);
+}
+.choice__score--neutral {
+  color: var(--neutral);
+}
+/* 020 rev. 2: read-only title (the Rename action in the body is the only edit entry
+   point, FR-007). Typography matches the old input so the swap is seamless. */
+.choice__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: var(--space-1) 0;
+}
+.choice__name--ghost {
+  color: var(--text-faint);
+  font-weight: 500;
+}
+/* 020 rev. 2: quiet meta-actions row at the bottom of the collapsible body. */
+.choice__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+.actbtn {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  padding: var(--space-1) var(--space-2);
+  min-block-size: 44px;
+  cursor: pointer;
+  /* Icon + label on one line, vertically centred with each other. */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.actbtn__icon {
+  line-height: 1;
+}
+.actbtn:hover:not([disabled]) {
+  color: var(--text);
+}
+.actbtn--danger:hover:not([disabled]) {
+  color: var(--disadvantage);
+}
+.actbtn[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.choice__title {
+  flex: 1;
+  /* 020: inputs carry a ~180px intrinsic min width; with TWO 44px iconbtns now in the
+     header row this is what made the minmax(0,1fr) tracks overflow/clip — let the
+     input itself shrink instead. */
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 600;
+  outline: none;
+  padding: var(--space-1) 0;
+}
+.choice__title::placeholder {
+  color: var(--text-faint);
+  font-weight: 500;
+}
+.iconbtn {
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  padding: var(--space-1);
+  border-radius: 6px;
+  /* Touch-target floor — the box grows, the glyph stays centered. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+}
+.iconbtn[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.group-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  margin-top: var(--space-2);
+}
+.note {
+  display: flex;
+  /* Center everything vertically so text, dots, sign and the 44px remove ✕ line up
+     on the Y axis (the tall touch-target button has no shared text baseline). */
+  align-items: center;
+  /* Text on the left, the sign+dots cluster on the right. */
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  /* No right padding so the row's remove ✕ sits flush to the card content edge,
+     vertically aligned with the choice-card's remove ✕ (same 44px .iconbtn column). */
+  padding-right: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  /* Comfortable tap target for the click-to-edit row. */
+  min-height: 44px;
+}
+/* Left cluster: the type sign followed by the note text (grows so text wraps). */
+.note__main {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+/* Right cluster: the weight dots followed by the remove ✕ (kept on one line). */
+.note__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+.note__sign {
+  font-weight: 700;
+  width: 1ch;
+  text-align: center;
+}
+.note--advantage .note__sign,
+.note--advantage .dots {
+  color: var(--advantage);
+}
+.note--disadvantage .note__sign,
+.note--disadvantage .dots {
+  color: var(--disadvantage);
+}
+.note--neutral .note__sign {
+  color: var(--neutral);
+}
+.dots {
+  letter-spacing: 1px;
+  font-size: 0.7rem;
+}
+.note__text {
+  flex: 1;
+  /* Wrap long content / unbroken tokens instead of forcing horizontal scroll. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.note__text--empty {
+  color: var(--text-faint);
+  font-style: italic;
+}
+/* Always-visible per-point remove ✕. Reuses .iconbtn for the 44px touch floor,
+   de-emphasized resting color, focus ring, and @media(hover)-gated emphasis. Seated at
+   the row's right edge after the meta cluster; centered against the baseline-aligned row. */
+.note__remove {
+  flex: none;
+  align-self: center;
+  font-size: 0.85rem;
+}
+.empty {
+  color: var(--text-faint);
+  font-style: italic;
+  padding: var(--space-2);
+}
+
+/* ---- Summary ---- */
+.summary {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+  margin: var(--space-5) 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+@media (min-width: 720px) {
+  /* 020 polish: mirror the .choices per-row grid so score cells stay
+     column-aligned under their cards (2-up from 720px, 3-up from 1280px). */
+  .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.sum {
+  text-align: center;
+  color: var(--text-muted);
+  padding: var(--space-2);
+  border-top: 2px solid transparent;
+}
+/* 018: tint each score cell by sign — a soft translucent wash (theme-aware via
+   color-mix over the page background) + a sign-coloured 2px top border, mirroring the
+   leader cell. The leader rule below comes last so the top choice keeps its distinct,
+   stronger highlight even though it is also a positive cell. */
+.sum--positive,
+.sum--negative,
+.sum--neutral {
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.sum--positive {
+  background: color-mix(in srgb, var(--advantage) 12%, transparent);
+  border-top-color: var(--advantage);
+}
+.sum--negative {
+  background: color-mix(in srgb, var(--disadvantage) 12%, transparent);
+  border-top-color: var(--disadvantage);
+}
+.sum--neutral {
+  background: color-mix(in srgb, var(--neutral) 12%, transparent);
+  border-top-color: var(--neutral);
+}
+.sum--leader {
+  background: var(--leader-bg);
+  border-top-color: var(--leader-border);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.sum__score {
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+/* 018: colour the score by sign — reuses the semantic advantage/disadvantage/neutral
+   tokens (AA-tuned in both themes). Supplementary to the +/−/0 text (Principle V). The
+   sign colour wins on the leader cell too (the old leader-only override is gone); the
+   leader cell keeps its background tint. */
+.sum__score--positive {
+  color: var(--advantage);
+}
+.sum__score--negative {
+  color: var(--disadvantage);
+}
+.sum__score--neutral {
+  color: var(--neutral);
+}
+.sum__totals {
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+.summary__formula {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* 018 (FR-015): quote-style callout for informational captions — a soft surface, italic
+   muted text, rounded + padded. Shared by the complexity hint and the score-formula
+   caption; the base classes keep their muted colour + 0.85rem size. */
+.callout {
+  /* Span the full width of the parent container. */
+  width: 100%;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  font-style: italic;
+}
+/* The formula callout reads left-aligned, not centred. */
+.summary__formula.callout {
+  text-align: left;
+}
+
+/* ---- Add/edit form ---- */
+.addtrigger {
+  margin: var(--space-3) 0;
+  /* Center the "＋ add point" trigger horizontally. */
+  display: flex;
+  justify-content: center;
+}
+.form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+.form__row {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: center;
+}
+.form__row--actions {
+  justify-content: flex-end;
+}
+.form select,
+.form textarea {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: var(--space-2);
+}
+.form textarea {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+}
+/* Touch-target floor for the choice <select>. */
+.form select {
+  min-height: 44px;
+}
+/* When a field is focused and the on-screen keyboard scrolls it into view, keep a
+   little breathing room so it isn't flush against the keyboard or a screen edge —
+   CSS-only, so focus/caret are never disturbed. */
+.header__title,
+.choice__title,
+.form,
+.form select,
+.form textarea {
+  scroll-margin-block: var(--space-5);
+}
+/* On narrow widths the inline form goes full-width and its controls stack, so each is
+   comfortably tappable. The actions row keeps its buttons inline. */
+@media (max-width: 719px) {
+  .form__row:not(.form__row--actions) > * {
+    flex-basis: 100%;
+  }
+  .form select {
+    width: 100%;
+  }
+  /* Full-width "＋ add point" trigger on small screens, matching Add choice/Group/Sort. */
+  .addtrigger .btn {
+    width: 100%;
+  }
+}
+
+/* ---- Footer (pinned to the bottom of the column) ---- */
+.footer {
+  margin-top: auto;
+  padding-top: var(--space-3);
+  /* Clear the bottom safe-area inset (home indicator) so the links stay visible and
+     tappable. */
+  padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.footer__links {
+  margin-left: var(--space-2);
+  white-space: nowrap;
+}
+/* Links use --accent (AA in both themes) rather than the faint footer text. */
+.footer__link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ---- Suggest-a-feature modal (custom accessible overlay) ---- */
+.modal-overlay {
+  /* Full-viewport dim backdrop. Bits UI renders this as a SIBLING of .modal (not its
+     parent), so it no longer centers the panel — it is purely the backdrop layer (014).
+     The screen-edge gutter and centering now live on .modal itself. */
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 100;
+}
+.modal {
+  /* Self-centering fixed top-layer panel (014). Because Bits UI emits .modal as a sibling
+     of .modal-overlay rather than a child, the panel can't rely on a flex parent to center
+     it. `inset` + `margin: auto` distribute the free space on every side (centering on both
+     axes without a parent or transforms); the inset doubles as the screen-edge gutter on
+     small viewports. z-index sits above the backdrop (100). */
+  position: fixed;
+  inset: var(--space-4);
+  margin: auto;
+  height: fit-content;
+  z-index: 101;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-5);
+  max-width: 460px;
+  /* dvh so the dialog fits short landscape / collapsing chrome. */
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+/* 016: shared destructive-action confirmation — same .modal placement/top-layer rules,
+   just narrower (a one-sentence question doesn't need the form width). The message IS the
+   accessible title (one-sentence dialog), so it renders calmer than a heading. */
+.modal--confirm {
+  max-width: 360px;
+}
+.modal--confirm .modal__title {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: var(--line);
+}
+.modal__title {
+  margin: 0;
+  font-size: 1.2rem;
+  /* Re-assert bold: Tailwind v4 preflight resets heading font-weight to inherit,
+     so without this the dialog title would render normal-weight (the MVP relied on
+     the browser-default bold). */
+  font-weight: 600;
+}
+.modal__intro {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.modal__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  font-size: 1.1rem;
+  padding: var(--space-1);
+  border-radius: 6px;
+  /* Touch-target floor. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+}
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.modal__field input,
+.modal__field textarea {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: var(--space-2);
+}
+.modal__field textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+.modal__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+/* Cancel + Send share the action row equally — each ≈50% minus its share of the gap.
+   Zero flex-basis makes the split ignore label width, so the two stay equal-width across
+   languages. */
+.modal__actions .btn--half {
+  flex: 1 1 0;
+}
+.modal__fallback {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 0.82rem;
+}
+
+/* Focus visibility for keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---- Hover emphasis, gated to true pointer devices ----
+   Hover only ever *raises emphasis*; every one of these affordances is also a real
+   button/link with the global :focus-visible outline above, so it stays reachable by
+   tap and keyboard. Gating behind (hover: hover) prevents stuck-hover artifacts after
+   a tap on touch devices and documents that nothing here is hover-only. */
+@media (hover: hover) and (pointer: fine) {
+  .iconbtn:hover {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+  .note:hover {
+    background: var(--surface-2);
+  }
+  .footer__link:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .modal__close:hover {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+}

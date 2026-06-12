@@ -1,0 +1,121 @@
+// Ukrainian catalog. Mirrors every key in en.ts (parity test enforces completeness).
+
+export const uk: Record<string, string> = {
+  // Header
+  'header.titlePlaceholder': 'Що ви вирішуєте?',
+  'header.titleAria': 'Рішення, яке ви зважуєте',
+  'header.langAria': 'Мова',
+  'header.taglineToggleShow': 'Детальніше про Sift',
+  'header.taglineToggleHide': 'Детальніше про Sift',
+  'header.tagline':
+    'Тихий спосіб зважити рішення. Порівняйте кілька варіантів за перевагами й недоліками, а делікатна оцінка допоможе подумати - вона ніколи не вирішує за вас. Приватність за задумом: ваші дані зберігаються лише в цьому браузері, без резервної копії на сервері.',
+
+  // Toolbar
+  'toolbar.addChoice': '＋ Додати варіант',
+  'toolbar.maxChoices': 'Максимум {n} варіантів',
+  'toolbar.manyChoices':
+    'Багато варіантів можуть ускладнити зважування - менше часто дає більше ясності.',
+  'toolbar.group': 'Групувати',
+  'toolbar.sort': 'Сортувати',
+  'toolbar.rank': 'Ранжувати за оцінкою',
+  'toolbar.scopeChoices': 'Варіанти',
+  'toolbar.scopePoints': 'Пункти',
+  'toolbar.saved': 'Збережено',
+  'toolbar.editing': 'Редагування',
+  'toolbar.themeTitle': 'Тема',
+  'toolbar.clear': 'Очистити',
+  'toolbar.direction': 'Напрям:',
+  'toolbar.directionAria': 'Напрям',
+  'toolbar.asc': 'Зрост.',
+  'toolbar.desc': 'Спад.',
+  'toolbar.by': 'За:',
+  'toolbar.sortKeyAria': 'Ключ сортування',
+  'toolbar.weight': 'Вагою',
+  'toolbar.type': 'Типом',
+  'toolbar.groupBy': 'Групувати за:',
+  'toolbar.groupKeyAria': 'Групувати за',
+  'theme.system': '◐ Авто',
+  'theme.light': '☀ Світла',
+  'theme.dark': '☾ Темна',
+
+  // Choice
+  'choice.placeholder': 'Варіант {n}',
+  'choice.empty': 'Поки немає пунктів',
+  'choice.nameAria': 'Назва варіанту',
+  'choice.remove': 'Видалити варіант',
+  'choice.removeDisabled': 'Щонайменше 2 варіанти',
+  'choice.removeAria': 'Видалити варіант',
+  'choice.toggleAria': 'Показати або приховати пункти',
+  'choice.scoreLabel': 'Бали',
+  'choice.rename': 'Перейменувати',
+  'choice.removeLabel': 'Видалити',
+  'group.advantage': 'Переваги',
+  'group.disadvantage': 'Недоліки',
+  'group.neutral': 'Нейтральні',
+  'group.weight': 'Вага {n}',
+  'group.weightless': 'Нейтральні',
+
+  // Note
+  'note.empty': '(порожній пункт)',
+  'note.emptyShort': '(порожньо)',
+  'note.weightLabel': ', вага {n}',
+  'note.editAria': 'Редагувати {type}{weight}: {text}',
+  'note.removeAria': 'Видалити пункт',
+  'noteType.advantage': 'перевага',
+  'noteType.disadvantage': 'недолік',
+  'noteType.neutral': 'нейтральне',
+
+  // Summary
+  'summary.totals': 'за {for} · проти {against}',
+  'summary.aria': 'Підсумкові бали',
+  'summary.formula':
+    'Кожна перевага додає свою вагу (1–3), кожен недолік її віднімає; нейтральні пункти не враховуються.',
+
+  // Add/edit form
+  'form.addNote': '＋ Додати пункт',
+  'form.choice': 'Варіант',
+  'form.noteTypeAria': 'Тип пункту',
+  'form.weightAria': 'Вага',
+  'form.weightN': 'Вага {n}',
+  'form.textPlaceholder': 'У чому суть?',
+  'form.textAria': 'Текст пункту',
+  'form.cancel': 'Скасувати',
+  'form.save': 'Зберегти',
+  'form.add': 'Додати',
+  'form.typeAdvantage': '＋ перевага',
+  'form.typeDisadvantage': '− недолік',
+  'form.typeNeutral': '~ нейтральне',
+
+  // Destructive-action confirmations (Clear since 002; choice removal + shared dialog since 016)
+  'confirm.clear': 'Очистити це рішення? Це не можна скасувати.',
+  'confirm.removeChoice': 'Видалити "{name}" і всі його пункти? Це не можна скасувати.',
+  'confirm.cancel': 'Скасувати',
+  'confirm.removeAction': 'Видалити',
+  'confirm.clearAction': 'Очистити',
+
+  // Footer (US3)
+  'footer.inspiredPre': 'Натхненна книжкою ',
+  'footer.inspiredBook': 'Essentialism',
+  'footer.inspiredPost': '.',
+  'footer.madeBy': 'Створив {name}.',
+  'footer.github': 'GitHub',
+  'footer.linkedin': 'LinkedIn',
+
+  // Suggest a feature (US2)
+  'suggest.open': 'Запропонувати функцію',
+  'suggest.title': 'Запропонувати функцію',
+  'suggest.intro': 'Маєте ідею? Розкажіть мені.',
+  'suggest.name': 'Ім’я',
+  'suggest.namePlaceholder': 'Ваше ім’я',
+  'suggest.description': 'Опис',
+  'suggest.descriptionPlaceholder': 'Що зробило б Sift кращим?',
+  'suggest.email': 'Контактний email (необов’язково)',
+  'suggest.emailPlaceholder': 'you@example.com',
+  'suggest.github': 'GitHub (необов’язково)',
+  'suggest.linkedin': 'LinkedIn (необов’язково)',
+  'suggest.send': 'Надіслати',
+  'suggest.close': 'Закрити',
+  'suggest.cancel': 'Скасувати',
+  'suggest.fallback': 'Немає поштового застосунку? Напишіть мені в {link}.',
+  'suggest.fallbackLink': 'LinkedIn',
+};

@@ -48,6 +48,35 @@ describe('scoring totals', () => {
   });
 });
 
+// 015 (FR-003/SC-004): regression locks for 6-choice boards. The scoring functions are
+// count-agnostic pure functions, so these may pass on first run — they exist to lock the
+// guarantee at the new 2..6 range, not as red-first TDD gates.
+describe('six-choice boards (015)', () => {
+  const six = [
+    choice('c1', [note('advantage', 1)]), // +1
+    choice('c2', [note('disadvantage', 2)]), // -2
+    choice('c3', [note('neutral', null)]), // 0
+    choice('c4', [note('advantage', 3), note('disadvantage', 1)]), // +2
+    choice('c5', [note('advantage', 2), note('advantage', 3)]), // +5
+    choice('c6', [note('advantage', 3), note('advantage', 2), note('neutral', null)]), // +5
+  ];
+
+  it('scores compute independently for all six choices', () => {
+    expect(six.map(choiceScore)).toEqual([1, -2, 0, 2, 5, 5]);
+  });
+
+  it('leaders scans the full six-choice board, including ties on the 5th/6th', () => {
+    expect(leaders(six)).toEqual(new Set(['c5', 'c6']));
+  });
+
+  it('totals on a 6th choice behave exactly as on a 1st (position-agnostic)', () => {
+    const sixth = six[5];
+    expect(forTotal(sixth)).toBe(5);
+    expect(againstTotal(sixth)).toBe(0);
+    expect(leaders([sixth])).toEqual(new Set(['c6']));
+  });
+});
+
 describe('leaders', () => {
   it('returns all tied leaders, no tiebreaker (S4)', () => {
     const a = choice('a', [note('advantage', 3)]);

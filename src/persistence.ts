@@ -4,6 +4,7 @@ import type {
   AppState,
   Dilemma,
   Direction,
+  Lang,
   NoteType,
   SortKey,
   Theme,
@@ -11,10 +12,10 @@ import type {
   ViewPrefs,
   PersistedV1,
 } from './types';
-import { MAX_CHOICES, MIN_CHOICES } from './types';
+import { LANGS, MAX_CHOICES, MIN_CHOICES } from './types';
 
 export const STORAGE_KEY = 'sift.v1';
-export const DEBOUNCE_MS = 400;
+export const DEBOUNCE_MS = 2000; // 2s settle window (010, FR-004)
 
 let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -62,10 +63,17 @@ const SORT_KEYS: SortKey[] = ['weight', 'type'];
 const DIRECTIONS: Direction[] = ['asc', 'desc'];
 const THEMES: Theme[] = ['system', 'light', 'dark'];
 
+export function isLang(v: unknown): v is Lang {
+  return typeof v === 'string' && (LANGS as string[]).includes(v);
+}
+
 function isObj(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null;
 }
 
+// `lang` is intentionally NOT validated here so that older payloads (pre-i18n,
+// no `lang`) still load — language is resolved at boot via detection. A present
+// but invalid `lang` is normalized away in load().
 function validView(v: unknown): v is ViewPrefs {
   if (!isObj(v)) return false;
   return (
@@ -114,6 +122,21 @@ export function load(): { dilemma: Dilemma; view: ViewPrefs } | null {
   }
   if (!isObj(parsed) || parsed.schemaVersion !== 1) return null;
   if (!validDilemma(parsed.dilemma) || !validView(parsed.view)) return null;
+  const view = parsed.view as unknown as Record<string, unknown>;
+  // Drop a missing/invalid language so boot detection resolves it (FR-002/FR-004).
+  if (!isLang(view.lang)) {
+    delete view.lang;
+  }
+  // 008: groupKey is additive — a missing/invalid value defaults to 'type' (the prior
+  // grouped behaviour), so pre-008 saves load unchanged without a schemaVersion bump.
+  if (view.groupKey !== 'type' && view.groupKey !== 'weight') {
+    view.groupKey = 'type';
+  }
+  // 018: rankByTotal is additive too — a missing/non-boolean value defaults to false, so
+  // pre-018 saves load unchanged without a schemaVersion bump (R4).
+  if (typeof view.rankByTotal !== 'boolean') {
+    view.rankByTotal = false;
+  }
   return { dilemma: parsed.dilemma, view: parsed.view };
 }
 
